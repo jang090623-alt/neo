@@ -79,6 +79,42 @@ ROWS = [
     ('배송비', '새 판매처 포함', 1, '식', None, None, '확정', 'v3 는 22,900원 · 새 항목 판매처에 따라 달라짐 (미확인)'),
 ]
 
+# 품명 칸 링크: 쿠팡 상품(번호) 또는 쿠팡 검색어. 규격이 계산에 들어가는 스프링·가공 축은 원래 판매처
+from urllib.parse import quote
+CP = 'https://www.coupang.com/vp/products/'
+LINK = {
+    '6001ZZ 볼 베어링 (10개 묶음)': CP + '8630678241', '6003ZZ 볼 베어링': '6003ZZ 베어링',
+    '연마봉(강철 축)': 'https://smball.co.kr', '연마봉(강철 축) 짧은 것': 'https://smball.co.kr', '연마봉(변속 레일)': 'https://smball.co.kr',
+    ('강철 평행핀', 'Ø5×25'): '평행핀 5x25', ('강철 평행핀', 'Ø5×40'): '평행핀 5x40', 'NBR 고무 호스': 'NBR 호스 내경5 외경10',
+    '큰 와셔 DIN9021 M16 (강철)': 'M16 큰와셔 외경50', '코르크 시트': '코르크 시트 2mm',
+    '압축 스프링 C252': 'https://www.devicemart.co.kr/goods/view?no=15336269', '압축 스프링 C147': 'https://www.devicemart.co.kr/goods/view?no=15336164',
+    '강구': CP + '9638493021', '샤프트 칼라 (Ø6 축용)': '샤프트 칼라 6mm 멈춤나사',
+    ('M3 렌치볼트', 'M3×8 (육각 홈붙이, 스텐)'): CP + '7499146770', ('M3 렌치볼트', 'M3×10'): CP + '7499146770',
+    ('M3 렌치볼트', 'M3×12'): CP + '7499146770', ('M3 렌치볼트', 'M3×16'): CP + '7499146770',
+    'M3 렌치볼트 + 너트': CP + '7499146770', ('M3 렌치볼트', 'M3×25'): CP + '7499146770', ('M3 렌치볼트', 'M3×50'): CP + '7499146770',
+    'M3 무두볼트': '스텐 무두볼트 M3x8', 'M3 평와셔': '스텐 평와셔 M3',
+    ('M4 렌치볼트 + 너트', 'M4×16'): '스텐 렌치볼트 M4x16', ('M4 렌치볼트 + 너트', 'M4×25'): '스텐 렌치볼트 M4x25',
+    ('M4 렌치볼트 + 너트', 'M4×30'): '스텐 렌치볼트 M4x30', ('M4 렌치볼트 + 너트', 'M4×60'): '스텐 렌치볼트 M4x60',
+    ('M5 렌치볼트 + 너트', 'M5×10'): '스텐 렌치볼트 M5x10', ('M5 렌치볼트 + 너트', 'M5×20'): '스텐 렌치볼트 M5x20',
+    'M5 렌치볼트 + 평와셔': '스텐 렌치볼트 M5x12', 'M5 렌치볼트 + 나일론 너트': '스텐 렌치볼트 M5x70',
+    'M6 렌치볼트': '스텐 렌치볼트 M6x25', 'M6 너트': '스텐 육각너트 M6', 'M6 나일론 너트': '나일론 너트 M6',
+    '목재 나사': '목재나사 4x16', '에폭시 접착제': '2액형 에폭시', '순간접착제': '순간접착제',
+    '자전거 브레이크 케이블 세트': '자전거 브레이크 케이블 속선 겉선 세트', 'MDF 판': CP + '71452005', '투명 아크릴': CP + '9593337115',
+    '아두이노 레오나르도 R3 + 케이블': CP + '1119152790', '홀센서 A3144': CP + '8520223332', '네오디뮴 자석': CP + '7119515778',
+    '가변저항 B10K': '가변저항 B10K 반달축 15mm', '마이크로스위치': CP + '9167678186', '점퍼 케이블': CP + '9699042565',
+    '만능기판': CP + '9661304796', '자동차 릴레이 + 소켓': '자동차 릴레이 12V 40A 소켓', '블레이드 퓨즈 + 인라인 홀더': '블레이드 퓨즈 홀더 15A',
+    '비상정지 스위치': '비상정지 스위치 버섯형 NC', '5V 릴레이 모듈': '아두이노 5V 릴레이 모듈 1채널', '다이오드 1N4007': '1N4007 다이오드',
+    '전선': '16AWG 전선 적흑', '압착 단자 세트': '250 절연 암 평형 단자', '저항': '저항 10K 4.7K 1/4W',
+    'PLA 필라멘트': 'PLA 필라멘트 2.85mm', '육각 렌치 세트': '육각 렌치 세트', '드릴 날': '드릴 비트 3.4mm',
+    '납땜 인두 + 실납': '납땜 인두 세트', '걸이 저울': '디지털 걸이 저울 5kg', '디지털 캘리퍼스': '디지털 캘리퍼스 150mm',
+}
+
+def link(name, spec):
+    q = LINK.get((name, spec), LINK.get(name))
+    if q is None:
+        return None
+    return q if q.startswith('http') else 'https://www.coupang.com/np/search?q=' + quote(q)
+
 wb = openpyxl.load_workbook(PATH)
 if '구매목록_v4' in wb.sheetnames:
     del wb['구매목록_v4']
@@ -94,7 +130,7 @@ for col, dim in src.column_dimensions.items():
     ws.column_dimensions[col].width = dim.width
 ws['A1'] = '3D프린팅 수동변속기 제작 - 구매 물품 목록 (v4.1)'; style(ws['A1'], src['A1'])
 ws['A2'] = ('작성일 2026-10-19 · 설계서 v4.1 기준 · 노란 칸(단가)만 입력하면 금액·합계가 계산됩니다. '
-            + V3 + ', 비어 있는 칸은 미확인입니다(비고의 검색어로 확인).')
+            + V3 + ', 비어 있는 칸은 미확인입니다. 품명을 누르면 쿠팡 상품·검색으로 (스프링은 디바이스마트, 축은 소망트레이딩).')
 style(ws['A2'], src['A2'])
 ws.row_dimensions[1].height = src.row_dimensions[1].height
 ws.row_dimensions[2].height = src.row_dimensions[2].height
@@ -108,6 +144,9 @@ for i, (name, spec, q, unit, price, use, st, note) in enumerate(ROWS):
     vals = [i + 1, name, spec, q, unit, price, f'=D{r}*F{r}', use, st, note]
     for c, v in enumerate(vals, 1):
         d = ws.cell(r, c); d.value = v; style(d, src.cell(5, c))
+    u = link(name, spec)
+    if u:
+        ws.cell(r, 2).hyperlink = u
     ws.row_dimensions[r].height = src.row_dimensions[5].height
 last = r0 + len(ROWS) - 1
 tot = [('합계 (확정 항목, 단가 입력된 것만)', f'=SUMIFS(G{r0}:G{last},I{r0}:I{last},"확정")', 36),
