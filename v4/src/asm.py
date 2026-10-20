@@ -73,7 +73,8 @@ def clutch(P, state='in'):
     R = np.array([[1, 0, 0], [0, math.cos(ang), -math.sin(ang)], [0, math.sin(ang), math.cos(ang)]])
     P['cl_fork'] = xf(tx.cl_fork().translate(list(-piv)), R, piv)
     P['cl_bracket'] = tx.cl_fork_bracket()
-    P['cl_pivot_bolt'] = tx.along_x(cyl(2.4, 34, -17)).translate(list(piv))
+    P['cl_pivot_bolt'] = (tx.along_x(cyl(2.4, 70, -39.5)) + tx.along_x(cyl(4.25, 5, 30.5))      # M5x70 (머리 30.5~35.5)
+                          + tx.along_x(cyl(4.6, 5, -35.5))).translate(list(piv))                    # 나일론 너트 (두께 5)
     # 파일럿 베어링·끝 와셔·끝 칼라
     P['cl_pilot'] = brg(0, H, tx.Z_FRONT[0])
     P['cl_endsp'] = tx.cl_end_spacer().translate([0, H, tx.Z_FRONT[0] - 1.0])
