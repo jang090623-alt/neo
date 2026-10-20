@@ -1,5 +1,7 @@
 """v4 최종 검증: 단별 정지 상태(클러치 물림/끊김) 간섭, 막힘 상태, 레버 경로(1mm), 후진 잠금, 맞물림 스윕, STL 닫힘"""
 import json, os, sys, time, asm, tx, trimesh
+ROOT = os.path.dirname(os.path.abspath(__file__))
+STL = os.path.join(ROOT, '..', 'stl')
 t0 = time.time()
 R = {}
 st = {}
@@ -21,8 +23,7 @@ if '--sweep' in sys.argv:
     R['sweep_non_reverse_lock'] = [x for x in sw if not (x[2] == 'gate' and x[3] == 'lock_collar')]
     R['reverse_blocked_at'] = sorted(set(float(x[1]) for x in sw if x[3] == 'lock_collar'))
     print('sweep done', round(time.time() - t0), flush=True)
-if os.path.isdir('stl') and os.listdir('stl'):
-    R['stl_bad'] = [f for f in sorted(os.listdir('stl')) if not trimesh.load('stl/' + f).is_watertight]
-    R['stl_count'] = len(os.listdir('stl'))
-json.dump(R, open('verify_result.json', 'w'), ensure_ascii=False, indent=1, default=str)
+R['stl_bad'] = [f for f in sorted(os.listdir(STL)) if not trimesh.load(os.path.join(STL, f)).is_watertight]
+R['stl_count'] = len(os.listdir(STL))
+json.dump(R, open(os.path.join(ROOT, 'verify_result.json'), 'w'), ensure_ascii=False, indent=1, default=str)
 print(json.dumps(R, ensure_ascii=False, indent=1, default=str))

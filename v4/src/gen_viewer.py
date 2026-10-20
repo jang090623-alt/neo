@@ -1,4 +1,4 @@
-import json, base64, numpy as np, fast_simplification, asm, tx
+import json, os, base64, numpy as np, fast_simplification, asm, tx
 _gp = tx.gear_poly                                   # 뷰어용: 이 모양을 거칠게 (용량 줄이기, 출력 STL 과 무관)
 tx.gear_poly = lambda z, *a, **k: _gp(z, steps=240).simplify(0.02)
 P = asm.assemble('N', carrier_side=1)
@@ -28,5 +28,5 @@ for n, m in P.items():
 consts = {'C': tx.C, 'H': tx.H, 'L1': tx.L1, 'PIVOT': list(map(float, tx.PIVOT)), 'TRAVEL': tx.TRAVEL, 'PUSH': tx.REV_PUSH,
           'RAIL_X': tx.RAIL_X, 'WIN': tx.WIN, 'FH': tx.FINGER_HALF, 'FINGER_YC': tx.FINGER_YC}
 data = json.dumps({'parts': out, 'k': consts})
-open('viewer_data.js', 'w').write('window.TXDATA=' + data + ';')
+open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'viewer_data.js'), 'w').write('window.TXDATA=' + data + ';')
 print(len(out), 'parts', tris, 'tris', round(len(data) / 1e6, 2), 'MB')

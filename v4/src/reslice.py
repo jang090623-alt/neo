@@ -18,8 +18,8 @@ if '--parse-only' in sys.argv:
 else:
     with ThreadPoolExecutor(4) as ex:
         new = {r[0]: list(r) for r in ex.map(slice_one, names)}
-old = [list(r) for r in json.load(open('slice_result.json'))]
+old = [list(r) for r in json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'slice_result.json')))]
 have = set(os.listdir(STL))
 res = [new.get(r[0], r) for r in old if r[0] in have] + [r for n, r in new.items() if n not in {o[0] for o in old}]
-json.dump(sorted(res), open('slice_result.json', 'w'), ensure_ascii=False)
+json.dump(sorted(res), open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'slice_result.json'), 'w'), ensure_ascii=False)
 for n in names: print(new[n])
