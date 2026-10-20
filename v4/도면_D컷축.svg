@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" font-family="Malgun Gothic, Arial, sans-serif">
+  <rect width="1000" height="560" fill="#ffffff"/>
+  <text x="30" y="40" font-size="22" font-weight="bold">Ø12 양면 D컷 축 가공 도면 (2종, 각 1개)</text>
+  <text x="30" y="66" font-size="13">RPM 동아리 · 3D프린팅 5단+후진 수동변속기 · 단위 mm · 축척 없음</text>
+
+  <!-- 축 1: 435 -->
+  <text x="30" y="120" font-size="15" font-weight="bold">① 입력축  L = 435 ±0.5</text>
+  <rect x="60" y="140" width="783" height="24" fill="#d9d9d9" stroke="#000" stroke-width="1.5"/>
+  <line x1="60" y1="144" x2="843" y2="144" stroke="#000" stroke-width="1"/>
+  <line x1="60" y1="160" x2="843" y2="160" stroke="#000" stroke-width="1"/>
+  <line x1="60" y1="185" x2="843" y2="185" stroke="#000"/>
+  <line x1="60" y1="178" x2="60" y2="192" stroke="#000"/><line x1="843" y1="178" x2="843" y2="192" stroke="#000"/>
+  <text x="430" y="203" font-size="13" text-anchor="middle">435 ±0.5 (전체 길이 양면 D컷)</text>
+  <text x="852" y="157" font-size="13">A</text>
+
+  <!-- 축 2: 358 -->
+  <text x="30" y="250" font-size="15" font-weight="bold">② 출력축  L = 358 ±0.5</text>
+  <rect x="60" y="270" width="644" height="24" fill="#d9d9d9" stroke="#000" stroke-width="1.5"/>
+  <line x1="60" y1="274" x2="704" y2="274" stroke="#000" stroke-width="1"/>
+  <line x1="60" y1="290" x2="704" y2="290" stroke="#000" stroke-width="1"/>
+  <line x1="60" y1="315" x2="704" y2="315" stroke="#000"/>
+  <line x1="60" y1="308" x2="60" y2="322" stroke="#000"/><line x1="704" y1="308" x2="704" y2="322" stroke="#000"/>
+  <text x="382" y="333" font-size="13" text-anchor="middle">358 ±0.5 (전체 길이 양면 D컷)</text>
+  <text x="713" y="287" font-size="13">A</text>
+
+  <!-- 단면 A-A -->
+  <text x="790" y="370" font-size="15" font-weight="bold" text-anchor="middle">단면 A-A (두 축 같음)</text>
+  <clipPath id="flats"><rect x="690" y="433" width="200" height="134"/></clipPath>
+  <g transform="translate(0,-33)">
+    <circle cx="790" cy="500" r="80" fill="#d9d9d9" stroke="#000" stroke-width="1.5" clip-path="url(#flats)"/>
+    <line x1="730" y1="433" x2="850" y2="433" stroke="#000" stroke-width="1.5"/>
+    <line x1="730" y1="567" x2="850" y2="567" stroke="#000" stroke-width="1.5"/>
+  </g>
+  <circle cx="790" cy="467" r="80" fill="none" stroke="#000" stroke-dasharray="4 3"/>
+  <line x1="700" y1="467" x2="880" y2="467" stroke="#888" stroke-dasharray="10 3 2 3"/>
+  <line x1="880" y1="400" x2="880" y2="534" stroke="#000"/>
+  <text x="888" y="472" font-size="13">10.0 (+0 / −0.1)</text>
+  <text x="888" y="490" font-size="12">마주 보는 두 면, 서로 평행</text>
+  <text x="700" y="560" font-size="13">원래 지름 Ø12 (점선)</text>
+
+  <!-- 요구 사항 -->
+  <text x="30" y="380" font-size="15" font-weight="bold">가공 요구 사항</text>
+  <text x="30" y="405" font-size="13">1. 소재: Ø12 연마봉 (h7 또는 g6). 열처리봉이 가공 어려우면 S45C 비열처리 연마봉도 됨</text>
+  <text x="30" y="427" font-size="13">2. 양면 D컷: 전체 길이, 한쪽 깊이 1.0 (중심에서 각 면까지 5.0), 면 사이 10.0 (+0 / −0.1)</text>
+  <text x="30" y="449" font-size="13">3. 두 면은 서로 평행, 길이 방향으로 비틀림 없이 곧게</text>
+  <text x="30" y="471" font-size="13">4. 길이 435 ±0.5, 358 ±0.5 / 양 끝 모따기 C0.5 / 버(burr) 제거</text>
+  <text x="30" y="493" font-size="13">5. 둥근 부분 지름은 원래 Ø12 그대로 (베어링 6001 안지름 12 에 끼움)</text>
+  <text x="30" y="515" font-size="13">6. 수량: ① 1개, ② 1개 (+ 같은 소재 Ø12 × 160 가공 없음 1개, Ø12 × 55 가공 없음 1개)</text>
+</svg>
