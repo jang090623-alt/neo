@@ -186,3 +186,77 @@ for col, w in (('A', 22), ('B', 34), ('C', 110)):
     wo.column_dimensions[col].width = w
 wb.save(PATH)
 print('rows', len(ROWS), 'last', last, 'PLA g', round(pla_g), 'rolls', pla_rolls)
+
+# 제출용 한 페이지 (동아리 학술제 물품 구입 신청): 판매처별로 묶고, A4 세로 한 장에 맞춤
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from urllib.parse import urlparse, parse_qs
+FINAL = os.path.join(ROOT, '..', '구매신청_최종.xlsx')
+SHORT = {'연마봉(강철 축)': 'Ø12 1m (435·358·160 으로 절단)'}
+
+def shop(u):
+    if not u:
+        return '-', ''
+    h, q = urlparse(u).netloc, parse_qs(urlparse(u).query)
+    if 'devicemart' in h:
+        return '디바이스마트', q.get('no', [''])[0]
+    if 'smball' in h:
+        return '소망트레이딩', ''
+    return '쿠팡', u.rsplit('/', 1)[-1] if '/vp/products/' in u else ''
+
+ORDER_SHOP = {'디바이스마트': 0, '소망트레이딩': 1, '쿠팡': 2, '-': 3}
+items = []
+for i, (name, spec, q, unit, price, use, st, note) in enumerate(ROWS):
+    s, no = shop(link(name, spec))
+    items.append((ORDER_SHOP[s], i, name, SHORT.get(name, spec), q, unit, price, s, no, link(name, spec)))
+items.sort()
+fb = openpyxl.Workbook()
+fs = fb.active
+fs.title = '물품 구입 신청'
+thin = Side(style='thin', color='999999')
+box_b = Border(left=thin, right=thin, top=thin, bottom=thin)
+fs['A1'] = '동아리 학술제 물품 구입 신청(1차) · RPM · 3D프린팅 5단+후진 수동변속기 제작 재료'
+fs['A1'].font = Font(bold=True, size=12)
+fs['A2'] = '단가는 2026-10-20 판매처 화면 기준(VAT 포함). 입력축·출력축 양면 D컷 가공비는 별도(가공 업체 견적 후 확정).'
+fs['A2'].font = Font(size=8)
+head = ['번호', '품명', '규격', '수량', '단위', '단가', '금액', '구입처', '상품번호']
+for c, v in enumerate(head, 1):
+    x = fs.cell(4, c, v)
+    x.font = Font(bold=True, size=8); x.border = box_b
+    x.fill = PatternFill('solid', fgColor='DDDDDD'); x.alignment = Alignment(horizontal='center', vertical='center')
+r = 5
+for k, (_, _, name, spec, q, unit, price, s, no, u) in enumerate(items, 1):
+    vals = [k, name, spec, q, unit, price, f'=D{r}*F{r}', s, no]
+    for c, v in enumerate(vals, 1):
+        x = fs.cell(r, c, v)
+        x.font = Font(size=8); x.border = box_b
+        x.alignment = Alignment(vertical='center', wrap_text=c in (2, 3), horizontal='center' if c in (1, 4, 5, 8) else None)
+        if c in (6, 7):
+            x.number_format = '#,##0'
+    if u:
+        fs.cell(r, 2).hyperlink = u
+    r += 1
+fs.cell(r, 1, len(items) + 1)
+fs.cell(r, 2, '축 양면 D컷 가공 (입력축 435, 출력축 358)').font = Font(size=8)
+fs.cell(r, 3, '면 사이 10.0, 전체 길이').font = Font(size=8)
+fs.cell(r, 4, 2); fs.cell(r, 5, '개'); fs.cell(r, 7, '견적 후'); fs.cell(r, 8, '가공 업체')
+for c in range(1, 10):
+    x = fs.cell(r, c); x.border = box_b; x.font = Font(size=8)
+    x.alignment = Alignment(vertical='center', horizontal='center' if c in (1, 4, 5, 7, 8) else None)
+r += 1
+fs.cell(r, 6, '합계').font = Font(bold=True, size=9)
+fs.cell(r, 7, f'=SUM(G5:G{r - 1})').font = Font(bold=True, size=9)
+fs.cell(r, 7).number_format = '#,##0'
+for c in (6, 7):
+    fs.cell(r, c).border = box_b
+for col, w in zip('ABCDEFGHI', (4, 26, 30, 5, 6, 8, 9, 10, 11)):
+    fs.column_dimensions[col].width = w
+fs.page_setup.paperSize = fs.PAPERSIZE_A4
+fs.page_setup.orientation = 'portrait'
+fs.page_setup.fitToWidth = 1
+fs.page_setup.fitToHeight = 1
+fs.sheet_properties.pageSetUpPr.fitToPage = True
+fs.page_margins.left = fs.page_margins.right = 0.4
+fs.page_margins.top = fs.page_margins.bottom = 0.5
+fs.print_area = f'A1:I{r}'
+fb.save(FINAL)
+print('final rows', len(items), '->', os.path.basename(FINAL))
