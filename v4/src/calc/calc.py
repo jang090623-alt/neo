@@ -32,7 +32,7 @@ def fatigue_allow(UTS, N):
     return 0.10 * UTS * (2e6 / min(N, 2e6)) ** (1 / 5.5)
 STEEL = dict(E=200000.0, G=80000.0, Y=235.0, rho=7.85e-3)      # 연마봉 재질 미확인 → 일반 구조용강 최저 항복 235 가정
 CORK = dict(mu_lo=0.30, mu_hi=0.50, mu_nom=0.40, pmax=0.10, Tmax=100.0)
-C252 = dict(L0=32.0, k=(44.03 - 26.48) / (21.6 - 14.73), P2L=14.73)
+C252 = dict(L0=32.0, k=(44.03 - 26.48) / (21.6 - 14.73), P2L=14.73, tol=0.10)   # 하중 허용차 ±10% (제조사 사양), P2 길이보다 짧게 쓰면 안 됨
 C147 = dict(L0=10.0, k=(2.79 - 1.77) / (6.47 - 4.41))
 B6001 = dict(C=5100.0, C0=2400.0)
 F_KNOB = 400.0                      # 손잡이 설계 하중 (HAND 근거)
@@ -115,10 +115,10 @@ for bl in (8.0, 10.0, 12.0):
                  'Tc μ0.3': round(Tc(F, 0.3, r_eff_worn) / 1e3, 2), 'Tc μ0.4': round(Tc(F, 0.4, r_eff_worn) / 1e3, 2),
                  'Tc μ0.5(새것)': round(Tc(F, 0.5, r_eff_new) / 1e3, 2)})
 F_MAX = F_spr(L_of_s(S_MIN))
-TC_MAX = Tc(F_MAX, CORK['mu_hi'], r_eff_new)                           # 설정(M5x10 끝까지)에서 마찰계수 최대(0.5, 새것) = 설계 하중
+TC_MAX = Tc(F_MAX * (1 + C252['tol']), CORK['mu_hi'], r_eff_new)        # 설정(M5x10 끝까지) + 스프링 +10% + 마찰계수 최대(0.5, 새것) = 설계 하중
 TC_NOM = Tc(F_MAX, CORK['mu_nom'], r_eff_worn)                         # 끝까지 조임 + μ0.4 (0.58 N·m)
 cork_area = math.pi * (r_o ** 2 - r_i ** 2)
-R['clutch'] = {'설정표': rows, 'Tc_max_Nm(설정 M5x10 + μ0.5 새것 = 설계 하중)': round(TC_MAX / 1e3, 3), 'Tc_nom_Nm(끝까지 조임, μ0.4)': round(TC_NOM / 1e3, 2),
+R['clutch'] = {'설정표': rows, 'Tc_max_Nm(설정 M5x10 + 스프링 +10% + μ0.5 새것 = 설계 하중)': round(TC_MAX / 1e3, 3), 'Tc_nom_Nm(끝까지 조임, μ0.4)': round(TC_NOM / 1e3, 2),
                '필요토크 대비 여유(공칭)': round(TC_NOM / T_need, 1),
                '코르크 압력 최대 MPa': round(F_MAX / cork_area, 4), '코르크 허용 MPa': CORK['pmax'],
                '스프링 최대 사용 길이(뗄 때) mm': L_of_s(S_MIN) - 1.5, 'C252 P2 길이 mm': C252['P2L']}
@@ -310,15 +310,19 @@ R['bearings'] = {'최대 반지름 하중 N': P_max, '정적 안전계수 C0/P':
                  'L10 수명(시간, 167rpm, 최대하중 계속)': round((B6001['C'] / P_max) ** 3 * 1e6 / (60 * 167)),
                  '릴리스 6003·파일럿 6001 축방향 N': round(F_rel, 1)}
 
+# C252 가 가장 많이 눌리는 길이 (제조사: 허용 하중 P2 길이 14.73 보다 더 누르지 말 것)
+lev_spr = (tx.PIVOT_Y + tx.LOCK_RHO - 8.5) - (tx.spring_spacer()[1]) - tx.REV_PUSH   # 레버 후진 잠금: 스페이서 끝 ~ 잠금 칼라, 눌렀을 때
+R['C252_min_len'] = {'클러치(뗄 때)': L_of_s(S_MIN) - 1.5, '카트리지(막힘)': round(tx.CART_PRE_L - (tx.TRAVEL - tx.GAP0), 2),
+                     '페달 복귀(끝)': 21.2, '레버 후진 잠금(눌렀을 때)': round(lev_spr, 2), 'P2 길이(이보다 길어야 함)': C252['P2L']}
 # ================= 10. 포크·카트리지 =================
-F_cart = 26.48 + C252['k'] * (tx.TRAVEL - tx.GAP0)          # 막혔을 때 (5mm 더 눌림)
+F_cart = (26.48 + C252['k'] * (tx.TRAVEL - tx.GAP0)) * (1 + C252['tol'])   # 막혔을 때 (5mm 더 눌림), 스프링 +10%
 F_det = 2.79
 F_shift = F_cart + F_det
 def Zrect(b, h): return b * h ** 2 / 6
 M_arm = F_shift * (tx.RAIL_Y - 13.5 - tx.H)                  # 카트리지 아래끝 ~ 홈 중심
 M_ring = F_shift / 2 * (tx.H + 44.6 - tx.H)                  # 양쪽 패드 → 링 위쪽
 s_arm = M_arm / Zrect(12.0, 13.0); s_ring = M_ring / (Zrect(7.4, 13.0))
-R['fork'] = {'카트리지 예압 N': 26.48, '막힘 최대 N': round(F_cart, 1), '디텐트 최대 N': F_det,
+R['fork'] = {'카트리지 예압 N(공칭)': 26.48, '막힘 최대 N': round(F_cart, 1), '디텐트 최대 N': F_det,
              '팔 굽힘 MPa': round(s_arm, 1), 'SF 정적': round(PLA['UTS_XY'] / s_arm, 1),
              'SF 피로 1만회': round(fatigue_allow(PLA['UTS_XY'], 1e4) / s_arm, 2),
              '링 굽힘 MPa': round(s_ring, 1), 'SF 링 피로 1만회': round(fatigue_allow(PLA['UTS_XY'], 1e4) / s_ring, 2),
