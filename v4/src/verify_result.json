@@ -85,6 +85,27 @@
   -4.0,
   -3.0
  ],
+ "pedal": {
+  "travel_deg": 10.74,
+  "arm^base": {
+   "24.0": 59.78,
+   "25.0": 0.0,
+   "30.4": 0.0,
+   "35.7": 0.0,
+   "36.7": 42.67
+  },
+  "bolt^base": 0.0,
+  "pot^base": -0.0,
+  "bolt^arm": -0.0,
+  "pot_shaft_tip_in_D_mm": 4.0,
+  "release_ring_travel_mm": 3.07,
+  "cable_rest^base": 0.0,
+  "cable_stop^base": 0.0,
+  "spring_len_rest_stop": [
+   29.0,
+   21.19
+  ]
+ },
  "stl_bad": [],
  "stl_count": 66
 }

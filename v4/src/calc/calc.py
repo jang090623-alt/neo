@@ -126,12 +126,15 @@ R['clutch'] = {'설정표': rows, 'Tc_max_Nm(설정 M5x10 + μ0.5 새것 = 설�
 F_rel = F_spr(L_of_s(S_MIN) - 1.5) * 1.1           # 마찰 10%
 fork_ratio = (tx.FORK_CABLE_Y - tx.FORK_PIV_Y) / (tx.FORK_PIV_Y - tx.H)
 cable_F = F_rel / fork_ratio
-pedal_ratio = (tx.PEDAL_L - 20) / 40.0
+pedal_ratio = tx.PEDAL_PAD_B / tx.PEDAL_CABLE_B
 R['clutch']['떼는 힘 N(압력판)'] = round(F_rel, 1)
 R['clutch']['포크 지렛대비'] = round(fork_ratio, 2)
 R['clutch']['케이블 장력 N'] = round(cable_F, 1)
-R['clutch']['페달 발 힘 N(복귀 스프링 제외, 40mm 구멍)'] = round(cable_F / pedal_ratio, 1)
+R['clutch']['페달 발 힘 N(복귀 스프링 제외, 케이블 30mm 구멍, 발판 180)'] = round(cable_F / pedal_ratio, 1)
+F_ret = C252['k'] * (C252['L0'] - 21.2)                                  # 복귀 스프링 끝 길이 21.2 (asm.pedal_check)
+R['clutch']['페달 복귀 스프링 힘 N(끝, 발판 기준)'] = round(F_ret * tx.PEDAL_SPR_B / tx.PEDAL_PAD_B, 1)
 R['clutch']['페달 행정 mm(발판, 압력판 1.5 + 유격 1.0)'] = round((1.5 + 1.0) * fork_ratio * pedal_ratio, 1)
+R['clutch']['페달 끝 멈춤 각 도(릴리스 링 3.0, 뒷판까지 3.5)'] = round(tx.PEDAL_TRAVEL, 1)
 # 발열
 P_jam = TC_MAX * W_IN_NOM / 1e3                                       # W
 E_eng = 0.5 * J1 * W_IN_NOM ** 2 * 2                                  # 한 번 물릴 때 미끄럼 손실 ≈ 얻는 운동에너지 x1 (x2 여유)

@@ -62,7 +62,7 @@ def parts():
         add(f'50_fork_{g}', to_print(tx.fork(g), (0, 0, 0) if tx.CART_DIR[g] > 0 else flip), 1, '5 변속', f'{g} 포크 (립 면이 바닥)')
     add('50a_fork_cap', to_print(tx.fork_cap()), 3, '5 변속', '카트리지 뚜껑 (M3x8 자가탭 2)')
     add('50b_cart_washer', to_print(tx.cart_washer()), 6, '5 변속', '카트리지 와셔')
-    add('51_lug', to_print(tx.lug('34')), 3, '5 변속', '세 레일 공통 (자석 1, M3x30 2)')
+    add('51_lug', to_print(tx.lug('34')), 3, '5 변속', '세 레일 공통 (자석 1, M3x25 자가탭 2: 끝이 레일을 누름)')
     add('52_selector_cage', to_print(tx.cage()), 1, '5 변속', '플랜지 바닥')
     add('53_pivot_lower', to_print(tx.pivot_half(False), (90, 0, 0)), 1, '5 변속', '')
     add('54_pivot_upper', to_print(tx.pivot_half(True), (-90, 0, 0)), 1, '5 변속', '')
@@ -81,14 +81,14 @@ def parts():
     add('74_cl_disc_hub', to_print(tx.cl_disc_hub(), flip), 1, '6 클러치', '디스크 허브: 플랜지가 바닥 (강철 와셔 에폭시)')
     add('75_cl_ring', to_print(tx.cl_ring()), 1, '6 클러치', '릴리스 링: 판이 바닥 (누름 볼트 M5x20 3)')
     add('76_cl_carrier', to_print(tx.cl_carrier(), flip), 1, '6 클러치', '릴리스 캐리어: 턱 면이 바닥 (6003)')
-    add('77_cl_fork', to_print(tx.cl_fork(), flip), 1, '6 클러치', '클러치 포크: 끝판 쪽 면이 바닥 (피벗 M5x35)')
+    add('77_cl_fork', to_print(tx.cl_fork(), flip), 1, '6 클러치', '클러치 포크: 끝판 쪽 면이 바닥 (피벗 M5x70 + 나일론 너트, 속선 M3x10 + 와셔)')
     add('78_cl_fork_bracket', to_print(tx.cl_fork_bracket(), flip), 1, '6 클러치', '끝판 A 에 붙는 면이 바닥')
     add('79_cl_spring_cup', to_print(tx.cl_spring_cup()), 3, '6 클러치', '스프링 컵')
     add('79b_cl_end_spacer', to_print(tx.cl_end_spacer()), 1, '6 클러치', '파일럿 베어링 끝 와셔 (두께 1)')
     # 7 페달
-    add('80_pedal_arm', to_print(tx.pedal_arm()), 2, '7 페달', '클러치·브레이크 공용 (옆면 바닥)')
-    add('81_pedal_pad', to_print(tx.pedal_pad()), 2, '7 페달', '발판 (M4x16 2)')
-    add('82_pedal_base', to_print(tx.pedal_base(), (90, 0, 0)), 2, '7 페달', '바닥판이 바닥')
+    add('80_pedal_arm', to_print(tx.pedal_arm()), 2, '7 페달', '클러치·브레이크 공용, 너트 홈 면이 바닥 (M6 나일론 너트, 가변저항 D축)')
+    add('81_pedal_pad', to_print(tx.pedal_pad()), 2, '7 페달', '발판 (M4x25 2, 너트는 팔 앞면 홈)')
+    add('82_pedal_base', to_print(tx.pedal_base(), (90, 0, 0)), 2, '7 페달', '바닥판이 바닥 (M6x25 피벗, 가변저항 에폭시, C252 복귀 스프링, 목재나사 4)')
     return L
 
 def parts_meta():

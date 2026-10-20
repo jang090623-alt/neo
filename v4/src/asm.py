@@ -302,3 +302,30 @@ def lever_sweep(step=2.0):
                 if a in parts or b in parts or a == 'carrier' or b == 'carrier':
                     bad.append((round(dx, 1), round(dz, 1), a, b, v))
     return bad
+
+def pedal_check():
+    """페달(받침·팔·M6 볼트·가변저항·케이블·복귀 스프링) 검사. 간섭 부피 mm³ (0 이 정상, 끝 ±1° 는 멈춤이 닿아야 정상)"""
+    base = tx.pedal_base()
+    py = tx.PEDAL_PIV_Y
+    tr, ts = tx.PEDAL_REST, tx.PEDAL_REST + tx.PEDAL_TRAVEL
+    R = {'travel_deg': round(tx.PEDAL_TRAVEL, 2)}
+    R['arm^base'] = {f'{th:.1f}': round((tx.pedal_arm_placed(th) ^ base).volume(), 2)
+                     for th in (tr - 1.0, tr, (tr + ts) / 2, ts, ts + 1.0)}
+    bolt = tx.along_x(cyl(3.0, 25, -22.5) + cyl(5.0, 4, -26.5)).translate([0, py, 0])          # M6x25 머리 x=-22.5 바깥
+    face = 22.5 - tx.PEDAL_POT_P
+    pot = tx.along_x(cyl(8.5, 10, face) + cyl(3.5, 7, face - 7)).translate([0, py, 0])        # 몸통 Ø17 + 부싱
+    R['bolt^base'] = round((bolt ^ base).volume(), 2)
+    R['pot^base'] = round((pot ^ base).volume(), 2)
+    R['bolt^arm'] = max(round((bolt ^ tx.pedal_arm_placed(th)).volume(), 2) for th in (tr, ts))
+    R['pot_shaft_tip_in_D_mm'] = round(tx.PEDAL_T / 2 - (face - 15.0), 2)                    # 축 15 (부싱 포함) 가 D 구멍에 들어간 깊이
+    cab0, cab1, spr0, spr1, nb, nfm = tx.pedal_points()
+    u, nbs, nfs = tx.pedal_dirs(ts)
+    cab0s = np.array([py, 0.0]) + tx.PEDAL_CABLE_B * u + tx.PEDAL_W / 2 * nbs
+    pull = float(np.linalg.norm(cab1 - cab0s) - np.linalg.norm(cab1 - cab0))
+    R['release_ring_travel_mm'] = round(pull * (tx.FORK_PIV_Y - tx.H) / (tx.FORK_CABLE_Y - tx.FORK_PIV_Y), 2)
+    for nm, p in (('rest', cab0), ('stop', cab0s)):
+        d = cab1 - p; L = float(np.linalg.norm(d))
+        R[f'cable_{nm}^base'] = round((tx._yz_cyl(p + 0.5 * d / L, d / L, 0.8, L - 0.5) ^ base).volume(), 2)
+    spr0s = np.array([py, 0.0]) + tx.PEDAL_SPR_B * u + (tx.PEDAL_W / 2 - 1.5) * nfs
+    R['spring_len_rest_stop'] = [round(float(np.linalg.norm(spr1 - p)) + 3.0, 2) for p in (spr0, spr0s)]
+    return R

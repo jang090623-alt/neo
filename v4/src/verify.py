@@ -23,6 +23,8 @@ if '--sweep' in sys.argv:
     R['sweep_non_reverse_lock'] = [x for x in sw if not (x[2] == 'gate' and x[3] == 'lock_collar')]
     R['reverse_blocked_at'] = sorted(set(float(x[1]) for x in sw if x[3] == 'lock_collar'))
     print('sweep done', round(time.time() - t0), flush=True)
+R['pedal'] = asm.pedal_check()
+print('pedal done', round(time.time() - t0), flush=True)
 R['stl_bad'] = [f for f in sorted(os.listdir(STL)) if not trimesh.load(os.path.join(STL, f)).is_watertight]
 R['stl_count'] = len(os.listdir(STL))
 json.dump(R, open(os.path.join(ROOT, 'verify_result.json'), 'w'), ensure_ascii=False, indent=1, default=str)
