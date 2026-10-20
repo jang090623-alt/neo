@@ -52,7 +52,7 @@ def parts():
     add('42_foot_bracket', to_print(tx.foot_bracket()), 4, '4 프레임', 'MDF 고정')
     add('43_display_wheel', to_print(tx.display_wheel()), 1, '4 프레임', '출력축 표시 바퀴 (끝판 B 바깥, 자석 Ø6x3 1, M3 무두볼트 1)')
     add('44_wheel_guard', to_print(tx.wheel_guard()), 1, '4 프레임', '바퀴 덮개 + A3144 자리 (끝판 B, M3 4)')
-    add('45_motor_riser', to_print(tx.motor_riser()), 1, '4 프레임', '감속기 받침 아래, 높이 55')
+    add('45_motor_riser', to_print(tx.motor_riser(), (-90, 0, 0)), 1, '4 프레임', 'K9B 브래킷 아래, 높이 19, 윗면이 바닥 (밑면 너트 홈에 M6 너트 4 → MDF 에 붙이기 전에)')
     add('46_clutch_hood', to_print(tx.clutch_hood(), flip), 1, '4 프레임', '클러치 덮개: 탭 쪽 끝이 바닥 (M3 3 + 목재나사 4)')
     add('47_hood_front', to_print(tx.hood_front()), 1, '4 프레임', '클러치 덮개 앞판 (M3 4)')
     add('48_end_cap', to_print(tx.collar_cap()), 2, '4 프레임', '축 끝 덮개: 끝판 A 출력축 + 끝판 B 입력축 (M3 2씩)')

@@ -84,8 +84,9 @@ def clutch(P, state='in'):
     rr = tx.CPL_PIN_R - 2.54 - 0.06
     P['m_sprocket'] = cyl(rr, tx.Z_SPROCKET[1] - tx.Z_SPROCKET[0], tx.Z_SPROCKET[0]).translate([0, H, 0])
     P['m_shaft'] = cyl(7.5, tx.Z_SHAFT_IN_END - 2.0 - tx.Z_GEARHEAD_FRONT, tx.Z_GEARHEAD_FRONT).translate([0, H, 0])
-    # 감속기·모터 몸체: 받침 바닥(y=55) 위, 감속기 앞판(z=Z_GEARHEAD_FRONT) 뒤 공간 (정확한 외형 미확인 → 직육면체 근사)
-    P['m_body'] = boxm(-45, 45, tx.RISER_H + 0.5, H + 60, tx.Z_GEARHEAD_FRONT - tx.MOTOR_LEN, tx.Z_GEARHEAD_FRONT)
+    # 감속기·모터 몸체: □90 (축 중심), 위는 60 까지 여유, 브래킷 앞판 뒤 (정확한 외형 미확인 → 직육면체 근사)
+    P['m_body'] = boxm(-45, 45, H - 45, H + 60, tx.Z_GEARHEAD_FRONT - tx.MOTOR_LEN, tx.Z_GEARHEAD_FRONT - 9.0)
+    P['m_bracket'] = tx.motor_bracket()
     P['m_riser'] = tx.motor_riser()
 
 def assemble(state='N', push=False, carrier_side=0, clutch_state='in', blocked=False):
@@ -222,7 +223,7 @@ ALLOWED = [('shaft_idler', 'plate_A'), ('rod', 'lower_lever'), ('rod', 'knob'), 
            ('cl_push', 'cl_ring'), ('cl_adj', 'cl_front'), ('cl_relbrg', 'cl_ring'), ('cl_relbrg', 'cl_carrier'),
            ('cl_bracket', 'plate_A'),
            ('cl_pilot', 'cl_front'), ('cpl_pin', 'cl_front'), ('cpl_pin', 'm_sprocket'),
-           ('m_shaft', 'm_sprocket'), ('m_shaft', 'm_body'),
+           ('m_shaft', 'm_sprocket'), ('m_shaft', 'm_body'), ('m_shaft', 'm_bracket'), ('m_body', 'm_bracket'),
            ('rcol', 'rail'), ('fwash', 'rail'), ('rail', 'lug'), ('fcap', 'fork'),
            ('cl_spring', 'cl_cup'), ('cl_spring', 'cl_press'), ('cl_cup', 'cl_adj')]
 

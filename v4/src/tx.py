@@ -128,8 +128,8 @@ Z_SHAFT_IN_END = Z_FRONT[0] - 1.0 - 8.0                # 입력축 끝 = 앞판 
 CPL_PIN_R = 18.40              # 스프로킷 12T 3/8" 피치원 반지름 (03 시험 캡과 같음)
 CPL_PIN_LEN = 40.0             # Ø5x40 강철 핀, 앞판에 15 박힘
 Z_SPROCKET = (Z_SHAFT_IN_END - 2.0 - 8.0 - 4.3, Z_SHAFT_IN_END - 2.0 - 8.0)   # 감속기 축 끝은 스프로킷 바깥면 +8
-Z_GEARHEAD_FRONT = Z_SPROCKET[1] - 15.0                # 사진 판독: 스프로킷 바깥면이 감속기 앞판에서 15
-MOTOR_LEN = 214.0              # 모터 뒤 ~ 감속기 앞판 (사진 판독)
+Z_GEARHEAD_FRONT = Z_SPROCKET[1] - 15.0                # 받침 브래킷(K9B-M6) 앞판 바깥면. 스프로킷 바깥면을 여기서 15에 맞춤 (축 끝 23 실측 = 설계 일치)
+MOTOR_LEN = 214.0              # 모터 뒤 ~ 브래킷 앞판 (사진 판독 약 210 → 긴 쪽 214 유지)
 
 
 # ======================= 기본 도형 =======================
@@ -892,25 +892,47 @@ def steel_washer():
 
 
 # ======================= 모터 받침·페달 =======================
-MOTOR_FOOT_DY = 30.0          # 감속기 받침 바닥 → 축 중심 (사진 판독 ±3)
-MOTOR_FOOT_HOLE = 39.0        # 받침 구멍 간격 (사진 판독)
-RISER_H = H - MOTOR_FOOT_DY   # 55
-Z_RISER = (Z_GEARHEAD_FRONT - 70.0, Z_GEARHEAD_FRONT)     # 감속기(길이 65) 아래
+# GGM K9B-M6 브래킷 (제조사 도면): 앞판 112x112 두께 9, Ø83 구멍, M6 4개 Ø104 원 / 바닥 146x65 두께 9,
+# 바닥 구멍 Ø6.4 좌우 128 · 앞뒤 40 (앞판 바깥면에서 17, 57), 바닥 → 축 중심 66±0.5
+MOTOR_FOOT_DY = 66.0          # 브래킷 바닥 → 축 중심 (도면)
+MOTOR_FOOT_HOLE = 128.0       # 바닥 구멍 좌우 간격 (도면, 실측 130)
+MOTOR_FOOT_Z = (17.0, 57.0)   # 앞판 바깥면 → 바닥 구멍 앞뒤 줄 (도면, 실측 간격 40)
+MOTOR_STUD_R = 52.0           # 앞판 M6 볼트 원 반지름 (도면 Ø104) → 45° 4곳
+MOTOR_STUD_OUT = 30.0         # 앞판 바깥면 → 볼트 끝 (실측)
+RISER_H = H - MOTOR_FOOT_DY   # 19
+RISER_BACK = 30.0             # 긴 구멍 뒤로 여유: 볼트 끝(30)이 덮개 앞판 뒤에 있는 위치에서 내려놓고 앞으로 밀어 넣음
+Z_RISER = (Z_GEARHEAD_FRONT - MOTOR_FOOT_Z[1] - RISER_BACK - 14.0, Z_GEARHEAD_FRONT + 3.0)   # 앞 끝은 덮개 앞판(-138)과 1 틈
 
 def motor_riser():
-    """모터 받침대 (조립 좌표). 높이 55, 윗판 10, 벽 8. 감속기 받침 구멍용 긴 구멍 2개
-    (x ±19.5, 폭 7 → M6, z 방향 ±15), 옆에서 너트 넣는 통로. 바닥 목재나사 4. 출력: 바닥이 바닥"""
+    """모터 받침대 (조립 좌표). 높이 19 판 (x ±85). 브래킷 바닥 구멍 4개용 긴 구멍 (폭 6.6, 정위치에서 뒤로 30, 앞 끝 = 정위치:
+    앞으로 끝까지 밀고 조이면 볼트 끝과 클러치 앞판 틈 4mm, 더 앞으로 못 감),
+    밑면에 M6 너트 홈 (폭 10.4, 깊이 9, 너트가 돌지 않고 긴 구멍을 따라 움직임 → MDF 에 붙이기 전에 너트를 넣음).
+    볼트 M6x25 (M6x30 이상은 MDF 에 닿음). 목재나사 4x20 4개 (브래킷 바닥 밖 x ±79, 머리 자리 Ø9). 출력: 바닥이 바닥"""
     z0, z1 = Z_RISER
-    zc = (z0 + z1) / 2
-    r = boxm(-40, 40, 0, RISER_H, z0, z1)
-    r -= boxm(-32, 32, -1, RISER_H - 10, z0 + 8, z1 - 8)
+    r = boxm(-85, 85, 0, RISER_H, z0, z1)
     for s in (-1, 1):
         x = s * MOTOR_FOOT_HOLE / 2
-        slot = Polygon([(x - 3.5, zc - 15), (x + 3.5, zc - 15), (x + 3.5, zc + 15), (x - 3.5, zc + 15)])
-        r -= ext(slot, 12, 0).rotate([90, 0, 0]).translate([0, RISER_H + 1, 0])   # (x,z) 단면을 y 방향으로
-    for (x, zz) in ((-36, z0 + 4), (36, z0 + 4), (-36, z1 - 4), (36, z1 - 4)):
+        for dz in MOTOR_FOOT_Z:
+            zc = Z_GEARHEAD_FRONT - dz
+            za, zb = zc - RISER_BACK - 3.3, zc + 3.3                                        # 볼트(Ø6) 중심 이동 범위 = 정위치 -30 ~ +0.3
+            r -= ext(Polygon([(x - 3.3, za), (x + 3.3, za), (x + 3.3, zb), (x - 3.3, zb)]),
+                     RISER_H + 2, 0).rotate([90, 0, 0]).translate([0, RISER_H + 1, 0])       # (x,z) 단면을 y 방향으로
+            r -= boxm(x - 5.2, x + 5.2, -1, 9.0, za - 5.5, zb + 5.5)                         # 너트 홈 (맞변 10)
+    for (x, zz) in ((-79, z0 + 6), (79, z0 + 6), (-79, z1 - 6), (79, z1 - 6)):
         r -= along_y(cyl(2.2, RISER_H + 2, -1)).translate([x, 0, zz])
+        r -= along_y(cyl(4.5, RISER_H, 9.0)).translate([x, 0, zz])       # 머리 자리: 바닥 9 남김 → 4x20 이 MDF(12T)에 11 박힘
     return r
+
+def motor_bracket():
+    """간섭 검사용 K9B-M6 브래킷 + 앞판 M6 볼트·너트 4 (조립 좌표, 구매품)"""
+    zf = Z_GEARHEAD_FRONT
+    b = boxm(-56, 56, RISER_H, RISER_H + 112, zf - 9, zf) - cyl(41.5, 11, zf - 10).translate([0, H, 0])
+    b += boxm(-73, 73, RISER_H, RISER_H + 9, zf - 65, zf)
+    for k in range(4):
+        a = math.radians(45 + 90 * k)
+        x, y = MOTOR_STUD_R * math.cos(a), H + MOTOR_STUD_R * math.sin(a)
+        b += cyl(3.0, MOTOR_STUD_OUT, zf).translate([x, y, 0]) + cyl(5.8, 5.0, zf).translate([x, y, 0])   # 볼트 + 너트(두께 5)
+    return b
 
 PEDAL_L = 195.0
 PEDAL_PIV_Y = 30.0
@@ -1006,11 +1028,14 @@ def clutch_hood():
     return h
 
 def hood_front():
-    """클러치 덮개 앞판 (조립 좌표 z -138~-135). 가운데 Ø46: 스프로킷(바깥지름 약 41)이 지나감 →
-    덮개를 먼저 달고 모터를 앞에서 밀어 넣음. 나사 4 (Ø3.4). 출력: 평평하게"""
+    """클러치 덮개 앞판 (조립 좌표 z -138~-135). 가운데 Ø46: 스프로킷(바깥지름 약 41)이 지나감,
+    브래킷 볼트 4곳 Ø13 → 덮개를 먼저 달고 모터를 뒤에서 밀어 넣음. 나사 4 (Ø3.4). 출력: 평평하게"""
     z0 = HOOD_Z[0] - COVER_T
     f = boxm(COVER_X0, -COVER_X0, 0, HOOD_TOP, z0, z0 + COVER_T)
     f -= cyl(23.0, 10, z0 - 1).translate([0, H, 0])
+    for k in range(4):                                              # 감속기 브래킷 볼트·너트(맞변 10)가 지나가는 구멍 Ø13
+        a = math.radians(45 + 90 * k)
+        f -= cyl(6.5, 10, z0 - 1).translate([MOTOR_STUD_R * math.cos(a), H + MOTOR_STUD_R * math.sin(a), 0])
     for (xc, yc) in HOOD_POSTS:
         f -= cyl(1.7, 10, z0 - 1).translate([xc, yc, 0])
     return f
