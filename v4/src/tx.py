@@ -907,7 +907,7 @@ def motor_riser():
     """모터 받침대 (조립 좌표). 높이 19 판 (x ±85). 브래킷 바닥 구멍 4개용 긴 구멍 (폭 6.6, 정위치에서 뒤로 30, 앞 끝 = 정위치:
     앞으로 끝까지 밀고 조이면 볼트 끝과 클러치 앞판 틈 4mm, 더 앞으로 못 감),
     밑면에 M6 너트 홈 (폭 10.4, 깊이 9, 너트가 돌지 않고 긴 구멍을 따라 움직임 → MDF 에 붙이기 전에 너트를 넣음).
-    볼트 M6x25 (M6x30 이상은 MDF 에 닿음). 목재나사 4x20 4개 (브래킷 바닥 밖 x ±79, 머리 자리 Ø9). 출력: 바닥이 바닥"""
+    볼트 M6x25 (M6x30 이상은 MDF 에 닿음). 목재나사 4x16 4개 (브래킷 바닥 밖 x ±79, 머리 자리 Ø9). 출력: 바닥이 바닥"""
     z0, z1 = Z_RISER
     r = boxm(-85, 85, 0, RISER_H, z0, z1)
     for s in (-1, 1):
@@ -920,7 +920,7 @@ def motor_riser():
             r -= boxm(x - 5.2, x + 5.2, -1, 9.0, za - 5.5, zb + 5.5)                         # 너트 홈 (맞변 10)
     for (x, zz) in ((-79, z0 + 6), (79, z0 + 6), (-79, z1 - 6), (79, z1 - 6)):
         r -= along_y(cyl(2.2, RISER_H + 2, -1)).translate([x, 0, zz])
-        r -= along_y(cyl(4.5, RISER_H, 9.0)).translate([x, 0, zz])       # 머리 자리: 바닥 9 남김 → 4x20 이 MDF(12T)에 11 박힘
+        r -= along_y(cyl(4.5, RISER_H, 5.0)).translate([x, 0, zz])       # 머리 자리: 바닥 5 남김 → 4x16 이 MDF(12T)에 11 박힘
     return r
 
 def motor_bracket():
@@ -1022,9 +1022,9 @@ def clutch_hood():
         h += post - cyl(1.25, 12.01, z0 - 0.01).translate([xc, yc, 0])
     for xs in (x0, x1):
         xa, xb = (xs - 14, xs) if xs < 0 else (xs, xs + 14)
-        h += boxm(xa, xb, 0, 3, z0, z1)
+        h += boxm(xa, xb, 0, 5, z0, z1)                                  # 두께 5: 목재나사 4x16 이 MDF(12T)에 11 박힘 (밑으로 안 나옴)
         for zz in (z0 + 20, z1 - 25):
-            h -= along_y(cyl(2.2, 5, -1)).translate([(xa + xb) / 2, 0, zz])
+            h -= along_y(cyl(2.2, 7, -1)).translate([(xa + xb) / 2, 0, zz])
     return h
 
 def hood_front():
