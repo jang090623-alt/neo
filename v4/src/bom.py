@@ -186,11 +186,22 @@ for col, w in (('A', 22), ('B', 34), ('C', 110)):
 wb.save(PATH)
 print('rows', len(ROWS), 'last', last, 'PLA g', round(pla_g), 'rolls', pla_rolls)
 
-# 제출용 한 페이지 (동아리 학술제 물품 구입 신청): 판매처별로 묶고, A4 세로 한 장에 맞춤
+# 제출용 신청서 (동아리 학술제 물품 구입 신청 1차): 판매처별로 묶어 A4 세로 한 장 + 구입처 링크 시트.
+# 같은 내용을 HTML 로도 써서 PDF 로 인쇄할 수 있게 함 (구매신청_최종.html)
+import html as _html
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from urllib.parse import urlparse, parse_qs
 FINAL = os.path.join(ROOT, '..', '구매신청_최종.xlsx')
-SHORT = {'연마봉(강철 축)': 'Ø12 1m (435·358·160 으로 절단)'}
+FINAL_HTML = os.path.join(ROOT, '..', '구매신청_최종.html')
+APPLY = {'동아리명': 'RPM', '지도교사': '홍경표, 장수빈', '신청일': '2026년 10월    일',
+         '학술제 주제': '직접 설계·3D 프린팅한 5단+후진 수동변속기로 탐구하는 기어비와 동력 전달 (전시·체험)',
+         '구입 목적': '수동변속기 제작 재료: 축·베어링·볼트 등 금속 부품, 스프링, 전기·안전 부품 (3D 프린팅 필라멘트는 별도 준비)'}
+NOTE = ('단가는 2026-10-20 판매처 화면 가격(VAT 포함)이며 주문 시점에 조금 달라질 수 있음. '
+        '배송비는 판매처별 합계. 축 양면 D컷 가공비는 소망트레이딩 견적 회신 후 확정.')
+SHORT = {'연마봉(강철 축)': 'Ø12 1m (435·358·160 으로 절단)',
+         '가변저항 B10K': '16mm, D축 Ø6 15mm, 부싱 M7 (P160KNP-1FD15B10K)',
+         '압축 스프링 C252': '외경 18, 자유장 32, SUS304'}
+
 
 def shop(u):
     if not u:
@@ -202,52 +213,77 @@ def shop(u):
         return '소망트레이딩', ''
     return '쿠팡', u.rsplit('/', 1)[-1] if '/vp/products/' in u else ''
 
+
 ORDER_SHOP = {'디바이스마트': 0, '소망트레이딩': 1, '쿠팡': 2, '-': 3}
 items = []
 for i, (name, spec, q, unit, price, use, st, note) in enumerate(ROWS):
     s, no = shop(link(name, spec))
     items.append((ORDER_SHOP[s], i, name, SHORT.get(name, spec), q, unit, price, s, no, link(name, spec)))
 items.sort()
+DCUT = ('축 양면 D컷 가공 (입력축 435, 출력축 358)', '면 사이 10.0, 전체 길이', 2, '개', '소망트레이딩(가공)')
+total = sum(it[4] * it[6] for it in items)
+
 fb = openpyxl.Workbook()
 fs = fb.active
 fs.title = '물품 구입 신청'
-thin = Side(style='thin', color='999999')
+thin = Side(style='thin', color='808080')
 box_b = Border(left=thin, right=thin, top=thin, bottom=thin)
-fs['A1'] = '동아리 학술제 물품 구입 신청(1차) · RPM · 3D프린팅 5단+후진 수동변속기 제작 재료'
-fs['A1'].font = Font(bold=True, size=12)
-fs['A2'] = '단가는 2026-10-20 판매처 화면 기준(VAT 포함). 입력축·출력축 양면 D컷 가공비는 별도(가공 업체 견적 후 확정).'
-fs['A2'].font = Font(size=8)
-head = ['번호', '품명', '규격', '수량', '단위', '단가', '금액', '구입처', '상품번호']
-for c, v in enumerate(head, 1):
-    x = fs.cell(4, c, v)
+F8, F9 = Font(size=8), Font(size=9)
+fs['A1'] = '2026학년도 동아리 학술제 물품 구입 신청서 (1차)'
+fs['A1'].font = Font(bold=True, size=14)
+fs.merge_cells('A1:I1')
+fs['A1'].alignment = Alignment(horizontal='center')
+r = 3
+for k, v in APPLY.items():
+    fs.cell(r, 1, k).font = Font(bold=True, size=9)
+    fs.merge_cells(start_row=r, start_column=1, end_row=r, end_column=2)
+    fs.cell(r, 3, v).font = F9
+    fs.merge_cells(start_row=r, start_column=3, end_row=r, end_column=9)
+    for c in range(1, 10):
+        fs.cell(r, c).border = box_b
+    fs.cell(r, 3).alignment = Alignment(wrap_text=True, vertical='center')
+    r += 1
+r += 1
+for c, v in enumerate(['번호', '품명', '규격', '수량', '단위', '단가', '금액', '구입처', '상품번호'], 1):
+    x = fs.cell(r, c, v)
     x.font = Font(bold=True, size=8); x.border = box_b
     x.fill = PatternFill('solid', fgColor='DDDDDD'); x.alignment = Alignment(horizontal='center', vertical='center')
-r = 5
+r += 1
+r0 = r
 for k, (_, _, name, spec, q, unit, price, s, no, u) in enumerate(items, 1):
-    vals = [k, name, spec, q, unit, price, f'=D{r}*F{r}', s, no]
-    for c, v in enumerate(vals, 1):
+    for c, v in enumerate([k, name, spec, q, unit, price, f'=D{r}*F{r}', s, no], 1):
         x = fs.cell(r, c, v)
-        x.font = Font(size=8); x.border = box_b
+        x.font = F8; x.border = box_b
         x.alignment = Alignment(vertical='center', wrap_text=c in (2, 3), horizontal='center' if c in (1, 4, 5, 8) else None)
         if c in (6, 7):
             x.number_format = '#,##0'
     if u:
         fs.cell(r, 2).hyperlink = u
     r += 1
-fs.cell(r, 1, len(items) + 1)
-fs.cell(r, 2, '축 양면 D컷 가공 (입력축 435, 출력축 358)').font = Font(size=8)
-fs.cell(r, 3, '면 사이 10.0, 전체 길이').font = Font(size=8)
-fs.cell(r, 4, 2); fs.cell(r, 5, '개'); fs.cell(r, 7, '견적 후'); fs.cell(r, 8, '소망트레이딩(가공)')
+for c, v in zip((1, 2, 3, 4, 5, 7, 8), (len(items) + 1,) + DCUT[:4] + ('견적 후', DCUT[4])):
+    fs.cell(r, c, v)
 for c in range(1, 10):
-    x = fs.cell(r, c); x.border = box_b; x.font = Font(size=8)
+    x = fs.cell(r, c); x.border = box_b; x.font = F8
     x.alignment = Alignment(vertical='center', horizontal='center' if c in (1, 4, 5, 7, 8) else None)
 r += 1
-fs.cell(r, 6, '합계').font = Font(bold=True, size=9)
-fs.cell(r, 7, f'=SUM(G5:G{r - 1})').font = Font(bold=True, size=9)
+fs.cell(r, 5, '합계 (가공비 제외)').font = Font(bold=True, size=9)
+fs.merge_cells(start_row=r, start_column=5, end_row=r, end_column=6)
+fs.cell(r, 7, f'=SUM(G{r0}:G{r - 1})').font = Font(bold=True, size=9)
 fs.cell(r, 7).number_format = '#,##0'
-for c in (6, 7):
+for c in (5, 6, 7):
     fs.cell(r, c).border = box_b
-for col, w in zip('ABCDEFGHI', (4, 26, 30, 5, 6, 8, 9, 10, 11)):
+r += 1
+fs.cell(r, 1, '※ ' + NOTE).font = Font(size=8)
+fs.merge_cells(start_row=r, start_column=1, end_row=r, end_column=9)
+fs.cell(r, 1).alignment = Alignment(wrap_text=True)
+fs.row_dimensions[r].height = 24
+r += 2
+fs.cell(r, 6, '신청자:').font = F9
+fs.cell(r, 7, '                (서명)').font = F9
+fs.cell(r + 1, 6, '지도교사:').font = F9
+fs.cell(r + 1, 7, '                (서명)').font = F9
+r += 1
+for col, w in zip('ABCDEFGHI', (5, 26, 30, 5, 6, 8, 9, 13, 11)):
     fs.column_dimensions[col].width = w
 fs.page_setup.paperSize = fs.PAPERSIZE_A4
 fs.page_setup.orientation = 'portrait'
@@ -257,5 +293,47 @@ fs.sheet_properties.pageSetUpPr.fitToPage = True
 fs.page_margins.left = fs.page_margins.right = 0.4
 fs.page_margins.top = fs.page_margins.bottom = 0.5
 fs.print_area = f'A1:I{r}'
+fs.print_options.horizontalCentered = True
+# 두 번째 시트: 구입처 링크 (행정실·주문하는 사람용)
+fl = fb.create_sheet('구입처 링크')
+fl.append(['번호', '품명', '구입처', '상품 링크'])
+for k, (_, _, name, spec, q, unit, price, s, no, u) in enumerate(items, 1):
+    fl.append([k, name, s, u or ''])
+    if u:
+        fl.cell(k + 1, 4).hyperlink = u
+for c in range(1, 5):
+    fl.cell(1, c).font = Font(bold=True)
+for col, w in zip('ABCD', (5, 30, 14, 70)):
+    fl.column_dimensions[col].width = w
 fb.save(FINAL)
-print('final rows', len(items), '->', os.path.basename(FINAL))
+
+# 같은 내용의 HTML (Chrome 등으로 PDF 인쇄)
+E = _html.escape
+rows_html = ''.join(
+    f'<tr><td class=c>{k}</td><td>{E(name)}</td><td>{E(str(spec))}</td><td class=c>{q}</td><td class=c>{E(unit)}</td>'
+    f'<td class=n>{price:,}</td><td class=n>{q * price:,}</td><td class=c>{E(s)}</td><td class=c>{E(no)}</td></tr>'
+    for k, (_, _, name, spec, q, unit, price, s, no, u) in enumerate(items, 1))
+rows_html += (f'<tr><td class=c>{len(items) + 1}</td><td>{E(DCUT[0])}</td><td>{E(DCUT[1])}</td><td class=c>{DCUT[2]}</td>'
+              f'<td class=c>{DCUT[3]}</td><td></td><td class=c>견적 후</td><td class=c>{E(DCUT[4])}</td><td></td></tr>')
+info_html = ''.join(f'<tr><th>{E(k)}</th><td>{E(v)}</td></tr>' for k, v in APPLY.items())
+link_html = ''.join(f'<tr><td class=c>{k}</td><td>{E(name)}</td><td class=c>{E(s)}</td><td class=u>{E(u or "")}</td></tr>'
+                    for k, (_, _, name, spec, q, unit, price, s, no, u) in enumerate(items, 1))
+CSS = ("@page{size:A4;margin:9mm}body{font-family:'Malgun Gothic',sans-serif;font-size:7pt;line-height:1.12;color:#000;margin:0}"
+       "h1{font-size:12pt;text-align:center;margin:0 0 4px}table{border-collapse:collapse;width:100%}"
+       "td,th{border:1px solid #777;padding:0 2px;vertical-align:middle}th{background:#ddd}"
+       ".info th{width:16%;text-align:left}.c{text-align:center}.n{text-align:right}.u{font-size:6.5pt;word-break:break-all}"
+       ".tot td{font-weight:bold;font-size:9pt}.note{font-size:7pt;margin:4px 0}"
+       ".sign{text-align:right;font-size:9pt;margin-top:4px;line-height:1.8}.p2{page-break-before:always}")
+with open(FINAL_HTML, 'w', encoding='utf-8') as f:
+    f.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>물품 구입 신청서</title>'
+            f'<style>{CSS}</style></head><body>'
+            '<h1>2026학년도 동아리 학술제 물품 구입 신청서 (1차)</h1>'
+            f'<table class=info>{info_html}</table><div style="height:5px"></div>'
+            '<table><colgroup><col style="width:4%"><col style="width:22%"><col style="width:30%"><col style="width:4%"><col style="width:8%"><col style="width:7%"><col style="width:7%"><col style="width:10%"><col style="width:8%"></colgroup>'
+            '<tr><th>번호</th><th>품명</th><th>규격</th><th>수량</th><th>단위</th><th>단가</th><th>금액</th><th>구입처</th><th>상품번호</th></tr>'
+            f'{rows_html}<tr class=tot><td colspan=6 class=n>합계 (가공비 제외)</td><td class=n>{total:,}</td><td colspan=2></td></tr></table>'
+            f'<p class=note>※ {E(NOTE)}</p>'
+            '<div class=sign>신청자: ____________ (서명)<br>지도교사: ____________ (서명)</div>'
+            '<div class=p2><h1>구입처 링크</h1><table><tr><th>번호</th><th>품명</th><th>구입처</th><th>상품 링크</th></tr>'
+            f'{link_html}</table></div></body></html>')
+print('final rows', len(items), 'total', total, '->', os.path.basename(FINAL), os.path.basename(FINAL_HTML))
