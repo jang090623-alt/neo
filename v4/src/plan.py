@@ -4,7 +4,7 @@
 import os, copy
 from urllib.parse import quote
 import openpyxl
-from openpyxl.styles import Alignment, Font
+from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FORM = os.path.join(ROOT, '..', '양식_창체_물품구입신청.xlsx')
@@ -16,8 +16,8 @@ ST = 'https://www.11st.co.kr/products/'
 GM = 'https://item.gmarket.co.kr/Item?goodscode='
 RW = CP + '6455358137'                       # 리우툴(우진카본볼트) 스텐 유두 렌치볼트 낱개: 볼트·너트·와셔 한 판매자
 SOMANG = GM + '2295287294'                   # 소망트레이딩 연마봉 12파이 길이조절 절단판매 (smball 과 같은 판매자)
-SPRING = 'https://www.coupang.com/np/search?q=' + quote('오케이스프링 맞춤 압축스프링')
-POT = 'https://www.gmarket.co.kr/n/search?keyword=' + quote('WH148 B10K 하프 샤프트 15mm')
+SPRING = 'https://www.coupang.com/np/search?q=오케이스프링 맞춤 압축스프링'   # 검색 링크: 칸에는 읽을 수 있게, 하이퍼링크는 인코딩
+POT = 'https://www.gmarket.co.kr/n/search?keyword=WH148 B10K 하프 샤프트 15mm'
 OK20, SR22, EST = '확인 2026-10-20', '검색 결과 2026-10-22 (화면 미확인)', '추정 (견적·옵션 확인 후 확정)'
 
 # (물품명, 규격, 수량, 예상단가, 링크, 쓰는 곳, 고른 이유·바뀐 점, 주문할 때 확인, 가격 근거)
@@ -36,7 +36,7 @@ ROWS = [
     ('강철 평행핀 Ø5×25', '100개, 공차 0~+0.01', 1, 27000, CP + '9743421687', '도그 24 + 여분', '그대로', '옵션 "M5 (+)공차 / 25mm × 100개"', OK20),
     ('강철 평행핀 Ø5×40', '공차 0~+0.01', 8, 440, CP + '8532354386', '스프로킷 커플링 6 + 여분 2', '여분 2 추가', '5x40 낱개', OK20),
     ('NBR 고무 호스', '안지름 5 × 바깥지름 10, 약 2m', 1, 8900, CP + '8558801755', '핀 쿠션 6mm × 24 (144mm)', '그대로', '도착하면 바깥지름 재기 (21 슬리브 출력 전)', OK20),
-    ('큰 와셔 DIN9021 M16 스텐', '17×50×3', 2, 710, RW, '클러치 원판 1 + 여분 1', '그대로', '옵션 "M16 × 50mm"', OK20),
+    ('큰 와셔 DIN9021 M16 스텐', '17×50×3', 2, 710, CP + '6305734042', '클러치 원판 1 + 여분 1', '그대로', '옵션 "M16 × 50mm"', OK20),
     ('코르크 시트', '2mm, A4 2매', 1, 1890, CP + '4845669553', '클러치 마찰 링 2 (바깥 Ø50, 안 Ø26)', '그대로', '', OK20),
     ('강구', 'Ø6, 50개', 1, 3500, CP + '9638493021', '러그 디텐트 3', '그대로', '', 'v3 단가'),
     ('샤프트 칼라 Ø6', '안 6.1 · 바깥 11 · 폭 6, 10개', 1, 14800, CP + '9669133315', '레일 카트리지 6 + 여분 4', '그대로', '옵션 "01 D11xd6.1xH6mm"', OK20),
@@ -57,7 +57,7 @@ ROWS = [
     ('M3 렌치볼트', 'M3×25', 8, 70, RW, '러그 6 + 여분 2', '여분 추가', 'M3×30 안 됨 (머리가 캐리어에 닿음)', OK20),
     ('M3 렌치볼트', 'M3×50', 5, 170, RW, '끝 채움판 4 + 여분 1', '여분 추가', '', OK20),
     ('M3 무두볼트 (오목끝)', 'M3×8', 3, 60, CP + '7974822838', '표시 바퀴 고정 1 + 여분 2', '여분 추가', '', OK20),
-    ('M3 평와셔 스텐', '바깥 8 × 두께 0.5', 20, 20, RW, '아크릴 나사 밑 14 · 속선 누름 1 + 여분 5', '여분 추가', '"스텐 평와셔 M3x8x0.5T"', OK20),
+    ('M3 평와셔 스텐', '바깥 8 × 두께 0.5', 20, 20, CP + '7440529428', '아크릴 나사 밑 14 · 속선 누름 1 + 여분 5', '여분 추가', '"스텐 평와셔 M3x8x0.5T"', OK20),
     ('M4 렌치볼트 + 너트', 'M4×16', 5, 170, RW, '클러치 포크 브래킷 4 + 여분 1', '여분 추가', '', OK20),
     ('M4 렌치볼트 + 너트', 'M4×25', 5, 160, RW, '페달 발판 4 + 여분 1', '여분 추가', '', OK20),
     ('M4 렌치볼트 + 너트', 'M4×30', 23, 190, RW, '케이지 4 · 피벗 8 · 게이트 4 · 받침 브래킷 4 = 20 + 여분 3', '여분 추가', '', OK20),
@@ -108,6 +108,11 @@ ROWS = [
 NOTE = ('※ 예상단가: 2026-10-20 판매처 화면 확인 또는 2026-10-22 검색 결과 가격 (VAT 포함). 맞춤 스프링·D컷 가공·아크릴 재단·일부 소모품은 추정 → 근거·확인 시트.'
         ' 3D 프린팅 PLA(2.85mm 약 4.7kg)는 따로 준비, 공구(육각 렌치·드릴·인두·캘리퍼스·걸이 저울)는 보유·학교 것.')
 
+def height(texts_widths, base):
+    """줄바꿈 칸의 줄 수로 행 높이 (한글은 2칸으로 셈)"""
+    n = max(-(-sum(2 if ord(ch) > 0x2E80 else 1 for ch in str(t)) // int(w - 2)) for t, w in texts_widths)
+    return max(base, 15.0 * n + 5)
+
 wb = openpyxl.load_workbook(FORM)
 ws = wb['물품']
 item_style = [copy.copy(ws.cell(3, c)._style) for c in range(1, 9)]
@@ -121,8 +126,8 @@ for i, (name, spec, q, price, link, *_ ) in enumerate(ROWS):
         x = ws.cell(r, c); x.value = v; x._style = copy.copy(item_style[c - 1])
         x.alignment = Alignment(wrap_text=True, vertical='center', horizontal=x.alignment.horizontal)
     if link:
-        ws.cell(r, 8).hyperlink = link
-    ws.row_dimensions[r].height = h
+        ws.cell(r, 8).hyperlink = quote(link, safe=':/?=&')
+    ws.row_dimensions[r].height = height([(vals[3], ws.column_dimensions['D'].width), (vals[7], ws.column_dimensions['H'].width)], h)
 last = 2 + len(ROWS)
 t = last + 1
 for c in range(1, 9):
@@ -148,11 +153,17 @@ for i, (name, spec, q, price, link, use, why, check, basis) in enumerate(ROWS, 1
     rs.append([i, name, spec, q, use, why, check, basis])
 for c in range(1, 9):
     rs.cell(1, c).font = Font(bold=True)
+W = dict(zip('ABCDEFGH', (5, 26, 26, 6, 40, 44, 40, 24)))
+for col, w in W.items():
+    rs.column_dimensions[col].width = w
+line = Side(style='thin', color='808080')
 for row in rs.iter_rows(min_row=1):
     for x in row:
         x.alignment = Alignment(wrap_text=True, vertical='top')
-for col, w in zip('ABCDEFGH', (5, 26, 26, 6, 40, 44, 40, 24)):
-    rs.column_dimensions[col].width = w
+        x.border = Border(left=line, right=line, top=line, bottom=line)
+        if x.row == 1:
+            x.fill = PatternFill('solid', fgColor='DDDDDD')
+    rs.row_dimensions[row[0].row].height = height([(x.value or '', W[x.column_letter]) for x in row], 15.0)
 rs.freeze_panes = 'A2'
 rs.sheet_properties.pageSetUpPr.fitToPage = True
 rs.page_setup.fitToWidth, rs.page_setup.fitToHeight = 1, 0
