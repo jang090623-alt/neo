@@ -285,7 +285,7 @@ def sleeve_inner_poly():
     return p
 
 BOLT_R = 23.5   # 슬리브 결합 볼트 원 (키 홈 r17.25 ~ 포켓 r30.35 사이, 육각 자리 벽 3 이상)
-BOLT_HEX = (5.7, 4.0)   # 슬리브 반쪽 바깥면 육각 자리 (맞변 5.7, 깊이 4): 한쪽은 M3 머리, 반대쪽은 너트 → 면 아래 1.0 에 숨음 (M3x20)
+BOLT_HEX = (6.2, 4.0)   # 슬리브 반쪽 바깥면 육각 자리 (맞변 6.2, 깊이 4): 한쪽은 M3 머리(유두 Ø5.7 도 들어감), 반대쪽은 너트(맞변 5.5, 못 돎) → 면 아래 1.0 에 숨음 (M3x20)
 def _bolts(h, z0, d=3.4):
     s = None
     for k in range(3):
@@ -762,7 +762,7 @@ def cl_front():
         f -= _at(cyl(PIN_HOLE / 2, 15.01, -0.01), x, y)
     for (x, y) in _ring_pts(CL_STANDOFF_R, STANDOFF_A):
         f -= _at(cyl(2.2, T + 2, -1), x, y)
-        f -= _at(cyl(4.0, 4.01, -0.01), x, y)
+        f -= _at(cyl(4.3, 4.01, -0.01), x, y)                                   # M4 머리 자리 Ø8.6 (유두 머리 Ø7.6)
     for a in SPRING_A:
         x, y = _ring_pts(CL_SPRING_R, [a])[0]
         f -= _at(cyl(10.0, SPRING_POCKET + 0.01, T - SPRING_POCKET), x, y)
@@ -867,7 +867,7 @@ def cl_fork_bracket():
     base = boxm(-24, 24, 104, 164, zb, zo) - boxm(-9.8, 9.8, 138, 165, zb - 1, zo + 1)   # 포크 위쪽이 밟을 때 들어오는 자리
     for (xb, yb) in FORK_BRK_HOLES:
         base -= cyl(2.2, 12, zb - 1).translate([xb, yb, 0])
-        base -= cyl(4.0, 3.0, zb - 0.01).translate([xb, yb, 0])
+        base -= cyl(4.3, 3.0, zb - 0.01).translate([xb, yb, 0])                # M4 머리 자리 Ø8.6
     zc = (FORK_Z[0] + FORK_Z[1]) / 2
     pv = FORK_PIV_Y
     for s in (-1, 1):
@@ -989,7 +989,7 @@ def pedal_pad():
     p = boxm(-35, 35, -20, 20, 0, 8)
     for dy in (-8.0, 8.0):
         p -= cyl(2.2, 10, -1).translate([0, dy, 0])
-        p -= cyl(4.0, 3.01, 5.0).translate([0, dy, 0])
+        p -= cyl(4.3, 3.01, 5.0).translate([0, dy, 0])                          # M4 머리 자리 Ø8.6
     for k in range(6):
         p -= boxm(-33, 33, -17 + 6 * k, -15 + 6 * k, 6.5, 9)
     return p
