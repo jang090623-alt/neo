@@ -54,12 +54,12 @@ def clutch(P, state='in'):
     zf1 = tx.Z_FRONT[1]
     for k, (x, y) in enumerate(tx._ring_pts(tx.CL_SPRING_R, tx.SPRING_A)):
         s = 3.0                                          # 조절나사 M5x10 끝까지 조임 (s = 13 - 10) = 설정값
-        cup_top = zf1 - s
-        P[f'cl_cup{k}'] = tx.cl_spring_cup().translate([x, H + y, cup_top - 3.0])
+        cup_bot = zf1 - s - 3.0                          # 조절나사 끝이 미는 컵 밑면
+        cup_top = cup_bot + tx.CUP_T                     # 스프링이 앉는 컵 판 윗면
+        P[f'cl_cup{k}'] = tx.cl_spring_cup().translate([x, H + y, cup_bot])
         z_top = tx.Z_PRESS[0] - rel + 2.0                            # 압력판 스프링 자리(홈 2) 바닥
-        P[f'cl_spring{k}'] = tube(9.0, 7.2, z_top - cup_top - 0.2, cup_top + 0.1).translate([x, H + y, 0])
-        P[f'cl_adj{k}'] = cyl(2.5, 12.0, tx.Z_FRONT[0] - 2.0).translate([x, H + y, 0]) if False else \
-            cyl(2.4, (cup_top - 3.0) - (tx.Z_FRONT[0] - 4.0) - 0.1, tx.Z_FRONT[0] - 4.0).translate([x, H + y, 0])
+        P[f'cl_spring{k}'] = tube(9.0, 7.6, z_top - cup_top - 0.2, cup_top + 0.1).translate([x, H + y, 0])
+        P[f'cl_adj{k}'] = cyl(2.4, cup_bot - (tx.Z_FRONT[0] - 4.0) - 0.1, tx.Z_FRONT[0] - 4.0).translate([x, H + y, 0])
     P['cl_ring'] = tx.cl_ring().translate([0, H, tx.Z_RING[0] - mv])
     for k, (x, y) in enumerate(tx._ring_pts(tx.CL_PUSH_R, tx.PUSH_A)):
         # M5x20 누름 볼트 (머리가 링 판 끝판 쪽 면): 물림 상태 끝이 압력판 뒷면에서 1.0, 밟으면 닿아서 1.5 더 밂
@@ -342,7 +342,7 @@ def steer_check():
     wash = tube(7.5, 6.15, 1.5, tx.ST_CH[0])
     pz = tx.ST_COVER[1]
     pot = cyl(8.5, 10.0, pz) + cyl(3.5, 7.0, pz - 7.0) + cyl(5.8, 3.0, pz - 7.0)             # 몸통 Ø17, 부싱 M7, 너트 (맞변 10)
-    pot_shaft0 = ext(tx.Point(0, 0).buffer(3.0, 32).intersection(tx.box(-4, -4, 1.5, 4)), 15.0, pz - 15.0)
+    pot_shaft0 = cyl(2.9, 15.0, pz - 15.0)                                                       # 톱니 축 (압입 구멍 안)
     table = boxm(-500, 500, -tx.ST_H - 40, -tx.ST_H, tx.ST_EDGE, 600)
     wheel = cyl(165.0, 30.0, tx.ST_HUB[0] - 30.0)                                               # 핸들 Ø330 두께 30 (가정)
     still = {'frame': fr, 'cover': cov, 'pot': pot, 'bearings': brgs}

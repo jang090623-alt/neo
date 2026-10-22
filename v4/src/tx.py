@@ -96,9 +96,19 @@ CAGE_Z0, CAGE_Z1 = STACK + PLATE_T, STACK + PLATE_T + 60.0
 WALL_X = ((16.0, 28.0), (170.0, 182.0))            # 케이지 옆벽 (두께 12)
 PLATE_X0, PLATE_X1, PLATE_Y1 = -25.0, 182.0, 200.0  # 끝판 외곽 (207 x 200)
 
-# ---------------- 포크 스프링 카트리지 (C252: 외경18, 자유장32, k≈2.55N/mm) ----------------
-SPR_FREE, SPR_K = 32.0, 2.55
-CART_PRE_L = 21.6                     # 예압 길이 → 26.5N (디바이스마트 C252 P1 값)
+# ---------------- 압축 스프링 (판매 중인 기성품 1종을 포크·클러치·레버·페달·핸들에 같이 씀) ----------------
+# 2026-10-22 고른 것: 스프링팜 SUS304 선경 1.5 · 외경 18 · 자유장 25 · 총 권수 약 5.5 (사진 판독) → k ≈ 2.8 N/mm (권수 5~6 이면 3.2~2.4).
+# 받으면 걸이 저울로 k 를 재서 SPRING_K 만 바꾸고 export → 포크 카트리지·클러치 컵·레버 스페이서·페달·핸들 길이가 모두 따라 바뀜.
+SPRING_L0, SPRING_K, SPRING_SOLID = 25.0, 2.8, 8.3     # 자유장, k (N/mm), 밀착 높이 (권수 5.5 x 선경 1.5)
+SPRING_TOL = 0.10                                      # 하중 허용차 (가정 → k 실측)
+SPRING_D, SPRING_OD, SPRING_SU = 1.5, 18.0, 1650.0     # 선경, 외경, 인장강도 MPa (SUS304-WPB Ø1.5 하한 근사, 가정)
+SPRING_C = (SPRING_OD - SPRING_D) / SPRING_D           # 스프링 지수
+SPRING_FMAX = (0.35 * SPRING_SU * math.pi * SPRING_D ** 3 / (8 * (SPRING_OD - SPRING_D))
+               / ((4 * SPRING_C - 1) / (4 * SPRING_C - 4) + 0.615 / SPRING_C))   # 전단응력(Wahl)이 인장강도 35% (스텐 정적 허용, Shigley 표 10-6) 가 되는 힘 → 41.0N
+
+# ---------------- 포크 스프링 카트리지 ----------------
+CART_P1 = min(26.48, min(43.2, SPRING_FMAX) / (1 + SPRING_TOL) - SPRING_K * (TRAVEL - GAP0))   # 예압: v4.1 값 26.48N, 단 막혔을 때(5mm 더) +10% 가 포크 한계 43.2N·스프링 허용 힘 이하
+CART_PRE_L = SPRING_L0 - CART_P1 / SPRING_K            # 예압 길이 (v4.1 C252: 21.6)
 CART_WASH_T, CART_CAV_D = 2.5, 19.0
 CART_HOLE = 13.0                      # 끝벽 구멍 (Ø12 강철 칼라가 들어감)
 CART_WALL = 3.0
@@ -123,8 +133,8 @@ Z_WASH = (-60.0, -57.0)        # 강철 와셔(디스크) — 코르크 사이
 Z_PRESS = (-70.0, -62.0)       # 압력판 (코르크 -62~-60)
 Z_FRONT = (-108.0, -92.0)      # 앞판(플라이휠): 스프링 컵 홈 깊이 9, 6001 파일럿 베어링
 Z_HUB = (-88.0, -55.0)         # 디스크 허브 (외경 16.6, 플랜지 -57~-55)
-SPRING_POCKET = 9.0            # 스프링 컵이 움직이는 홈 깊이. 컵 윗면 깊이 s = 13 - 조절나사 길이.
-                               # 스프링 길이 = 24 + s (압력판 자리 홈 2 포함). 설정 = M5x10 끝까지 → s=3, 27mm (calc: 0.44~0.75 N·m). M5x12 이상 금지
+SPRING_POCKET = 9.0            # 스프링 컵이 움직이는 홈 깊이. 컵 밑면 = 앞판 스프링 쪽 면에서 s + 3 아래, s = 13 - 조절나사 길이.
+                               # 스프링 길이 = 24 + s + 3 - CUP_T (압력판 자리 홈 2 포함). 설정 = M5x10 끝까지 (s=3) → 1개 12.8N (v4.1 과 같은 힘, calc: 0.44~0.75 N·m). M5x12 이상 금지
 Z_SHAFT_IN_END = Z_FRONT[0] - 1.0 - 8.0                # 입력축 끝 = 앞판 - 끝 와셔 1 - 칼라 8
 CPL_PIN_R = 18.40              # 스프로킷 12T 3/8" 피치원 반지름 (03 시험 캡과 같음)
 CPL_PIN_LEN = 40.0             # Ø5x40 강철 핀, 앞판에 15 박힘
@@ -637,11 +647,13 @@ def ball_half(upper):
     keep = boxm(-20, 20, 0, 20, -20, 20) if upper else boxm(-20, 20, -20, 0, -20, 20)
     return (s ^ keep).translate(list(PIVOT))
 
-SPACER_L = 30.0
+LOCK_F0 = 2.555 * (32.0 - 26.15)    # 후진 잠금 스프링이 쉴 때 레버를 미는 힘 (v4.1 C252 값 14.9N 유지)
 def spring_spacer():
+    """볼 위 ~ 후진 잠금 스프링 아래 스페이서. 길이 = 스프링이 쉴 때 LOCK_F0 를 내는 길이가 남게 (v4.1 C252: 30)"""
     rb = SHAFT_HOLE / 2 + 0.05                                                   # 레버봉 위로 미끄러짐 (Ø12.4)
     y0 = PIVOT_Y + math.sqrt(BALL_R ** 2 - rb ** 2)
-    return along_y(tube(8.0, rb, SPACER_L)).translate([C, y0, LUG_Z]), y0 + SPACER_L
+    L = (PIVOT_Y + LOCK_RHO - 8.5) - y0 - (SPRING_L0 - LOCK_F0 / SPRING_K)      # 잠금 칼라 밑면까지에서 스프링 쉴 때 길이를 뺌
+    return along_y(tube(8.0, rb, L)).translate([C, y0, LUG_Z]), y0 + L
 
 LOCK_RHO = GATE_Y - GATE_T / 2 - 0.6 - PIVOT_Y
 LIP_Y0 = GATE_Y - GATE_T / 2 - 8.0
@@ -881,9 +893,13 @@ def cl_fork_bracket():
     base += boxm(-14.0, 14.0, 146, 154, FORK_Z[0] - 4.0, FORK_Z[0] - 1.5)
     return base
 
+CL_SPRING_F = 2.555 * (32.0 - 27.0)                         # 클러치 스프링 1개 설정 힘 (v4.1: C252 를 M5x10 끝까지 = 27mm) → 토크 그대로
+CUP_T = 3.0 + 27.0 - (SPRING_L0 - CL_SPRING_F / SPRING_K)   # 컵 판 두께: 짧은 스프링이 같은 힘을 내게 컵을 높임 (v4.1: 3)
+
 def cl_spring_cup():
-    """스프링 컵: Ø19x3 + 맞춤 보스 Ø11x3 (C252 안지름이 11 보다 커야 함 — 미확인). 출력: 판이 바닥"""
-    return cyl(9.5, 3.0) + cyl(5.5, 3.0, 3.0)
+    """스프링 컵: 판 Ø19 x CUP_T + 맞춤 보스 Ø11x3 (스프링 안지름 15). 앞판 홈(Ø20 깊이 9)에 6 들어가 안내되고 나머지는 위로 나옴.
+    출력: 판이 바닥"""
+    return cyl(9.5, CUP_T) + cyl(5.5, 3.0, CUP_T)
 
 def cl_end_spacer():
     """파일럿 베어링 내륜 ~ 끝 칼라 사이 와셔 (외경 16, 두께 1)"""
@@ -948,12 +964,13 @@ PEDAL_PAD_B = 180.0            # 발판 가운데
 PEDAL_SPR_B = 42.0             # 복귀 스프링(C252 압축) 자리
 PEDAL_REST = 25.0              # 쉬는 각 (수직에서 운전자 반대쪽 +z 로 기움, 도)
 PEDAL_TRAVEL = math.degrees(3.0 * (FORK_CABLE_Y - FORK_PIV_Y) / (FORK_PIV_Y - H) / PEDAL_CABLE_B)   # 끝 멈춤: 릴리스 링 3.0 이동 (뒷판까지 3.5)
-PEDAL_SPR_L = 29.0             # 쉴 때 복귀 스프링 길이 (C252 자유장 32 → 7.6N)
+PEDAL_SPR_F0 = 2.555 * (32.0 - 29.0)                 # 쉴 때 복귀 힘 (v4.1 C252 7.7N 유지)
+PEDAL_SPR_L = SPRING_L0 - PEDAL_SPR_F0 / SPRING_K    # 쉴 때 복귀 스프링 길이 (v4.1: 29). 끝까지 밟으면 7.8 더 눌림
 PEDAL_POT_P = 2.5              # 가변저항 몸통 자리 깊이 (축 15mm 기준: 축 끝이 D 구멍에 4 물림)
-POT_D = (3.05, 1.65)           # 가변저항 D 구멍: 반지름, 가운데 → 평면 (반달축 Ø6, 평면까지 4.6 + 틈). 실물 재고 페달·핸들 함께 바뀜
+POT_HOLE = 5.85               # 가변저항 축 구멍: 2026-10-22 고른 WH148 은 톱니 축 Ø6 (D축 국내품 없음) → 압입. 받으면 톱니 바깥지름 -0.15 로
 
-def pot_d_poly():
-    return Point(0, 0).buffer(POT_D[0], 32).intersection(box(-4, -4, POT_D[1], 4))
+def pot_hole_poly():
+    return Point(0, 0).buffer(POT_HOLE / 2, 48)
 
 def pedal_dirs(th_deg):
     """받침 (y, z) 평면에서 팔 방향 u, 운전자 쪽 면 법선 nb, 앞쪽 면 법선 nf"""
@@ -962,7 +979,7 @@ def pedal_dirs(th_deg):
 
 def pedal_arm():
     """페달 팔 (클러치·브레이크 공용, 2개). 로컬: a=x(-9 운전자 쪽 면 ~ +9 앞면), b=y(피벗 0 ~ 195), 두께 z 0~18 (z=0 = 받침 왼쪽).
-    피벗: z=0 면 M6 나일론 너트 홈(맞변 10.2, 깊이 6.2) + Ø6.4, z=18 면 가변저항 D 구멍(Ø6.1, 평면까지 1.6, 깊이 5).
+    피벗: z=0 면 M6 나일론 너트 홈(맞변 10.2, 깊이 6.2) + Ø6.4, z=18 면 가변저항 축 구멍 (톱니 축 압입 POT_HOLE, 깊이 5).
     케이블 구멍 b=30 (a 방향 Ø3.4, 니플은 앞면), 복귀 스프링 자리 b=42 (앞면 Ø20 깊이 1.5),
     발판 M4 2개 (b=172, 188, a 방향, 앞면 너트 홈). 출력: z=0 면이 바닥"""
     hw = PEDAL_W / 2
@@ -971,7 +988,7 @@ def pedal_arm():
     zc = PEDAL_T / 2
     arm -= ext(hexagon(10.2), 6.2, -0.01)                                    # 나일론 너트 (DIN985 M6 두께 6)
     arm -= cyl(3.2, 12.0, -0.5)                                              # M6 Ø6.4 (볼트 끝 z=11.5)
-    arm -= ext(pot_d_poly(), 5.01, PEDAL_T - 5.0)                            # 반달축 (평면이 +a 쪽)
+    arm -= ext(pot_hole_poly(), 5.01, PEDAL_T - 5.0)                         # 톱니 축 압입
     arm -= along_x(cyl(1.7, 30, -15)).translate([0, PEDAL_CABLE_B, zc])     # 케이블 (a 방향)
     arm -= along_x(cyl(10.0, 2.0, hw - 1.5)).translate([0, PEDAL_SPR_B, zc])  # 스프링 끝 자리 (앞면 Ø20 깊이 1.5)
     for bb in (172.0, 188.0):
@@ -1078,10 +1095,11 @@ ST_BRG = (0.0, 56.0)                # 앞·뒤 6001 앞면 z (폭 8)
 ST_FR = (45.0, 45.0)                # 몸체 바깥: x 반폭, y 위 (아래는 받침판 윗면)
 ST_BASE_T = 8.0                     # 받침판 두께
 ST_CAM_Z = (65.5, 73.5)             # 캠 판 z (롤러 폭 8). 앞은 1.5 와셔가 뒤 베어링 내륜을 누름
-ST_ROLLER = 14.0                    # 롤러 = 6001 바깥 반지름 (핀 Ø12x22 강철, 여분 연마봉에서)
+ST_ROLLER = 14.0                    # 롤러 = 6001 바깥 반지름 (핀 Ø12x22 강철, 마봉 봉 2 에서)
 ST_PITCH0, ST_LIFT = 34.0, 10.0     # 롤러 중심 ~ 축: 가운데 34, 135° 에서 +10 (아르키메데스 → 복귀 토크 = 스프링 힘 x 4.24mm)
-ST_SPR_X, ST_SPR_PRE = 13.0, 26.0   # 스프링 2개 x 위치, 가운데일 때 길이 (135° 에서 16)
-SPRING_K, SPRING_L0 = 2.555, 32.0  # 압축 스프링 (C252 값. 기성품을 고르면 그 k·자유장으로 바꿈 → 핸들 복귀 토크·길이 다시 계산)
+ST_SPR_X = 13.0                     # 스프링 2개 x 위치
+ST_SPR_F0 = min(12.0, SPRING_FMAX / (1 + SPRING_TOL) - SPRING_K * ST_LIFT)   # 가운데일 때 스프링 1개 힘: 135° 에서 +10% 가 스프링 허용 힘 이하
+ST_SPR_PRE = SPRING_L0 - ST_SPR_F0 / SPRING_K   # 가운데일 때 스프링 길이 (135° 에서 ST_LIFT 더 눌림)
 ST_CH = (64.0, 97.0, 34.0, -(ST_PITCH0 + 20.0 + ST_SPR_PRE) + 2.0, 34.0)   # 캠 방 (안쪽): z 앞, z 뒤(열림, 덮개), x 반폭, y 바닥 (= 스프링 길이에서), y 위
 ST_COVER = (97.0, 101.0)            # 뒤 덮개 z (뒷면 = 가변저항 장착면)
 ST_SHAFT = (-21.0, 85.0)            # 강철 축 z (길이 106). 무두볼트 평면: z -12 (허브), z 79 (캠), 둘 다 ST_SET_A 쪽
@@ -1176,13 +1194,13 @@ def steer_cover():
 
 def steer_cam():
     """캠 (조립 좌표, 가운데 위치): 판 z 65.5~73.5 (steer_cam_poly), 뒤 보스 r13 z 73.5~93.
-    강철 축 구멍 (축 끝 z 85), M3 무두볼트 (z 79, 30° 방향, 너트는 뒷면 홈으로), 가변저항 D 구멍 (z 86~93: 축 15mm 중 7 물림).
+    강철 축 구멍 (축 끝 z 85), M3 무두볼트 (z 79, 30° 방향, 너트는 뒷면 홈으로), 가변저항 축 구멍 (z 86~93: 톱니 축 15mm 중 7 압입).
     출력: 앞면(판)이 바닥"""
     z0, z1 = ST_CAM_Z
     zr = ST_CH[1] - 4.0                                           # 보스 뒷면 93 (가변저항 너트와 1 틈)
     c = ext(steer_cam_poly(), z1 - z0, z0) + cyl(13.0, zr - z1, z1)
     c -= cyl(SHAFT_HOLE / 2, ST_SHAFT[1] + 0.5 - z0 + 1, z0 - 1)
-    c -= ext(pot_d_poly(), zr - (ST_COVER[1] - 15.0) + 0.01, ST_COVER[1] - 15.0)
+    c -= ext(pot_hole_poly(), zr - (ST_COVER[1] - 15.0) + 0.01, ST_COVER[1] - 15.0)
     c -= _st_setscrew(79.0, 13.0)
     return c
 

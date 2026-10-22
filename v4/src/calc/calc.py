@@ -15,8 +15,8 @@ SRC = {
     'CORK': 'RoyMech 브레이크·클러치 마찰재 표: 코르크-주철/강 건식 μ 0.3~0.5, 최대압력 0.1 MPa, 최고온도 100°C: https://roymech.org/Useful_Tables/Drive/Brake_Clutch_mat.html',
     'MU_PLA': 'PLA-강 건식 마찰계수 0.30(정지, 30N)·0.49(핀온디스크): https://tribology.rs/journals/2024/2024-1/9-1546.pdf , https://engmechx.it.cas.cz/improc/2018/649.pdf',
     'B6001': '6001-2Z: C=5.1 kN, C0=2.4 kN: https://www.simplybearings.co.uk/products/6001-2z-eu',
-    'C252': '디바이스마트 C252 (외경18, 자유장32, P1 26.48N@21.6mm, P2 44.03N@14.73mm): https://www.devicemart.co.kr/goods/view?no=15336269',
-    'C147': '디바이스마트 C147 (외경5, 자유장10, P1 1.77N@6.47mm, P2 2.79N@4.41mm): https://www.devicemart.co.kr/goods/view?no=15336164',
+    'C252': f'압축 스프링 (C252 대신 기성품): 스프링팜 SUS304 선경1.5 외경18 자유장{tx.SPRING_L0:.0f} (쿠팡 4387963066), 권수 약 5.5 사진 판독 → k {tx.SPRING_K} N/mm (받으면 걸이 저울로 실측해 tx.SPRING_K), 밀착 {tx.SPRING_SOLID}',
+    'C147': '디텐트 스프링 (C147 대신 기성품): 스프링팜 SUS304 선경0.4 외경5 자유장10 (쿠팡 8501265889), 권수 약 6 → k 0.57 N/mm, 5mm 에서 2.85N, 밀착 2.4',
     'MOTOR': '모터 라벨 GGM K9DP90N2: DC24V 90W 3000rpm 5.9A / 감속기 K9P9BH 1:9 (2026-10-19 사진·판매처 목록)',
     'HAND': 'Das & Black (2000) 한 손 당김 최대 473N(남, 앉은 자세), NBSIR 73-156 (1973) 2~6세 당김 95백분위 ~296N: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nbsir73-156.pdf',
     'GENT': 'Gent (1958) 쇼어 A 경도-영률 관계식 (고무 쿠션 강성 추정)',
@@ -32,8 +32,8 @@ def fatigue_allow(UTS, N):
     return 0.10 * UTS * (2e6 / min(N, 2e6)) ** (1 / 5.5)
 STEEL = dict(E=200000.0, G=80000.0, Y=235.0, rho=7.85e-3)      # 연마봉 재질 미확인 → 일반 구조용강 최저 항복 235 가정
 CORK = dict(mu_lo=0.30, mu_hi=0.50, mu_nom=0.40, pmax=0.10, Tmax=100.0)
-C252 = dict(L0=32.0, k=(44.03 - 26.48) / (21.6 - 14.73), P2L=14.73, tol=0.10)   # 하중 허용차 ±10% (제조사 사양), P2 길이보다 짧게 쓰면 안 됨
-C147 = dict(L0=10.0, k=(2.79 - 1.77) / (6.47 - 4.41))
+C252 = dict(L0=tx.SPRING_L0, k=tx.SPRING_K, P2L=tx.SPRING_SOLID + 1.0, tol=tx.SPRING_TOL)   # 기성품: 밀착 + 1mm 보다 짧게 쓰지 않음, 하중 ±10% 가정
+C147 = dict(L0=10.0, k=0.57)
 B6001 = dict(C=5100.0, C0=2400.0)
 F_KNOB = 400.0                      # 손잡이 설계 하중 (HAND 근거)
 
@@ -102,7 +102,7 @@ r_o, r_i = tx.CORK[1], tx.CORK[0]
 r_eff_new = (2 / 3) * (r_o ** 3 - r_i ** 3) / (r_o ** 2 - r_i ** 2)       # 새 클러치(균일 압력)
 r_eff_worn = (r_o + r_i) / 2                                            # 길든 뒤(균일 마모)
 # 스프링 길이 = 컵 윗면(앞판 스프링 쪽 면에서 s 아래) ~ 압력판 스프링 자리 홈(깊이 2) 바닥
-L_of_s = lambda s: (tx.Z_PRESS[0] + 2.0) - (tx.Z_FRONT[1] - s)          # = 24 + s
+L_of_s = lambda s: (tx.Z_PRESS[0] + 2.0) - (tx.Z_FRONT[1] - s - 3.0 + tx.CUP_T)   # = 24 + s + 3 - CUP_T (컵 높이)
 S_OF_BOLT = lambda L: 13.0 - L                                          # 조절나사 길이 L 을 끝까지 조였을 때 s
 S_MIN = S_OF_BOLT(10.0)                                                 # v4.1: M5x10 끝까지 조임 = 설정값 (s=3, 스프링 27mm)
 F_spr = lambda L: 3 * C252['k'] * (C252['L0'] - L)
@@ -111,7 +111,7 @@ rows = []
 for bl in (8.0, 10.0, 12.0):
     s = S_OF_BOLT(bl); F = F_spr(L_of_s(s))
     rows.append({'조절나사': f'M5x{bl:.0f}' + (' (설정)' if bl == 10.0 else ' (금지: 기어 설계 하중 초과)' if bl > 10 else ' (약하게)'),
-                 's_mm': s, '스프링길이': L_of_s(s), '누르는 힘N': round(F, 1),
+                 's_mm': s, '스프링길이': round(L_of_s(s), 2), '누르는 힘N': round(F, 1),
                  'Tc μ0.3': round(Tc(F, 0.3, r_eff_worn) / 1e3, 2), 'Tc μ0.4': round(Tc(F, 0.4, r_eff_worn) / 1e3, 2),
                  'Tc μ0.5(새것)': round(Tc(F, 0.5, r_eff_new) / 1e3, 2)})
 F_MAX = F_spr(L_of_s(S_MIN))
@@ -121,7 +121,7 @@ cork_area = math.pi * (r_o ** 2 - r_i ** 2)
 R['clutch'] = {'설정표': rows, 'Tc_max_Nm(설정 M5x10 + 스프링 +10% + μ0.5 새것 = 설계 하중)': round(TC_MAX / 1e3, 3), 'Tc_nom_Nm(끝까지 조임, μ0.4)': round(TC_NOM / 1e3, 2),
                '필요토크 대비 여유(공칭)': round(TC_NOM / T_need, 1),
                '코르크 압력 최대 MPa': round(F_MAX / cork_area, 4), '코르크 허용 MPa': CORK['pmax'],
-               '스프링 최대 사용 길이(뗄 때) mm': L_of_s(S_MIN) - 1.5, 'C252 P2 길이 mm': C252['P2L']}
+               '스프링 최대 사용 길이(뗄 때) mm': round(L_of_s(S_MIN) - 1.5, 2), '스프링 최소 허용 길이 mm(밀착 + 1)': C252['P2L']}
 # 떼는 힘·페달
 F_rel = F_spr(L_of_s(S_MIN) - 1.5) * 1.1           # 마찰 10%
 fork_ratio = (tx.FORK_CABLE_Y - tx.FORK_PIV_Y) / (tx.FORK_PIV_Y - tx.H)
@@ -131,7 +131,8 @@ R['clutch']['떼는 힘 N(압력판)'] = round(F_rel, 1)
 R['clutch']['포크 지렛대비'] = round(fork_ratio, 2)
 R['clutch']['케이블 장력 N'] = round(cable_F, 1)
 R['clutch']['페달 발 힘 N(복귀 스프링 제외, 케이블 30mm 구멍, 발판 180)'] = round(cable_F / pedal_ratio, 1)
-F_ret = C252['k'] * (C252['L0'] - 21.2)                                  # 복귀 스프링 끝 길이 21.2 (asm.pedal_check)
+PEDAL_STOP_L = tx.PEDAL_SPR_L - 7.81                                    # 복귀 스프링 끝 길이 (쉴 때보다 7.81 짧음, asm.pedal_check)
+F_ret = C252['k'] * (C252['L0'] - PEDAL_STOP_L)
 R['clutch']['페달 복귀 스프링 힘 N(끝, 발판 기준)'] = round(F_ret * tx.PEDAL_SPR_B / tx.PEDAL_PAD_B, 1)
 R['clutch']['페달 행정 mm(발판, 압력판 1.5 + 유격 1.0)'] = round((1.5 + 1.0) * fork_ratio * pedal_ratio, 1)
 R['clutch']['페달 끝 멈춤 각 도(릴리스 링 3.0, 뒷판까지 3.5)'] = round(tx.PEDAL_TRAVEL, 1)
@@ -310,19 +311,28 @@ R['bearings'] = {'최대 반지름 하중 N': P_max, '정적 안전계수 C0/P':
                  'L10 수명(시간, 167rpm, 최대하중 계속)': round((B6001['C'] / P_max) ** 3 * 1e6 / (60 * 167)),
                  '릴리스 6003·파일럿 6001 축방향 N': round(F_rel, 1)}
 
-# C252 가 가장 많이 눌리는 길이 (제조사: 허용 하중 P2 길이 14.73 보다 더 누르지 말 것)
+# 스프링이 가장 많이 눌리는 길이 (밀착 + 1mm 보다 길어야 함)
 lev_spr = (tx.PIVOT_Y + tx.LOCK_RHO - 8.5) - (tx.spring_spacer()[1]) - tx.REV_PUSH   # 레버 후진 잠금: 스페이서 끝 ~ 잠금 칼라, 눌렀을 때
-R['C252_min_len'] = {'클러치(뗄 때)': L_of_s(S_MIN) - 1.5, '카트리지(막힘)': round(tx.CART_PRE_L - (tx.TRAVEL - tx.GAP0), 2),
-                     '페달 복귀(끝)': 21.2, '레버 후진 잠금(눌렀을 때)': round(lev_spr, 2), 'P2 길이(이보다 길어야 함)': C252['P2L']}
+R['C252_min_len'] = {'클러치(뗄 때)': round(L_of_s(S_MIN) - 1.5, 2), '카트리지(막힘)': round(tx.CART_PRE_L - (tx.TRAVEL - tx.GAP0), 2),
+                     '페달 복귀(끝)': round(PEDAL_STOP_L, 2), '레버 후진 잠금(눌렀을 때)': round(lev_spr, 2),
+                     '핸들 복귀(135°)': round(tx.ST_SPR_PRE - tx.ST_LIFT, 2), '밀착 + 1 (이보다 길어야 함)': C252['P2L']}
+# 스프링 전단응력 (Wahl 보정, 하중 +10%): 인장강도 35% 이하 (스텐 정적 허용). 카트리지·핸들 예압은 tx 에서 이 한도로 정함
+A['spring_su'] = f'기성 스프링 SUS304 선경 {tx.SPRING_D} 외경 {tx.SPRING_OD}: 인장강도 {tx.SPRING_SU:.0f} MPa (JIS G4314 SUS304-WPB 하한 근사, 미확인)'
+Kw = (4 * tx.SPRING_C - 1) / (4 * tx.SPRING_C - 4) + 0.615 / tx.SPRING_C
+F_spr = lambda L: C252['k'] * (C252['L0'] - L) * (1 + C252['tol'])
+tau_spr = lambda L: Kw * 8 * F_spr(L) * (tx.SPRING_OD - tx.SPRING_D) / (math.pi * tx.SPRING_D ** 3)
+R['springs'] = [{'쓰는 곳': k, '가장 짧을 때 mm': L, '힘 N(+10%)': round(F_spr(L), 1), '전단응력 MPa': round(tau_spr(L)),
+                 '인장강도 대비 %': round(100 * tau_spr(L) / tx.SPRING_SU, 1)}
+                for k, L in list(R['C252_min_len'].items())[:-1] + [('밀착 (참고)', tx.SPRING_SOLID)]]
 # ================= 10. 포크·카트리지 =================
-F_cart = (26.48 + C252['k'] * (tx.TRAVEL - tx.GAP0)) * (1 + C252['tol'])   # 막혔을 때 (5mm 더 눌림), 스프링 +10%
-F_det = 2.79
+F_cart = (tx.CART_P1 + C252['k'] * (tx.TRAVEL - tx.GAP0)) * (1 + C252['tol'])   # 막혔을 때 (5mm 더 눌림), 스프링 +10%
+F_det = round(C147['k'] * (C147['L0'] - 5.0), 2)                            # 디텐트 스프링 5mm 로 눌림
 F_shift = F_cart + F_det
 def Zrect(b, h): return b * h ** 2 / 6
 M_arm = F_shift * (tx.RAIL_Y - 13.5 - tx.H)                  # 카트리지 아래끝 ~ 홈 중심
 M_ring = F_shift / 2 * (tx.H + 44.6 - tx.H)                  # 양쪽 패드 → 링 위쪽
 s_arm = M_arm / Zrect(12.0, 13.0); s_ring = M_ring / (Zrect(7.4, 13.0))
-R['fork'] = {'카트리지 예압 N(공칭)': 26.48, '막힘 최대 N': round(F_cart, 1), '디텐트 최대 N': F_det,
+R['fork'] = {'카트리지 예압 N(공칭)': round(tx.CART_P1, 2), '막힘 최대 N': round(F_cart, 1), '디텐트 최대 N': F_det,
              '팔 굽힘 MPa': round(s_arm, 1), 'SF 정적': round(PLA['UTS_XY'] / s_arm, 1),
              'SF 피로 1만회': round(fatigue_allow(PLA['UTS_XY'], 1e4) / s_arm, 2),
              '링 굽힘 MPa': round(s_ring, 1), 'SF 링 피로 1만회': round(fatigue_allow(PLA['UTS_XY'], 1e4) / s_ring, 2),
@@ -373,7 +383,7 @@ R['motor_mount'] = {'반력 토크 N·m(클러치 최대)': round(TC_MAX / 1e3, 
                     '받침 볼트 좌우 줄(간격 128) 힘 N': round(TC_MAX / tx.MOTOR_FOOT_HOLE, 1)}
 
 # ================= 15. 디텐트 =================
-R['detent'] = {'C147 최대 힘 N': 2.79, '설명': '레버 느낌용(가벼움). 기어 유지는 핀 마찰·카트리지 예압이 담당'}
+R['detent'] = {'디텐트 스프링 최대 힘 N': F_det, '설명': '레버 느낌용(가벼움). 기어 유지는 핀 마찰·카트리지 예압이 담당'}
 
 json.dump(R, open(os.path.join(ROOT, 'calc', 'calc_result.json'), 'w'), ensure_ascii=False, indent=1, default=float)
 print(json.dumps({k: v for k, v in R.items() if k not in ('src',)}, ensure_ascii=False, indent=1, default=float))
