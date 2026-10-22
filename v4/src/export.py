@@ -41,7 +41,7 @@ def parts():
     add('22_sleeve_ring', to_print(tx.sleeve_ring()), 3, '2 슬리브', '포크 홈')
     # 3 축 부속
     add('30_spacer_3', to_print(tx.spacer(3.0)), 9, '3 축 부속', '출력 4 + 입력 4 + 아이들러 1')
-    add('31_spacer_1', to_print(tx.spacer(1.0)), 6, '3 축 부속', '허브 양 끝 (베어링 내륜만 누름)')
+    add('31_spacer_1', to_print(tx.spacer(1.0)), 7, '3 축 부속', '허브 양 끝 6 (베어링 내륜만 누름) + 핸들 롤러 뒤 1')
     add('32_spacer_43', to_print(tx.spacer(tx.HUB_LEN)), 3, '3 축 부속', '입력축: 그룹 안 두 기어 사이')
     add('33_spacer_plate_9', to_print(tx.plate_spacer()), 4, '3 축 부속', '끝판 베어링 ~ 칼라')
     add('34_collar_M3', to_print(tx.collar()), 5, '3 축 부속', '축 끝 4 + 아이들러 1 (M3x12 자가탭 1)')
@@ -89,6 +89,14 @@ def parts():
     add('80_pedal_arm', to_print(tx.pedal_arm()), 2, '7 페달', '클러치·브레이크 공용, 너트 홈 면이 바닥 (M6 나일론 너트, 가변저항 D축)')
     add('81_pedal_pad', to_print(tx.pedal_pad()), 2, '7 페달', '발판 (M4x25 2, 너트는 팔 앞면 홈)')
     add('82_pedal_base', to_print(tx.pedal_base(), (90, 0, 0)), 2, '7 페달', '바닥판이 바닥 (M6x25 피벗, 가변저항 에폭시, C252 복귀 스프링, 목재나사 4)')
+    # 8 핸들 받침 (v4.2)
+    add('90_steer_frame', to_print(tx.steer_frame()), 1, '8 핸들', '몸체: 앞면이 바닥 (6001 2, 멈춤 홈, 캠 방, 받침판 M4 너트 4는 옆면 홈)')
+    add('91_steer_base', to_print(tx.steer_base(), (90, 0, 0)), 1, '8 핸들', '받침판: 밑면이 바닥 (C클램프 2개로 책상 모서리에)')
+    add('92_steer_hub', to_print(tx.steer_hub()), 1, '8 핸들', '허브: 핸들 쪽 면이 바닥 (M5 6 + 너트, M3 무두볼트 1 + 너트)')
+    add('93_steer_cam', to_print(tx.steer_cam()), 1, '8 핸들', '복귀 캠: 판이 바닥 (M3 무두볼트 1 + 너트, 가변저항 D축)')
+    add('94_steer_yoke', to_print(tx.steer_yoke(), (180, 0, 0)), 1, '8 핸들', '롤러 요크: 뒷면이 바닥 (롤러 6001 + 핀 Ø12x22 압입, 스프링 2)')
+    add('95_steer_cover', to_print(tx.steer_cover()), 1, '8 핸들', '뒤 덮개: 넓은 면이 바닥 (가변저항, M3x12 4)')
+    add('96_steer_washer_1.5', to_print(tx.spacer(1.5)), 2, '8 핸들', '캠 앞 1 + 롤러 앞 1')
     return L
 
 def parts_meta():

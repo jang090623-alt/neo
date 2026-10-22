@@ -13,7 +13,7 @@ BASE = ['--bed-shape', '0x0,223x0,223x223,0x223', '--max-print-height', '205', '
 STRONG = ['--perimeters', '4', '--top-solid-layers', '5', '--bottom-solid-layers', '5', '--fill-density', '40%']
 FRAME = ['--perimeters', '3', '--top-solid-layers', '4', '--bottom-solid-layers', '4', '--fill-density', '20%']
 GEAR = ['--perimeters', '5', '--top-solid-layers', '5', '--bottom-solid-layers', '5', '--fill-density', '25%']
-FRAME_PARTS = ('00_', '02_', '40_', '41_', '42_', '43_', '44_', '45_', '46_', '47_', '48_', '49_', '52_', '53_', '54_', '60_', '78_', '80_', '81_')
+FRAME_PARTS = ('00_', '02_', '40_', '41_', '42_', '43_', '44_', '45_', '46_', '47_', '48_', '49_', '52_', '53_', '54_', '60_', '78_', '80_', '81_', '90_', '91_', '95_')
 GEAR_PARTS = ('10_', '11_', '12_')
 
 def slice_one(fn):

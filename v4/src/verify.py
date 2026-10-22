@@ -25,6 +25,8 @@ if '--sweep' in sys.argv:
     print('sweep done', round(time.time() - t0), flush=True)
 R['pedal'] = asm.pedal_check()
 print('pedal done', round(time.time() - t0), flush=True)
+R['steer'] = asm.steer_check()
+print('steer done', round(time.time() - t0), flush=True)
 R['stl_bad'] = [f for f in sorted(os.listdir(STL)) if not trimesh.load(os.path.join(STL, f)).is_watertight]
 R['stl_count'] = len(os.listdir(STL))
 json.dump(R, open(os.path.join(ROOT, 'verify_result.json'), 'w'), ensure_ascii=False, indent=1, default=str)

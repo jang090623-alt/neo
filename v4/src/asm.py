@@ -329,3 +329,58 @@ def pedal_check():
     spr0s = np.array([py, 0.0]) + tx.PEDAL_SPR_B * u + (tx.PEDAL_W / 2 - 1.5) * nfs
     R['spring_len_rest_stop'] = [round(float(np.linalg.norm(spr1 - p)) + 3.0, 2) for p in (spr0, spr0s)]
     return R
+
+
+def steer_check():
+    """핸들 받침 검사. 간섭 부피 mm³ (0 이 정상). 멈춤: ±135° 에서 닿기 시작 → ±137° 는 겹쳐야 정상.
+    캠-롤러는 닿아 있어야 함 (틈 0). 복귀 토크 = 스프링 2개 힘 x 캠 기울기 (아르키메데스: 10mm / 135°)"""
+    fr, cov, base = tx.steer_frame(), tx.steer_cover(), tx.steer_base()
+    hub0, cam0 = tx.steer_hub(), tx.steer_cam()
+    z0c, z1c = tx.ST_CAM_Z
+    shaft = cyl(6.0, tx.ST_SHAFT[1] - tx.ST_SHAFT[0], tx.ST_SHAFT[0])
+    brgs = tube(14.0, 6.05, 8.0, tx.ST_BRG[0]) + tube(14.0, 6.05, 8.0, tx.ST_BRG[1])
+    wash = tube(7.5, 6.15, 1.5, tx.ST_CH[0])
+    pz = tx.ST_COVER[1]
+    pot = cyl(8.5, 10.0, pz) + cyl(3.5, 7.0, pz - 7.0) + cyl(5.8, 3.0, pz - 7.0)             # 몸통 Ø17, 부싱 M7, 너트 (맞변 10)
+    pot_shaft0 = ext(tx.Point(0, 0).buffer(3.0, 32).intersection(tx.box(-4, -4, 1.5, 4)), 15.0, pz - 15.0)
+    table = boxm(-500, 500, -tx.ST_H - 40, -tx.ST_H, tx.ST_EDGE, 600)
+    wheel = cyl(165.0, 30.0, tx.ST_HUB[0] - 30.0)                                               # 핸들 Ø330 두께 30 (가정)
+    still = {'frame': fr, 'cover': cov, 'pot': pot, 'bearings': brgs}
+    R = {'static': {'frame^cover': round((fr ^ cov).volume(), 2), 'frame^base': round((fr ^ base).volume(), 2),
+                    'frame^bearings': round((fr ^ brgs).volume(), 2), 'shaft^frame': round((shaft ^ fr).volume(), 2),
+                    'pot^frame': round((pot ^ fr).volume(), 2), 'wheel^table': round((wheel ^ table).volume(), 2),
+                    'wheel^base': round((wheel ^ base).volume(), 2)}}
+    rows = {}
+    for th in (-137.0, -135.0, -134.0, -90.0, -45.0, -10.0, 0.0, 10.0, 45.0, 90.0, 134.0, 135.0, 137.0):
+        yr = -tx.st_pitch(th)
+        hub, cam = hub0.rotate([0, 0, th]), cam0.rotate([0, 0, th])
+        yoke = tx.steer_yoke(min(abs(th), tx.ST_RANGE))
+        roller = tube(14.0, 6.05, 8.0, z0c).translate([0, yr, 0])
+        pin = cyl(6.0, 22.0, tx.ST_CH[0] + 0.5).translate([0, yr, 0])
+        rw = (tube(7.5, 6.15, 1.5, tx.ST_CH[0]) + tube(7.5, 6.15, 1.0, z1c)).translate([0, yr, 0])
+        spr = M.batch_boolean([tx.along_y(tube(9.0, 7.4, (yr - 20.0) - (tx.ST_CH[3] - 2.0), 0)).translate([s * tx.ST_SPR_X, tx.ST_CH[3] - 2.0, (tx.ST_CH[0] + tx.ST_CH[1]) / 2])
+                               for s in (-1, 1)], mf.OpType.Add)
+        moving = {'hub': hub, 'cam': cam, 'pot_shaft': pot_shaft0.rotate([0, 0, th]), 'shaft': shaft, 'wash': wash}
+        follower = {'yoke': yoke, 'roller': roller, 'pin': pin, 'roller_wash': rw, 'springs': spr}
+        r = {}
+        for a, ma in list(moving.items()) + list(follower.items()):
+            for b, mb in still.items():
+                if (a, b) in (('pot_shaft', 'pot'), ('shaft', 'bearings')):
+                    continue
+                v = (ma ^ mb).volume()
+                if v > 0.01:
+                    r[f'{a}^{b}'] = round(v, 2)
+        for a, ma in moving.items():
+            for b, mb in follower.items():
+                v = (ma ^ mb).volume()
+                if v > 0.01:
+                    r[f'{a}^{b}'] = round(v, 2)
+        r['cam_roller_gap'] = round(float(tx.affinity.rotate(tx.steer_cam_poly(), th, origin=(0, 0)).distance(tx.Point(0, yr).buffer(14.0, 256))), 3)
+        r['spring_len'] = round((yr - 20.0) - (tx.ST_CH[3] - 2.0), 2)
+        rows[f'{th:.0f}'] = r
+    R['angles'] = rows
+    c = tx.ST_LIFT / math.radians(tx.ST_RANGE)                                                 # 캠 기울기 mm/rad
+    R['return_torque_Nm'] = {f'{th}': round(2 * tx.SPRING_K * (tx.SPRING_L0 - (tx.ST_SPR_PRE - (tx.st_pitch(th) - tx.ST_PITCH0))) * c / 1000, 3)
+                             for th in (0.5, 15, 45, 90, 135)}
+    return R
+

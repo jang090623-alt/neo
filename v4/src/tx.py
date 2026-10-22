@@ -18,6 +18,7 @@ import numpy as np
 import manifold3d as mf
 from shapely.geometry import Polygon, Point, box
 from shapely import affinity
+from shapely.ops import unary_union
 
 mf.set_circular_segments(96)
 M = mf.Manifold
@@ -949,6 +950,10 @@ PEDAL_REST = 25.0              # 쉬는 각 (수직에서 운전자 반대쪽 +z
 PEDAL_TRAVEL = math.degrees(3.0 * (FORK_CABLE_Y - FORK_PIV_Y) / (FORK_PIV_Y - H) / PEDAL_CABLE_B)   # 끝 멈춤: 릴리스 링 3.0 이동 (뒷판까지 3.5)
 PEDAL_SPR_L = 29.0             # 쉴 때 복귀 스프링 길이 (C252 자유장 32 → 7.6N)
 PEDAL_POT_P = 2.5              # 가변저항 몸통 자리 깊이 (축 15mm 기준: 축 끝이 D 구멍에 4 물림)
+POT_D = (3.05, 1.65)           # 가변저항 D 구멍: 반지름, 가운데 → 평면 (반달축 Ø6, 평면까지 4.6 + 틈). 실물 재고 페달·핸들 함께 바뀜
+
+def pot_d_poly():
+    return Point(0, 0).buffer(POT_D[0], 32).intersection(box(-4, -4, POT_D[1], 4))
 
 def pedal_dirs(th_deg):
     """받침 (y, z) 평면에서 팔 방향 u, 운전자 쪽 면 법선 nb, 앞쪽 면 법선 nf"""
@@ -966,8 +971,7 @@ def pedal_arm():
     zc = PEDAL_T / 2
     arm -= ext(hexagon(10.2), 6.2, -0.01)                                    # 나일론 너트 (DIN985 M6 두께 6)
     arm -= cyl(3.2, 12.0, -0.5)                                              # M6 Ø6.4 (볼트 끝 z=11.5)
-    dcut = Point(0, 0).buffer(3.05, 32).intersection(box(-4, -4, 1.65, 4))   # 반달축 Ø6, 평면 4.6 (평면이 +a 쪽)
-    arm -= ext(dcut, 5.01, PEDAL_T - 5.0)
+    arm -= ext(pot_d_poly(), 5.01, PEDAL_T - 5.0)                            # 반달축 (평면이 +a 쪽)
     arm -= along_x(cyl(1.7, 30, -15)).translate([0, PEDAL_CABLE_B, zc])     # 케이블 (a 방향)
     arm -= along_x(cyl(10.0, 2.0, hw - 1.5)).translate([0, PEDAL_SPR_B, zc])  # 스프링 끝 자리 (앞면 Ø20 깊이 1.5)
     for bb in (172.0, 188.0):
@@ -1055,6 +1059,155 @@ def pedal_base():
     b += post + _yz_cyl(spr1, nfm, 6.0, 3.0)
     for (x, zz) in ((-50, -45), (50, -45), (-50, 75), (50, 75)):
         b -= along_y(cyl(2.2, 10, -1)).translate([x, 0, zz])
+    return b
+
+
+# ======================= 핸들 받침 (v4.2, 2026-10-22) =======================
+# 사용자의 핸들은 축이 없음 → 강철 축 Ø12 (여분 연마봉에서 106) + 6001 2개. 좌우 135° 멈춤, 캠·롤러·스프링 2개로 가운데 복귀,
+# 뒤에 가변저항 (페달과 같은 B10K). 받침판은 C클램프 2개로 책상 모서리에.
+# 좌표: 축 = z (운전자 쪽이 -z), y 위, 축 중심 (0, 0), 몸체 앞면 z = 0, 책상 윗면 y = -ST_H. 핸들 각 th 는 +z 축 기준 반시계 (도).
+ST_H = 110.0                        # 책상 윗면 → 축 중심
+ST_RANGE = 135.0                    # 한쪽 회전 (멈춤)
+ST_LUG = 30.0                       # 허브 멈춤턱 폭 (도). 몸체 홈의 막힌 부분 = 2 x (180 - 135) - 30 = 60° (아래)
+ST_LUG_A = 90.0                     # 가운데일 때 멈춤턱 각 (위)
+ST_GROOVE = (26.0, 40.0, 14.0)      # 몸체 앞면 멈춤 홈: 안·바깥 반지름, 깊이
+ST_LUG_R = (27.0, 39.0, 10.0)       # 허브 멈춤턱: 안·바깥 반지름, 끝 z (홈 바닥과 4 틈)
+ST_HUB = (-22.0, -2.0, 50.0)        # 허브 원판: 앞면 z (핸들 닿는 면), 뒷면 z (몸체 앞면과 2 틈 → 손가락 안 들어감), 반지름
+ST_SET_A = 30.0                     # 허브·캠 무두볼트 방향 (도): 축의 평면 두 곳이 같은 쪽 → 갈기 쉬움
+ST_BRG = (0.0, 56.0)                # 앞·뒤 6001 앞면 z (폭 8)
+ST_FR = (45.0, 45.0)                # 몸체 바깥: x 반폭, y 위 (아래는 받침판 윗면)
+ST_BASE_T = 8.0                     # 받침판 두께
+ST_CAM_Z = (65.5, 73.5)             # 캠 판 z (롤러 폭 8). 앞은 1.5 와셔가 뒤 베어링 내륜을 누름
+ST_ROLLER = 14.0                    # 롤러 = 6001 바깥 반지름 (핀 Ø12x22 강철, 여분 연마봉에서)
+ST_PITCH0, ST_LIFT = 34.0, 10.0     # 롤러 중심 ~ 축: 가운데 34, 135° 에서 +10 (아르키메데스 → 복귀 토크 = 스프링 힘 x 4.24mm)
+ST_SPR_X, ST_SPR_PRE = 13.0, 26.0   # 스프링 2개 x 위치, 가운데일 때 길이 (135° 에서 16)
+SPRING_K, SPRING_L0 = 2.555, 32.0  # 압축 스프링 (C252 값. 기성품을 고르면 그 k·자유장으로 바꿈 → 핸들 복귀 토크·길이 다시 계산)
+ST_CH = (64.0, 97.0, 34.0, -(ST_PITCH0 + 20.0 + ST_SPR_PRE) + 2.0, 34.0)   # 캠 방 (안쪽): z 앞, z 뒤(열림, 덮개), x 반폭, y 바닥 (= 스프링 길이에서), y 위
+ST_COVER = (97.0, 101.0)            # 뒤 덮개 z (뒷면 = 가변저항 장착면)
+ST_SHAFT = (-21.0, 85.0)            # 강철 축 z (길이 106). 무두볼트 평면: z -12 (허브), z 79 (캠), 둘 다 ST_SET_A 쪽
+ST_EDGE = 15.0                      # 받침판 앞 끝 z = 책상 모서리 (핸들 면이 모서리보다 37 앞)
+ST_BOLTS = ((-39.5, 25.0), (39.5, 25.0), (-39.5, 85.0), (39.5, 85.0))   # 받침판-몸체 M4 (x, z)
+WHEEL_PCD, WHEEL_N, WHEEL_PHASE = 70.0, 6, 0.0   # 핸들 볼트 (사진 받기 전 가정: 레이싱 핸들 6구멍 PCD 70, M5)
+
+def st_pitch(th):
+    """핸들 각 th(도) 에서 롤러 중심 ~ 축 거리"""
+    return ST_PITCH0 + ST_LIFT * abs(th) / ST_RANGE
+
+def _sector(r0, r1, a0, a1, n=96):
+    """반지름 r0~r1, 각 a0→a1 (도, 반시계) 부채꼴 고리"""
+    arc = lambda r, s, e: [(r * math.cos(math.radians(s + (e - s) * k / n)), r * math.sin(math.radians(s + (e - s) * k / n))) for k in range(n + 1)]
+    return Polygon(arc(r1, a0, a1) + arc(r0, a1, a0))
+
+@lru_cache(maxsize=None)
+def steer_cam_poly():
+    """캠 단면: 롤러(몸체에 고정, -y 쪽, 위아래로만 움직임)가 지나가는 원들을 뺀 나머지.
+    캠이 th 돌면 롤러는 캠 좌표에서 -90-th 방향, 거리 st_pitch(th). ±145° 까지 (멈춤 135 + 여유 10)"""
+    keep = Point(0, 0).buffer(st_pitch(ST_RANGE + 10) - ST_ROLLER, 256)
+    rings = []
+    for k in range(-290, 291):                                   # 0.5° 간격
+        a = math.radians(-90.0 - k / 2.0)
+        s = st_pitch(k / 2.0)
+        rings.append(Point(s * math.cos(a), s * math.sin(a)).buffer(ST_ROLLER, 96))
+    return keep.difference(unary_union(rings))
+
+def _st_setscrew(z, r_out, access=None):
+    """M3 무두볼트 (ST_SET_A 방향, 높이 z): Ø3.4 구멍 + 너트 홈 (r 7.9~10.5, z 아래 3.2 ~ 뒤로 열림) [+ 공구 구멍 Ø6]"""
+    m = along_x(cyl(1.7, r_out + 1, 0)) + boxm(7.9, 10.5, -2.85, 2.85, -3.2, 30.0)
+    if access:
+        m += along_x(cyl(3.0, access - 14.0 + 1, 14.0))
+    return m.rotate([0, 0, ST_SET_A]).translate([0, 0, z])
+
+def steer_hub():
+    """허브 (조립 좌표, 가운데 위치). 원판 r50 z -22~-2: 앞면에 핸들 (M5 6개 PCD 70, 너트는 뒷면 홈 깊이 8),
+    뒷면에 멈춤턱 (위 90°, 폭 30°, r 27~39, z -2~10 → 몸체 앞면 홈 안) + 앞 베어링 내륜 누름 턱 Ø15 (z -2~0).
+    가운데 축 구멍, M3 무두볼트 (z -12, 30° 방향, 테두리에서 Ø6 공구 구멍, 너트는 뒷면 홈으로). 출력: 앞면이 바닥"""
+    za, zb, R = ST_HUB
+    h = cyl(R, zb - za, za) + cyl(7.5, -zb, zb)
+    h += ext(_sector(ST_LUG_R[0], ST_LUG_R[1], ST_LUG_A - ST_LUG / 2, ST_LUG_A + ST_LUG / 2), ST_LUG_R[2] - zb, zb)
+    h -= cyl(SHAFT_HOLE / 2, 30.0, za - 1)
+    nut = _st_setscrew((za + zb) / 2, R, access=R)
+    h -= nut - boxm(-60, 60, -60, 60, zb + 0.5, 40)              # 너트 홈은 뒷면(zb)까지만 → 턱·멈춤턱은 안 뚫음
+    for k in range(WHEEL_N):
+        a = math.radians(WHEEL_PHASE + 360.0 * k / WHEEL_N)
+        x, y = WHEEL_PCD / 2 * math.cos(a), WHEEL_PCD / 2 * math.sin(a)
+        h -= cyl(2.75, zb - za + 2, za - 1).translate([x, y, 0])
+        h -= ext(hexagon(8.2), 8.01, zb - 8.0).translate([x, y, 0])
+    return h
+
+def steer_frame():
+    """몸체 (조립 좌표). 바깥 x ±45, y 받침판 위 ~ 45, z 0~97.
+    앞면: 멈춤 홈 (r 26~40, 깊이 14, 아래 60° 는 막힘 → 허브 턱이 ±135° 에서 닿음), 앞 6001 자리 z 0~8 + 45° 턱.
+    축 지나감 Ø14, 뒤 6001 자리 z 56~64. 캠 방 z 64~97 (뒤로 열림 → 덮개): x ±34, y -78~34,
+    바닥에 스프링 자리 2 (Ø19 깊이 2), 요크 안내 벽 (x ±24.3 바깥, 요크 판이 위아래로 미끄러짐).
+    밑면 받침판 M4 4개 (너트는 옆면 홈), 뒷면 덮개 M3 자가탭 4. 출력: 앞면이 바닥 (홈 천장은 14mm 다리)"""
+    xh, yt = ST_FR
+    yb = -ST_H + ST_BASE_T
+    z0, z1, chx, chyb, chyt = ST_CH
+    f = boxm(-xh, xh, yb, yt, 0.0, z1)
+    dam = 2 * (180.0 - ST_RANGE) - ST_LUG
+    f -= ext(_sector(ST_GROOVE[0], ST_GROOVE[1], 270.0 + dam / 2 - 360.0, 270.0 - dam / 2), ST_GROOVE[2] + 0.01, -0.01)
+    f -= cyl(BRG_SEAT / 2, 8.01, -0.01)
+    f -= M.cylinder(BRG_SEAT / 2 - 7.0, BRG_SEAT / 2, 7.0).translate([0, 0, 8.0])
+    f -= cyl(7.0, z0 + 1, -0.5)
+    f -= cyl(BRG_SEAT / 2, 8.01, ST_BRG[1])
+    f -= boxm(-chx, chx, chyb, chyt, z0, z1 + 1)
+    rib_top = -ST_PITCH0 - 15.0                                   # 가운데일 때 요크 판 윗면
+    for s in (-1, 1):
+        f += boxm(min(24.3 * s, chx * s), max(24.3 * s, chx * s), chyb - 0.01, rib_top, z0 - 0.01, z1)
+        f -= along_y(cyl(9.5, 2.01, 0)).translate([s * ST_SPR_X, chyb - 2.0, (z0 + z1) / 2])
+    for (x, z) in ST_BOLTS:
+        f -= along_y(cyl(2.2, 26, 0)).translate([x, yb - 1, z])
+        f -= boxm(x - 4.1 if x < 0 else x - 3.6, x + 3.6 if x < 0 else x + 4.1, yb + 8.0, yb + 11.4, z - 3.6, z + 3.6)   # 너트 자리
+        f -= boxm(-xh - 1 if x < 0 else x, x if x < 0 else xh + 1, yb + 8.0, yb + 11.4, z - 3.6, z + 3.6)            # 옆면에서 끼움
+    for (x, y) in ((-39.5, chyb - 6.0), (39.5, chyb - 6.0), (-39.5, chyt + 5.5), (39.5, chyt + 5.5)):
+        f -= cyl(1.25, 12.01, z1 - 12.0).translate([x, y, 0])
+    return f
+
+def steer_cover():
+    """뒤 덮개 (조립 좌표) z 97~101, 몸체 뒷면 크기. 가운데 가변저항 부싱 구멍 Ø7.4: 회전 방지 돌기는 니퍼로 잘라 내고,
+    핸들을 가운데 두고 가변저항 몸통을 돌려 가운데(저항 반)를 맞춘 뒤 너트를 조임. M3x12 4개. 출력: 넓은 면이 바닥"""
+    xh, yt = ST_FR
+    yb = -ST_H + ST_BASE_T
+    c = boxm(-xh, xh, yb, yt, ST_COVER[0], ST_COVER[1])
+    c -= cyl(3.7, 10, ST_COVER[0] - 1)
+    for (x, y) in ((-39.5, ST_CH[3] - 6.0), (39.5, ST_CH[3] - 6.0), (-39.5, ST_CH[4] + 5.5), (39.5, ST_CH[4] + 5.5)):
+        c -= cyl(1.7, 10, ST_COVER[0] - 1).translate([x, y, 0])
+    return c
+
+def steer_cam():
+    """캠 (조립 좌표, 가운데 위치): 판 z 65.5~73.5 (steer_cam_poly), 뒤 보스 r13 z 73.5~93.
+    강철 축 구멍 (축 끝 z 85), M3 무두볼트 (z 79, 30° 방향, 너트는 뒷면 홈으로), 가변저항 D 구멍 (z 86~93: 축 15mm 중 7 물림).
+    출력: 앞면(판)이 바닥"""
+    z0, z1 = ST_CAM_Z
+    zr = ST_CH[1] - 4.0                                           # 보스 뒷면 93 (가변저항 너트와 1 틈)
+    c = ext(steer_cam_poly(), z1 - z0, z0) + cyl(13.0, zr - z1, z1)
+    c -= cyl(SHAFT_HOLE / 2, ST_SHAFT[1] + 0.5 - z0 + 1, z0 - 1)
+    c -= ext(pot_d_poly(), zr - (ST_COVER[1] - 15.0) + 0.01, ST_COVER[1] - 15.0)
+    c -= _st_setscrew(79.0, 13.0)
+    return c
+
+def steer_yoke(th=0.0):
+    """롤러 요크 (조립 좌표, 핸들 각 th 일 때 위치). z 64.5~96.5 같은 단면: 판 (x ±24, 롤러 중심 아래 15~23) +
+    볼 (x ±10, 판 위 ~ 롤러 중심 위 8). 앞쪽 z 64.5~74.5 는 롤러·캠 자리로 파냄 (출력 때 볼 아랫면은 31mm 다리).
+    롤러 핀 Ø12x22 (볼에 IDLER_PRESS 압입), 롤러 앞 1.5 와셔·뒤 1 와셔. 밑면 스프링 자리 2 (Ø19 깊이 3). 출력: 앞면이 바닥"""
+    yr = -st_pitch(th)
+    zf, zr = ST_CH[0] + 0.5, ST_CH[1] - 0.5
+    prof = box(-24, yr - 23, 24, yr - 15).union(box(-10, yr - 15, 10, yr + 8))
+    y = ext(prof, zr - zf, zf)
+    y -= boxm(-15.5, 15.5, yr - 14.5, yr + 9, zf - 1, ST_CAM_Z[1] + 1.0)
+    y -= cyl(IDLER_PRESS / 2, zr - zf + 2, zf - 1).translate([0, yr, 0])
+    for s in (-1, 1):
+        y -= along_y(cyl(9.5, 3.01, -0.01)).translate([s * ST_SPR_X, yr - 23, (zf + zr) / 2])
+    return y
+
+def steer_base():
+    """받침판 (조립 좌표): x ±100, 두께 8 (책상 위), z 15~115 (앞 끝 = 책상 모서리). 몸체 M4x30 4개 (머리는 밑면 Ø8.6 자리).
+    양쪽 끝 (x ±60~±100, 앞쪽) 을 C클램프로 책상에 물림. 출력: 밑면이 바닥"""
+    yb = -ST_H
+    b = boxm(-100, 100, yb, yb + ST_BASE_T, ST_EDGE, 115.0)
+    for (x, z) in ST_BOLTS:
+        b -= along_y(cyl(2.2, ST_BASE_T + 2, -1)).translate([x, yb, z])
+        b -= along_y(cyl(4.3, 3.0, -0.01)).translate([x, yb, z])
     return b
 
 
