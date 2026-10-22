@@ -523,7 +523,7 @@ def cap_placed(group):
     return c.translate([xr, RAIL_Y, za])
 
 def cart_washer():
-    return tube(CART_CAV_D / 2 - 0.2, 3.2, CART_WASH_T)
+    return tube(CART_CAV_D / 2 - 0.2, (RAIL_HOLE + 0.05) / 2, CART_WASH_T)     # 레일 위로 미끄러짐 (Ø6.4)
 
 def cart_inner_z(group):
     """카트리지 안쪽 공간 (와셔 바깥면) z 범위"""
@@ -608,7 +608,7 @@ def lower_lever():
     sock_y0 = PIVOT_Y - BALL_R - 14.0
     neck = boxm(C - 7, C + 7, FINGER_YC, sock_y0 + 1, zc - 3, zc + 3)
     sock = along_y(cyl(7.5, 14.0, 0)).translate([C, sock_y0, zc])
-    sock -= along_y(cyl(6.15, 13, 0)).translate([C, ROD_Y0, zc])
+    sock -= along_y(cyl(SHAFT_HOLE / 2, 13, 0)).translate([C, ROD_Y0, zc])      # 레버봉 접착 구멍 = SHAFT_HOLE (쿠폰 결과를 따라감)
     fin -= boxm(C - 20, C + 20, FINGER_YC - 6, FINGER_YC - 4.4, zc - 6, zc + 6)
     return fin + neck + sock
 
@@ -632,19 +632,20 @@ def pivot_half(upper):
     return b
 
 def ball_half(upper):
-    s = M.sphere(BALL_R, 128) - along_y(cyl(6.15, 40, -20))
+    s = M.sphere(BALL_R, 128) - along_y(cyl(SHAFT_HOLE / 2, 40, -20))
     keep = boxm(-20, 20, 0, 20, -20, 20) if upper else boxm(-20, 20, -20, 0, -20, 20)
     return (s ^ keep).translate(list(PIVOT))
 
 SPACER_L = 30.0
 def spring_spacer():
-    y0 = PIVOT_Y + math.sqrt(BALL_R ** 2 - 6.2 ** 2)
-    return along_y(tube(8.0, 6.2, SPACER_L)).translate([C, y0, LUG_Z]), y0 + SPACER_L
+    rb = SHAFT_HOLE / 2 + 0.05                                                   # 레버봉 위로 미끄러짐 (Ø12.4)
+    y0 = PIVOT_Y + math.sqrt(BALL_R ** 2 - rb ** 2)
+    return along_y(tube(8.0, rb, SPACER_L)).translate([C, y0, LUG_Z]), y0 + SPACER_L
 
 LOCK_RHO = GATE_Y - GATE_T / 2 - 0.6 - PIVOT_Y
 LIP_Y0 = GATE_Y - GATE_T / 2 - 8.0
 def lock_collar():
-    c = along_y(collar(bore=12.1, w=9.0, r=14.0)).translate([C, PIVOT_Y + LOCK_RHO - 8.5, LUG_Z])
+    c = along_y(collar(w=9.0, r=14.0)).translate([C, PIVOT_Y + LOCK_RHO - 8.5, LUG_Z])
     return c ^ M.sphere(LOCK_RHO, 256).translate(list(PIVOT))
 
 def lever_paths(step=1.0):
@@ -691,7 +692,7 @@ def gate():
 def knob():
     y0 = ROD_Y0 + ROD_LEN - 15.0
     k = cyl(17.0, 25.0, 0) + M.cylinder(4.0, 17.0, 14.0).translate([0, 0, 25.0])
-    k -= cyl(6.15, 15.2, -0.2)
+    k -= cyl(SHAFT_HOLE / 2, 15.2, -0.2)
     for x in (-8.0, 0.0, 8.0):
         k -= boxm(x - 0.8, x + 0.8, -6, 6, 28.2, 30)
     k -= boxm(-8.8, 8.8, -0.8, 0.8, 28.2, 30)
