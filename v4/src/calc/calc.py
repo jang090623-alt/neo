@@ -15,7 +15,7 @@ SRC = {
     'CORK': 'RoyMech 브레이크·클러치 마찰재 표: 코르크-주철/강 건식 μ 0.3~0.5, 최대압력 0.1 MPa, 최고온도 100°C: https://roymech.org/Useful_Tables/Drive/Brake_Clutch_mat.html',
     'MU_PLA': 'PLA-강 건식 마찰계수 0.30(정지, 30N)·0.49(핀온디스크): https://tribology.rs/journals/2024/2024-1/9-1546.pdf , https://engmechx.it.cas.cz/improc/2018/649.pdf',
     'B6001': '6001-2Z: C=5.1 kN, C0=2.4 kN: https://www.simplybearings.co.uk/products/6001-2z-eu',
-    'C252': f'압축 스프링 (C252 대신 기성품): 스프링팜 SUS304 선경1.5 외경18 자유장{tx.SPRING_L0:.0f} (쿠팡 4387963066), 권수 약 5.5 사진 판독 → k {tx.SPRING_K} N/mm (받으면 걸이 저울로 실측해 tx.SPRING_K), 밀착 {tx.SPRING_SOLID}',
+    'C252': f'압축 스프링 (C252 대신 기성품): 스프링팜 SUS304 선경1.5 외경18 자유장{tx.SPRING_L0:.0f} (쿠팡 4387963066), 권수 약 5.5 사진 판독 → k {tx.SPRING_K} N/mm (받으면 물 무게로 실측해 tx.SPRING_K), 밀착 {tx.SPRING_SOLID}',
     'C147': '디텐트 스프링 (C147 대신 기성품): 스프링팜 SUS304 선경0.4 외경5 자유장10 (쿠팡 8501265889), 권수 약 6 → k 0.57 N/mm, 5mm 에서 2.85N, 밀착 2.4',
     'MOTOR': '모터 라벨 GGM K9DP90N2: DC24V 90W 3000rpm 5.9A / 감속기 K9P9BH 1:9 (2026-10-19 사진·판매처 목록)',
     'HAND': 'Das & Black (2000) 한 손 당김 최대 473N(남, 앉은 자세), NBSIR 73-156 (1973) 2~6세 당김 95백분위 ~296N: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nbsir73-156.pdf',
@@ -92,7 +92,7 @@ R['inertia_kgm2']['J_in(입력축 기준)'] = float(f'{J_in:.3g}'); R['inertia_k
 
 # ================= 4. 필요 토크와 클러치 =================
 T_DRAG = 0.10e3          # N·mm, 가정 (조립 후 측정, 합격 기준 0.15 N·m 이하)
-A['drag_torque'] = '입력축 기준 끌림 토크 0.10 N·m (미측정: 2단계 조립 후 걸이 저울로 측정, 0.15 이하이면 합격)'
+A['drag_torque'] = '입력축 기준 끌림 토크 0.10 N·m (미측정: 2단계 조립 후 물 무게로 측정, 0.15 이하이면 합격)'
 J1 = J_in + J_out * (17 / 49) ** 2
 T_need = T_DRAG + J1 * (W_IN_NOM / 0.3) * 1e3
 R['torque_need_Nm'] = {'끌림(가정)': T_DRAG / 1e3, '1단에서 0.3초 만에 최고속도까지 가속': round(J1 * (W_IN_NOM / 0.3), 4),
