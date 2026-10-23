@@ -57,7 +57,7 @@ def parts():
     add('40_plate_A', to_print(tx.end_plate('A')), 1, '4 프레임', '바깥면 바닥 (모터 쪽, 아이들러 축, 포크 브래킷)')
     add('41_plate_B', to_print(tx.end_plate('B'), flip), 1, '4 프레임', '바깥면 바닥 (셀렉터·rpm 센서 쪽)')
     add('42_foot_bracket', to_print(tx.foot_bracket()), 4, '4 프레임', 'MDF 고정')
-    add('43_display_wheel', to_print(tx.display_wheel()), 1, '4 프레임', '출력축 표시 바퀴 (끝판 B 바깥, 자석 Ø6x3 1, M3 무두볼트 1)')
+    add('43_display_wheel', to_print(tx.display_wheel()), 1, '4 프레임', '출력축 표시 바퀴 (끝판 B 바깥, 자석 Ø6x3 4, M3 무두볼트 1)')
     add('44_wheel_guard', to_print(tx.wheel_guard()), 1, '4 프레임', '바퀴 덮개 + A3144 자리 (끝판 B, M3 4)')
     add('45_motor_riser', to_print(tx.motor_riser(), (-90, 0, 0)), 1, '4 프레임', 'K9B 브래킷 아래, 높이 19, 윗면이 바닥 (밑면 너트 홈에 M6 너트 4 → MDF 에 붙이기 전에)')
     add('46_clutch_hood', bed_film(to_print(tx.clutch_hood(), flip)), 1, '4 프레임', '클러치 덮개: 탭 쪽 끝이 바닥, 바닥 막 0.4 는 출력 후 칼로 잘라냄 (M3 3 + 목재나사 4)')
