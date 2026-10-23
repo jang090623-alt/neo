@@ -1,7 +1,7 @@
 """물품계획서: 학교 양식(2026학년도 창체 동아리 물품 구입 신청)에 구입 물품을 채움.
 허용 쇼핑몰(S2B·쿠팡·11번가·G마켓)만, 국내배송만, 가격 제한 없음 → 여분·품질 올림 포함 (2026-10-22).
 입력: v4/양식_창체_물품구입신청.xlsx
-출력: v4/창체_물품계획서_RPM.xlsx (제출용: 학교 양식 그대로), v4/물품계획서_근거.xlsx (주문하는 사람용),
+출력: v4/2026학년도 창체 동아리 물품 구입 신청_RPM.xlsx (제출용: 받은 양식 파일에 줄만 채움), v4/물품계획서_근거.xlsx (주문하는 사람용),
       v4/쇼핑몰_확인_프롬프트.md (이 환경은 쇼핑몰 화면을 못 열어서, 다른 세션이 확인할 때 쓰는 지시문)"""
 import os, copy
 from urllib.parse import quote
@@ -11,7 +11,7 @@ from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
 ROOT = os.path.dirname(os.path.abspath(__file__))
 V4 = os.path.join(ROOT, '..')
 FORM = os.path.join(V4, '양식_창체_물품구입신청.xlsx')
-OUT = os.path.join(V4, '창체_물품계획서_RPM.xlsx')
+OUT = os.path.join(V4, '2026학년도 창체 동아리 물품 구입 신청_RPM.xlsx')
 REF = os.path.join(V4, '물품계획서_근거.xlsx')
 PROMPT = os.path.join(V4, '쇼핑몰_확인_프롬프트.md')
 CLUB, TEACHER = 'RPM', '홍경표, 장수빈'
@@ -148,7 +148,7 @@ def height(texts_widths, base):
 def label(name, spec):
     return f'{name} ({spec})' if spec and name != '배송비' else ('배송비 (판매처별 합계)' if name == '배송비' else name)
 
-# 1) 제출용: 학교 양식 그대로 (시트 '물품' 하나, 메모 줄 없음)
+# 1) 제출용: 받은 양식 파일에 줄만 채움 (시트·제목·머리줄·열 너비·인쇄 설정은 양식 그대로, 메모 줄 없음)
 wb = openpyxl.load_workbook(FORM)
 ws = wb['물품']
 item_style = [copy.copy(ws.cell(3, c)._style) for c in range(1, 9)]
@@ -173,11 +173,6 @@ ws.cell(t, 6).value = f'=SUM(F3:F{last})'
 ws.cell(t, 7).value = f'=SUM(G3:G{last})'
 for r in range(t + 1, t + 20):              # delete_rows 는 행 높이를 옮기지 않음 → 남은 높이 지움
     ws.row_dimensions[r].height = None
-ws.sheet_properties.pageSetUpPr.fitToPage = True      # 인쇄: 가로 방향, 폭 한 장, 제목 줄 반복
-ws.page_setup.fitToWidth, ws.page_setup.fitToHeight = 1, 0
-ws.page_setup.orientation = 'landscape'
-ws.page_setup.paperSize = ws.PAPERSIZE_A4
-ws.print_title_rows = '2:2'
 wb.save(OUT)
 
 # 2) 주문하는 사람용: 쓰는 곳·고른 이유·꼭 맞아야 할 것·가격 근거·상태
