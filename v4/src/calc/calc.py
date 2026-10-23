@@ -337,8 +337,10 @@ R['fork'] = {'카트리지 예압 N(공칭)': round(tx.CART_P1, 2), '막힘 최�
              'SF 피로 1만회': round(fatigue_allow(PLA['UTS_XY'], 1e4) / s_arm, 2),
              '링 굽힘 MPa': round(s_ring, 1), 'SF 링 피로 1만회': round(fatigue_allow(PLA['UTS_XY'], 1e4) / s_ring, 2),
              '(v3 6mm 팔이었다면) MPa': round(M_arm / Zrect(12.0, 6.0), 1),
-             '러그 고정력 여유(M3 2개 마찰, 300N/나사 가정)': round(0.3 * 2 * 2 * 300 / F_shift, 1)}
+             '러그 고정력 여유(M3 2개 마찰, 300N/나사 가정)': round(0.3 * 2 * 2 * 300 / F_shift, 1),
+             '출력 레일 칼라 고정력 여유(M3 조임 1개 300N 가정, 마찰 0.3 x 2면)': round(0.3 * 2 * 300 / F_cart, 1)}
 A['lug_screw'] = '러그 M3 자가탭 나사가 레일을 누르는 힘 300N/개 가정 (손으로 조인 값, 미측정)'
+A['rail_collar'] = '출력 레일 칼라(50c) M3x10 자가탭 조임 장력 300N 가정 (러그와 같음, 미측정) → 조립 때 물 4L(39N) 를 얹어 미끄러지지 않는지 확인'
 
 # ================= 11. 레버·게이트 (손잡이 400N) =================
 y_knob = tx.ROD_Y0 + tx.ROD_LEN - 15 + 14.0

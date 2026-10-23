@@ -62,6 +62,7 @@ def parts():
         add(f'50_fork_{g}', to_print(tx.fork(g), (0, 0, 0) if tx.CART_DIR[g] > 0 else flip), 1, '5 변속', f'{g} 포크 (립 면이 바닥)')
     add('50a_fork_cap', to_print(tx.fork_cap()), 3, '5 변속', '카트리지 뚜껑 (M3x8 자가탭 2)')
     add('50b_cart_washer', to_print(tx.cart_washer()), 6, '5 변속', '카트리지 와셔')
+    add('50c_rail_collar', to_print(tx.rail_collar()), 8, '5 변속', '레일 칼라: 코 끝이 바닥 (M3x10 자가탭 조임 1), 카트리지 6 + 여분 2')
     add('51_lug', to_print(tx.lug('34')), 3, '5 변속', '세 레일 공통 (자석 1, M3x25 자가탭 2: 끝이 레일을 누름)')
     add('52_selector_cage', to_print(tx.cage()), 1, '5 변속', '플랜지 바닥')
     add('53_pivot_lower', to_print(tx.pivot_half(False), (90, 0, 0)), 1, '5 변속', '')

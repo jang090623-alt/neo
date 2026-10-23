@@ -171,9 +171,9 @@ def assemble(state='N', push=False, carrier_side=0, clutch_state='in', blocked=F
         P[f'fwash_a_{g}'] = tx.cart_washer().translate([xr, tx.RAIL_Y, wa0])
         P[f'fwash_b_{g}'] = tx.cart_washer().translate([xr, tx.RAIL_Y, wb0])
         P[f'fspring_{g}'] = tube(9.0, 7.0, (wb0 - (wa0 + tx.CART_WASH_T)) - 0.2, wa0 + tx.CART_WASH_T + 0.1).translate([xr, tx.RAIL_Y, 0])
-        rc_od, rc_w = tx.RAIL_COLLAR
-        P[f'rcol_a_{g}'] = tube(rc_od / 2, 3.05, rc_w, zi0 - rc_w + rs).translate([xr, tx.RAIL_Y, 0])
-        P[f'rcol_b_{g}'] = tube(rc_od / 2, 3.05, rc_w, zi1 + rs).translate([xr, tx.RAIL_Y, 0])
+        rc = tx.rail_collar()                         # 코 끝이 와셔에 닿음
+        P[f'rcol_a_{g}'] = rc.mirror([0, 0, 1]).translate([xr, tx.RAIL_Y, zi0 + rs])
+        P[f'rcol_b_{g}'] = rc.translate([xr, tx.RAIL_Y, zi1 + rs])
         P[f'lug_{g}'] = tx.lug(g).translate([0, 0, rs])
     P['cage'] = tx.cage()
     P['gate'] = tx.gate()

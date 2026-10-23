@@ -116,7 +116,8 @@ CART_OD = 30.0
 CART_CAV_L = CART_PRE_L + 2 * CART_WASH_T            # 26.6
 CART_LEN = CART_CAV_L + 2 * CART_WALL                # 32.6
 CART_DIR = {'12': -1, '34': -1, '5R': +1}            # 카트리지를 기어와 안 부딪히는 쪽으로
-RAIL_COLLAR = (12.0, 8.0)                            # 6mm 강철 샤프트 칼라 외경·폭 (구매품)
+RAIL_COLLAR = (12.0, 12.5, 20.0, 8.5)                # 출력 레일 칼라 (2026-10-23, 국내 칼라 판매 종료): 코 바깥지름·길이, 몸통 바깥지름·길이
+                                                     # 코: 끝벽 구멍(13) 으로 들어가 와셔를 밂. 길이 = 끝벽 3 + 최대 넘침 5.73 (R 누름 막힘) + 뚜껑 볼트 머리 3 + 0.77
 
 # ---------------- 클러치 (끝판 A 바깥, 입력축 x=0) ----------------
 CL_R = 50.0                    # 앞판·뒷판·압력판 반지름
@@ -338,10 +339,9 @@ def spacer(length, r_out=7.5):
     """베어링 내륜만 누르는 스페이서 (6001 내륜 어깨 ≈ 지름 16.7 → 외경 15)"""
     return tube(r_out, SHAFT_HOLE / 2, length)
 
-def collar(bore=SHAFT_HOLE - 0.2, w=10.0, r=13.0):
+def collar(bore=SHAFT_HOLE - 0.2, w=10.0, r=13.0, yb=8.5):
     """M3 조임 칼라 (v4.1): 슬릿 + M3x12 머리 자리(바닥 x=-3, 머리가 반지름 r 안으로 숨음) + 반대쪽 자가탭 Ø2.5.
-    너트 없음 → 밖으로 튀어나온 것 없음 (v4 는 너트가 칼라 밖으로 3mm 튀어나와 덮개·커플링 핀에 닿았음)"""
-    yb = 8.5
+    너트 없음 → 밖으로 튀어나온 것 없음 (v4 는 너트가 칼라 밖으로 3mm 튀어나와 덮개·커플링 핀에 닿았음). yb = 나사 축 ~ 구멍 중심"""
     c = tube(r, bore / 2, w)
     c -= boxm(-0.75, 0.75, 0, r + 1, -1, w + 1)                                  # 슬릿
     c -= along_x(cyl(1.7, r + 1, -r - 1)).translate([0, yb, w / 2])              # 머리 쪽 Ø3.4
@@ -535,6 +535,12 @@ def cap_placed(group):
 
 def cart_washer():
     return tube(CART_CAV_D / 2 - 0.2, (RAIL_HOLE + 0.05) / 2, CART_WASH_T)     # 레일 위로 미끄러짐 (Ø6.4)
+
+def rail_collar():
+    """레일 칼라 (z=0 이 와셔 쪽 끝): 코 + 조임 몸통 (M3x10 자가탭 1, 머리는 몸통 안). 슬릿은 끝까지 → 몸통을 조이면 코도 같이 물림"""
+    nd, nl, bd, bl = RAIL_COLLAR
+    nose = tube(nd / 2, RAIL_HOLE / 2, nl) - boxm(-0.75, 0.75, 0, nd / 2 + 1, -1, nl + 1)
+    return nose + collar(RAIL_HOLE, bl, bd / 2, yb=5.7).translate([0, 0, nl])
 
 def cart_inner_z(group):
     """카트리지 안쪽 공간 (와셔 바깥면) z 범위"""
