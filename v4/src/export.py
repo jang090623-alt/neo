@@ -1,6 +1,6 @@
 """v4: 출력 방향으로 돌려 STL 저장 + 부품표(수량·분류·비고)"""
 import os
-import numpy as np, trimesh
+import numpy as np, trimesh, manifold3d as mf
 import tx
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -11,6 +11,13 @@ def to_print(m, rot=(0, 0, 0)):
     m = m.rotate(list(rot))
     b = m.bounding_box()
     return m.translate([-(b[0] + b[3]) / 2, -(b[1] + b[4]) / 2, -b[2]])
+
+def bed_film(m, t=0.4):
+    """출력용 바닥 막 (두께 t): 첫 층 윤곽의 볼록 껍질을 채움.
+    얇은 벽만 바닥에 닿는 키 큰 부품이 들떠 떨어지지 않게 함 → 출력 후 벽 안쪽을 따라 칼로 잘라냄.
+    막이 바닥 쪽 나사 구멍도 0.4 덮음 (구멍 모양과 겹치면 STL 이 안 닫힘) → 나사로 뚫음"""
+    film = m.slice(0.1).hull().offset(0.5, mf.JoinType.Round)                 # 벽 바깥면과 겹치지 않게 0.5 키움
+    return m + film.extrude(t)
 
 def save(m, name):
     mesh = m.to_mesh()
@@ -53,7 +60,7 @@ def parts():
     add('43_display_wheel', to_print(tx.display_wheel()), 1, '4 프레임', '출력축 표시 바퀴 (끝판 B 바깥, 자석 Ø6x3 1, M3 무두볼트 1)')
     add('44_wheel_guard', to_print(tx.wheel_guard()), 1, '4 프레임', '바퀴 덮개 + A3144 자리 (끝판 B, M3 4)')
     add('45_motor_riser', to_print(tx.motor_riser(), (-90, 0, 0)), 1, '4 프레임', 'K9B 브래킷 아래, 높이 19, 윗면이 바닥 (밑면 너트 홈에 M6 너트 4 → MDF 에 붙이기 전에)')
-    add('46_clutch_hood', to_print(tx.clutch_hood(), flip), 1, '4 프레임', '클러치 덮개: 탭 쪽 끝이 바닥 (M3 3 + 목재나사 4)')
+    add('46_clutch_hood', bed_film(to_print(tx.clutch_hood(), flip)), 1, '4 프레임', '클러치 덮개: 탭 쪽 끝이 바닥, 바닥 막 0.4 는 출력 후 칼로 잘라냄 (M3 3 + 목재나사 4)')
     add('47_hood_front', to_print(tx.hood_front()), 1, '4 프레임', '클러치 덮개 앞판 (M3 4)')
     add('48_end_cap', to_print(tx.collar_cap()), 2, '4 프레임', '축 끝 덮개: 끝판 A 출력축 + 끝판 B 입력축 (M3 2씩)')
     add('49_end_filler', to_print(tx.end_filler()), 2, '4 프레임', '끝 채움판: 끝판 A·B 왼쪽 (M3x50 2씩)')
