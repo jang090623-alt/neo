@@ -1,0 +1,3 @@
+cp planetary_testrig.scad pg.scad
+awk 'NR<=52' pg.scad > params.scad
+(det.scad, thumbs_v1.scad, bracket_collision_check.scad 는 pg.scad/params.scad 를 use/include 함)
