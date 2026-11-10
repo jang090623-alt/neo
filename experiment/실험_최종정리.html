@@ -1,0 +1,64 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>윤활유 비교 실험 최종 정리</title>
+<style>
+body{font-family:"Noto Sans CJK KR","Malgun Gothic",sans-serif;font-size:10.5pt;line-height:1.5;color:#222;margin:18mm 16mm}
+h1{font-size:17pt;margin:0 0 4px}h2{font-size:13pt;margin:16px 0 6px;border-bottom:2px solid #333;padding-bottom:2px}
+table{border-collapse:collapse;width:100%;margin:6px 0}th,td{border:1px solid #888;padding:3px 6px;text-align:center}
+th{background:#dde8f5}td.l{text-align:left}.todo{background:#fff2b3;font-weight:bold}.note{background:#fff7d6;border:1px solid #e0b000;padding:6px 10px;margin:8px 0}
+ol,ul{margin:4px 0 4px 18px;padding:0}li{margin:2px 0}.sub{color:#555;font-size:9.5pt}
+</style></head><body>
+<h1>윤활유 비교 실험 — 최종 정리</h1>
+<div class="sub">팀 고르티스 · 정리일 2026-11-10</div>
+
+<h2>실험 목적</h2>
+<p>윤활유 종류에 따라 <b>점도(흐름)</b>와 <b>유성기어 시험기의 전류·회전수·온도 변화</b>가 어떻게 다른지 비교한다.</p>
+
+<h2>비교 조건</h2>
+<table><tr><th>측정</th><th>ATF 멀티</th><th>ZIC TOP LS</th><th>고성능 엔진오일<br>(0W-30)</th><th>G-EP 기어오일</th><th>그리스 RG2</th><th>무윤활</th></tr>
+<tr><td>1. 점도</td><td>○</td><td>○</td><td>○</td><td>○</td><td>제외</td><td>제외</td></tr>
+<tr><td>2. 유성기어 시험기</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○ (바르기)</td><td>○</td></tr></table>
+
+<h2>1. 점도(흐름) 측정</h2>
+<p><b>고정 조건:</b> 오일 <b>2 mL</b>, 판 <b>80°</b>, 출발선과 도착선은 지금까지와 같게, 초시계로 잰다. 데울 때는 물중탕을 쓰고, 목표 온도를 확인한 바로 뒤에 떨어뜨린다.</p>
+<table><tr><th>오일</th><th>상온 (20.1 ℃)</th><th>30 ℃</th><th>50 ℃</th><th>100 ℃</th></tr>
+<tr><td class="l">ATF 멀티</td><td>79초</td><td>66초</td><td>64초</td><td>48초</td></tr>
+<tr><td class="l">ZIC TOP LS</td><td>213초</td><td>183초</td><td>152초</td><td>63초</td></tr>
+<tr><td class="l">G-EP 기어오일</td><td>240초</td><td>190초</td><td>150초</td><td>60초</td></tr>
+<tr><td class="l"><b>고성능 엔진오일</b></td><td class="todo">재기</td><td class="todo">재기</td><td class="todo">재기</td><td class="todo">재기</td></tr></table>
+<ul><li><b>남은 측정:</b> 고성능 엔진오일 4번. 처음 잰 1분 45초는 다른 때에 잰 것이라 상온부터 다시 잰다.</li>
+<li>ATF 상온은 처음 55초, 다시 재서 79초가 나왔다. 표에는 다시 잰 79초를 쓴다.</li></ul>
+
+<h2>2. 유성기어 시험기 측정</h2>
+<table><tr><th style="width:28%">항목</th><th>값</th></tr>
+<tr><td>모터 1 (짧은 막대)</td><td class="l">전원 공급기 <b>12.0 V</b></td></tr>
+<tr><td>모터 2 (긴 막대)</td><td class="l">축에는 연결해 두고 <b>전선은 연결하지 않음</b> (선 두 가닥을 각각 테이프로 감기)</td></tr>
+<tr><td>오일 양·온도</td><td class="l"><b>50 mL</b>, 비커에서 물중탕으로 <b>50 ℃</b>로 데워 넣기 (50 ℃ 넘기지 않기)</td></tr>
+<tr><td>그리스</td><td class="l">기어에 고르게 바르기, 사용한 양(g)을 저울로 재기, 상온에서 시작</td></tr>
+<tr><td>무윤활</td><td class="l">오일 없이 상온에서 시작</td></tr>
+<tr><td>측정 시간</td><td class="l"><b>20분</b></td></tr>
+<tr><td>정지 기준</td><td class="l">전류 <b>1.2 A</b> 넘으면 바로 끄기</td></tr></table>
+<p><b>순서:</b> ATF 멀티 → ZIC TOP LS → 고성능 엔진오일 → G-EP 기어오일 → 그리스 RG2 → 무윤활 (조건마다 <b>새 기어 세트</b>)</p>
+<p><b>한 번 측정하는 방법</b></p>
+<ol><li>오일 50 mL를 50 ℃로 데운다. 그리스는 바르고, 무윤활은 그대로 둔다.</li>
+<li>시험기에 붓자마자 모터를 켜고 타이머를 시작한다(0분).</li>
+<li><b>0~10분은 1분마다, 10~20분은 5분마다</b> 적는다: 전원 공급기 <b>전류(A)</b>, 시리얼 모니터 <b>오일 온도·Input RPM·Ratio</b>.</li>
+<li>20분이 되면 끄고, 시리얼 기록을 <code>오일이름_날짜</code>로 저장하고 기어 사진을 찍는다.</li>
+<li>오일을 빼고 닦은 뒤, 실내 온도까지 식히고 다음 조건으로 간다.</li></ol>
+<div class="note"><b>주의</b> · 온도센서 끝은 오일(그리스는 기어 근처 그리스)에 닿게 한다 · 빨간 집게와 검은 집게가 서로 닿지 않게 한다 · 모터 2는 아무 데도 전기 연결하지 않는다.</div>
+
+<h2>3. 계산과 비교</h2>
+<ul><li>입력 전력 = 12.0 × 전류</li>
+<li>오일끼리 <b>같은 온도일 때의 전류와 Input RPM</b>을 비교한다. 전류가 낮을수록, RPM이 높을수록 마찰이 적은 오일이다.</li>
+<li>Ratio가 4에서 크게 벗어난 회차는 센서 문제라 빼고 비교한다.</li></ul>
+
+<h2>4. 보고서에 꼭 적을 것</h2>
+<ul><li>그리스는 반고체라 점도 비교에서 빼고, 시험기에는 붓지 않고 발라서 넣었다(조건이 다름).</li>
+<li>효율 측정은 하지 않았다. 모터 2는 축에만 연결하고 전기는 연결하지 않았다.</li>
+<li>오일은 50 ℃로 데워 넣고 식는 동안 측정했다. 그래서 온도 변화는 대부분 식는 것이다.</li></ul>
+<h2>5. 효율 예상값 (측정하지 않음)</h2>
+<p>효율은 직접 재지 않고, 기어 맞물림 마찰만으로 계산한 <b>이론 예상값</b>만 적는다. 마찰계수 μ는 잰 값이 아니라 가정값이다.</p>
+<table><tr><th>조건</th><th>가정 마찰계수 μ</th><th>태양–유성 맞물림</th><th>유성–링 맞물림</th><th>기어 전체 예상 효율</th></tr>
+<tr><td>오일 윤활</td><td>0.1</td><td>96.5 %</td><td>98.8 %</td><td><b>약 96.5 %</b></td></tr>
+<tr><td>무윤활</td><td>0.3</td><td>89.5 %</td><td>96.5 %</td><td><b>약 89.8 %</b></td></tr></table>
+<ul><li>계산식: 맞물림 효율 = 1 − πμ(1/z₁ ± 1/z₂) (외접 +, 내접 −), 태양 18T·유성 18T·링 54T, 감속비 4. 링 고정에서는 손실이 (4−1)/4만큼만 작용한다.</li>
+<li>베어링, 유성기어 핀(미끄럼), 오일 휘젓기 손실은 빠져 있어서 실제 효율은 이보다 낮다.</li></ul>
+</body></html>
