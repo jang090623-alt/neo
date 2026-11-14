@@ -11,15 +11,15 @@ mid = lambda lo, hi: [(a + b) / 2 for a, b in zip(lo, hi)]
 
 def finish(ax, xl, yl, name, legend_kw=None):
     ax.set_xlabel(xl); ax.set_ylabel(yl); ax.legend(frameon=False, **(legend_kw or {}))
-    plt.tight_layout(); plt.savefig(f'figs/{name}_v2.png'); plt.close()
+    plt.tight_layout(); plt.savefig(f'figs/{name}_v3.png'); plt.close()
 
 # 그림 3: 온도-유동 시간
 fig, ax = plt.subplots()
-for k, v in FLOW.items(): ax.plot(FLOW_T, v, marker=MK[k], color=COLOR[k], lw=2, ms=7, label=OILS[k])
+for k, v in FLOW.items(): ax.errorbar(FLOW_T, v, yerr=FLOW_SD[k], marker=MK[k], color=COLOR[k], lw=2, ms=7, capsize=4, label=OILS[k] + ('' if FLOW_SD[k] else ' (1회)'))
 for k, v in FLOW.items():
-    if k != 'JET': ax.annotate(f'{v[0]}', (FLOW_T[0], v[0]), textcoords='offset points', xytext=(-8, 4), ha='right', color=COLOR[k], fontsize=10)
+    if k in ('GEP', 'TOP'): ax.annotate(f'{v[0]:.0f}', (FLOW_T[0], v[0]), textcoords='offset points', xytext=(-8, 4), ha='right', color=COLOR[k], fontsize=10)
 ax.set_xticks(FLOW_T); ax.set_xticklabels(['20.1', '30', '50', '100']); ax.set_ylim(0, 270)
-finish(ax, '기름 온도 (℃)', '유동 시간 (초)', 'fig3_flow_time')
+finish(ax, '기름 온도 (℃)', '유동 시간 (초)\n점: 평균, 막대: 표준편차', 'fig3_flow_time')
 
 def rpm_plot(D, name, ylim):
     fig, ax = plt.subplots()
