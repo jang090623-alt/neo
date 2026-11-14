@@ -11,7 +11,7 @@ mid = lambda lo, hi: [(a + b) / 2 for a, b in zip(lo, hi)]
 
 def finish(ax, xl, yl, name, legend_kw=None):
     ax.set_xlabel(xl); ax.set_ylabel(yl); ax.legend(frameon=False, **(legend_kw or {}))
-    plt.tight_layout(); plt.savefig(f'figs/{name}_v3.png'); plt.close()
+    plt.tight_layout(); plt.savefig(f'figs/{name}_v4.png'); plt.close()
 
 # 그림 3: 온도-유동 시간
 fig, ax = plt.subplots()
