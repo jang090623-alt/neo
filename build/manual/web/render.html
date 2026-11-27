@@ -35,7 +35,11 @@ async function geo(url) {
   }
   return geoCache[url];
 }
+const GROUP_COL = [[/^m_/, 0x3b6fd8], [/^(cl_|cpl_pin)/, 0xd8342b], [/^(gin_|gout_|g_idler|pins_|slv_|hub_|hubw|sp_|shaft_|brg_g|brg_idler|idler_|pinsteel)/, 0xf39a2b],
+  [/^(fork_|fwash|fspring|fcap|rail_|rcol|lug_|mag_lug|cage|carrier|pivot|rod$|ball|lower_lever|spring_spacer|lock_collar|gate|knob|hall_(12|34|5R))/, 0x2f9e5b],
+  [/^(wheel|hall_rpm)/, 0x8b5cf6]];
 function colorOf(name, isNew) {
+  if (window.GROUPMODE) { for (const [re, c] of GROUP_COL) if (re.test(name)) return c; return 0xc9ccd2; }
   if (RUBBER.test(name)) return COL.rubber;
   if (CORK.test(name)) return COL.cork;
   const metal = METAL.test(name);
@@ -129,7 +133,7 @@ window.renderStep = async function (st, W, H, insetMode) {
     const px = Math.hypot((pa.x - pb.x) * W / 2, (pa.y - pb.y) * H / 2);
     if (px > 60) arrow(scene, A.toArray(), B.toArray(), Math.min(size, 350));
   }
-  renderer.render(scene, cam);
+  renderer.render(scene, cam); window._cam = cam; window._W = W; window._H = H;
   const url = renderer.domElement.toDataURL('image/png');
   scene.traverse(o => { if (o.material) o.material.dispose(); });
   return url;
@@ -190,5 +194,6 @@ window.renderIcon = async function (key, W) {
   renderer.render(scene, cam);
   return renderer.domElement.toDataURL('image/png');
 };
+window.projectPts = function (pts) { return pts.map(p => { const v = new THREE.Vector3(...p).project(window._cam); return [(v.x + 1) / 2 * window._W, (1 - v.y) / 2 * window._H]; }); };
 window.ready = true;
 </script></body></html>
