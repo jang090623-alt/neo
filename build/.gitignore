@@ -1,0 +1,14 @@
+stl/
+gcode_est/
+out/
+manual/parts/
+manual/img/
+manual/web/three
+manual/web/parts
+manual/web/stl
+manual/web/steps.json
+manual/node_modules
+manual/render.log
+src/verify.log
+src/__pycache__/
+src/gcode/
