@@ -137,7 +137,14 @@
 ],
 "rep": "×6",
 "note": "예: 핀 6mm → 호스 5.5mm. 핀보다 길면 끝이 찢어짐",
-"inset": null,
+"inset": {
+"target": [
+134.5,
+85.0,
+263.0
+],
+"size": 40
+},
 "fit": null,
 "tip": null
 },
@@ -575,7 +582,7 @@
 "rep": null,
 "note": "칼라가 축 위치를 잡아 줘서, 쌓는 동안 축이 미끄러져 내려가지 않음",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -634,7 +641,7 @@
 "rep": null,
 "note": null,
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -708,7 +715,7 @@
 "rep": null,
 "note": "입력 기어만 축에 에폭시 (출력 기어는 붙이지 않음). 출력 기어 핀은 위로",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -792,7 +799,7 @@
 "rep": null,
 "note": "허브만 출력축에 에폭시. 와셔·슬리브·베어링에는 묻히지 않기",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -876,7 +883,7 @@
 "rep": null,
 "note": "입력 기어만 축에 에폭시 (출력 기어는 붙이지 않음). 출력 기어 핀은 아래로",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -952,7 +959,7 @@
 "rep": null,
 "note": null,
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1043,7 +1050,7 @@
 "rep": null,
 "note": "입력 기어만 축에 에폭시 (출력 기어는 붙이지 않음). 출력 기어 핀은 위로",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1144,7 +1151,7 @@
 "rep": null,
 "note": "허브만 출력축에 에폭시. 와셔·슬리브·베어링에는 묻히지 않기",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1245,7 +1252,7 @@
 "rep": null,
 "note": "입력 기어만 축에 에폭시 (출력 기어는 붙이지 않음). 출력 기어 핀은 아래로",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1338,7 +1345,7 @@
 "rep": null,
 "note": null,
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1446,7 +1453,7 @@
 "rep": null,
 "note": "입력 기어만 축에 에폭시 (출력 기어는 붙이지 않음). 출력 기어 핀은 위로",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1564,7 +1571,7 @@
 "rep": null,
 "note": "허브만 출력축에 에폭시. 와셔·슬리브·베어링에는 묻히지 않기",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1682,7 +1689,7 @@
 "rep": null,
 "note": "입력 기어만 축에 에폭시 (출력 기어는 붙이지 않음). 출력 기어 핀은 아래로",
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -1792,7 +1799,7 @@
 "rep": null,
 "note": null,
 "inset": null,
-"fit": null,
+"fit": "new",
 "tip": null
 },
 {
@@ -2704,7 +2711,7 @@
 80
 ],
 "rep": null,
-"note": null,
+"note": "M3×10이 모자라면 M3×12도 됨: 끝이 칼라 밖으로 1.5mm 나오니 칼라를 돌려 나사 끝이 빈 쪽을 보게",
 "inset": null,
 "fit": null,
 "tip": null
@@ -3839,9 +3846,16 @@
 ],
 "rep": null,
 "note": null,
-"inset": null,
+"inset": {
+"target": [
+99.0,
+302.93438720703125,
+341.0122833251953
+],
+"size": 45
+},
 "fit": null,
-"tip": null
+"tip": "스프링 길이는 스페이서 윗면 ~ 칼라 아랫면 사이를 자로 잼"
 },
 {
 "n": 40,
@@ -5498,7 +5512,7 @@
 "note": "와셔를 코르크에 손으로 붙인 채 몇 분 잡고, 하루 굳힌 뒤 다음 단계. 에폭시가 릴리스 링 쪽(바깥면에서 14~30mm)으로 흐르지 않게",
 "inset": null,
 "fit": "new",
-"tip": null
+"tip": "축에 유성펜으로 40mm·73mm 두 곳을 표시하고 그 사이에만 바르기"
 },
 {
 "n": 53,
@@ -6422,8 +6436,15 @@
 -60
 ],
 "rep": null,
-"note": null,
-"inset": null,
+"note": "M3×12는 핀을 누르기만 함. 세게 조이면 허브가 갈라짐",
+"inset": {
+"target": [
+20.02608823776245,
+89.80561447143555,
+-123.5
+],
+"size": 40
+},
 "fit": "new",
 "tip": null
 },

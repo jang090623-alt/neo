@@ -3,7 +3,11 @@ import os, sys, json, math
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'src'))
 import tx
-NAMES = set(json.load(open(os.path.join(HERE, 'parts.json'))))
+BOUNDS = json.load(open(os.path.join(HERE, 'parts.json')))
+NAMES = set(BOUNDS)
+def center(*names):
+    lo = [min(BOUNDS[n][0][i] for n in names) for i in range(3)]; hi = [max(BOUNDS[n][1][i] for n in names) for i in range(3)]
+    return [(a + b) / 2 for a, b in zip(lo, hi)]
 
 def G(*prefixes):
     out = []
@@ -38,7 +42,7 @@ def step(sec, new, text, call, view, ctx=None, explode=None, rep=None, note=None
         ctx_ = [n for n in built if n not in hide]
     else:
         ctx_ = ctx
-    if fit is None and ctx is None and sec.startswith(('9.', '10.')): fit = 'new'
+    if fit is None and ctx is None and sec.startswith(('4.', '9.', '10.')) and new: fit = 'new'
     S.append(dict(n=len(S) + 1, sec=sec, new=new, ctx=ctx_, text=text, call=call, view=view, explode=explode or [0, 0, 0],
                   rep=rep, note=note, inset=inset, fit=fit, tip=tip))
     if keep and ctx is None:
@@ -56,7 +60,7 @@ step('1. 출력 기어 준비', ['pinsteel_1'], f'핀 구멍 4곳에 평행핀 �
      tip='나온 길이 − 1mm = 슬리브에 걸리는 길이')
 step('1. 출력 기어 준비', ['pins_1'], '고무 호스를 (핀 나온 길이 − 0.5mm)로 잘라 핀에 끼우기. 접착은 아직 안 함',
      [['고무 호스 Ø5×10', 4, 'hose']], FACE1, ctx=[g1, 'pinsteel_1'] + G('brg_g1_*'), explode=[0, 0, -12], rep='×6',
-     note='예: 핀 6mm → 호스 5.5mm. 핀보다 길면 끝이 찢어짐', keep=False)
+     note='예: 핀 6mm → 호스 5.5mm. 핀보다 길면 끝이 찢어짐', keep=False, inset=dict(target=[tx.C + tx.PIN_R, tx.H, tx.PLANE['1']], size=40))
 
 # ---------------- 2. 슬리브 ----------------
 step('2. 슬리브', ['slv_12'], '반쪽 2개 사이에 링을 끼우고 M3×20 3개 + 너트로 조이기 (머리·너트는 육각 자리 안)',
@@ -135,7 +139,8 @@ step('7. 변속 포크', G('fork_*'), '포크 3개를 슬리브 링 홈에 위�
 step('7. 변속 포크', G('fwash_*', 'fspring_*', 'fcap_*'), '통마다 와셔 → 큰 스프링 → 와셔 → 뚜껑 (M3×8 2개)',
      [['50b 와셔', 6, 'stl:50b_cart_washer'], ['큰 스프링 C252', 3, 'spring:big'], ['50a 뚜껑', 3, 'stl:50a_fork_cap'], ['M3×8', 6, 'bolt:3:8']], LIE_B, explode=[0, 0, 40])
 step('7. 변속 포크', G('rail_*', 'rcol_*'), f'레일 Ø6×{tx.RAIL_LEN:.0f}을 끝판 A 쪽에서 밀어 넣으며 칼라 → 포크 통 → 칼라. 포크를 가운데 두고 칼라 코를 와셔에 대고 M3×10 조이기',
-     [[f'레일 Ø6×{tx.RAIL_LEN:.0f}', 3, 'rod:6:371'], ['50c 레일 칼라', 6, 'stl:50c_rail_collar'], ['M3×10', 6, 'bolt:3:10']], LIE_B, explode=[0, 0, 80])
+     [[f'레일 Ø6×{tx.RAIL_LEN:.0f}', 3, 'rod:6:371'], ['50c 레일 칼라', 6, 'stl:50c_rail_collar'], ['M3×10', 6, 'bolt:3:10']], LIE_B, explode=[0, 0, 80],
+     note='M3×10이 모자라면 M3×12도 됨: 끝이 칼라 밖으로 1.5mm 나오니 칼라를 돌려 나사 끝이 빈 쪽을 보게')
 step('7. 변속 포크', G('lug_*'), '케이지 안 레일 끝에 러그. 밑에 작은 스프링 + 쇠구슬, M3×25 2개로 고정 (세 러그 홈이 일직선)',
      [['51 러그', 3, 'stl:51_lug'], ['M3×25', 6, 'bolt:3:25'], ['작은 스프링 C147', 3, 'spring:small'], ['쇠구슬 Ø6', 3, 'ball'], ['M3×8', 3, 'bolt:3:8']], LIE_B, explode=[0, 40, 0])
 
@@ -148,7 +153,8 @@ step('8. 레버', ['rod', 'lower_lever'], f'레버봉 Ø12×{tx.ROD_LEN:.0f} 끝
 step('8. 레버', ['ball'], '볼 반쪽 2개를 레버봉에 끼워 피벗 자리에 앉히기', [['55 볼 반쪽', 2, 'stl:55_ball_half']], LIE_B, explode=[0, 40, 0])
 step('8. 레버', ['pivot_hi'], '위 피벗으로 볼을 덮고 M4×30 4개', [['54 위 피벗', 1, 'stl:54_pivot_upper'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], LIE_B, explode=[0, 40, 0])
 step('8. 레버', ['spring_spacer', 'lock_collar'], f'스페이서 → 큰 스프링 → 잠금 칼라. 스프링을 {lock_len:.1f}mm로 누르고 M3×12 조이기',
-     [['58 스프링 스페이서', 1, 'stl:58_spring_spacer'], ['큰 스프링 C252', 1, 'spring:big'], ['59 잠금 칼라', 1, 'stl:59_lock_collar'], ['M3×12', 1, 'bolt:3:12']], LIE_B, explode=[0, 40, 0])
+     [['58 스프링 스페이서', 1, 'stl:58_spring_spacer'], ['큰 스프링 C252', 1, 'spring:big'], ['59 잠금 칼라', 1, 'stl:59_lock_collar'], ['M3×12', 1, 'bolt:3:12']], LIE_B, explode=[0, 40, 0],
+     inset=dict(target=center('spring_spacer', 'lock_collar'), size=45), tip='스프링 길이는 스페이서 윗면 ~ 칼라 아랫면 사이를 자로 잼')
 step('8. 레버', ['gate'], '게이트를 레버봉에 꿰어 케이지 위에 얹고 M4×30 4개', [['60 게이트', 1, 'stl:60_gate'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], LIE_B, explode=[0, 50, 0])
 step('8. 레버', ['knob'], '손잡이 안에 에폭시를 바르고 레버봉 끝에 끝까지 끼우기', [['61 손잡이', 1, 'stl:61_knob'], ['에폭시', 0, 'epoxy']], LIE_B, explode=[0, 40, 0])
 step('8. 레버', [], 'PTFE 그리스를 톱니·허브·레일에만 얇게 바르고, 입력축을 손으로 돌리며 1~5단·R 넣어 보기 (짧은 핀 단은 세게 돌려 안 빠지는지)',
@@ -180,7 +186,8 @@ step(CL, front_sub, f'앞판: 바깥면에 베어링 6001, 핀 Ø5×{tx.CPL_PIN_
 step(CL, ['cl_back', 'cl_cork_b'], '뒷판을 입력축에 끼우기 (코르크가 바깥쪽)', [['뒷판', 1, 'stl:71_cl_back']], CLU, explode=[0, 0, -60])
 step(CL, ['cl_hub', 'cl_washer'], f'입력축의 끝판 A 바깥면에서 {hub0}~{hub1}mm 구간에 에폭시를 얇게 바르고, 허브를 와셔가 뒷판 코르크에 닿을 때까지 밀기',
      [['허브+와셔', 1, 'stl:74_cl_disc_hub'], ['에폭시', 0, 'epoxy']], CLU, explode=[0, 0, -50],
-     note='와셔를 코르크에 손으로 붙인 채 몇 분 잡고, 하루 굳힌 뒤 다음 단계. 에폭시가 릴리스 링 쪽(바깥면에서 14~30mm)으로 흐르지 않게')
+     note='와셔를 코르크에 손으로 붙인 채 몇 분 잡고, 하루 굳힌 뒤 다음 단계. 에폭시가 릴리스 링 쪽(바깥면에서 14~30mm)으로 흐르지 않게',
+     tip='축에 유성펜으로 40mm·73mm 두 곳을 표시하고 그 사이에만 바르기')
 step(CL, ['cl_press', 'cl_cork_p'] + G('cl_spring*', 'cl_standoff*'), '압력판(코르크가 와셔 쪽) → 스프링 3개를 압력판 자리에 → 기둥 3개',
      [['압력판', 1, 'stl:72_cl_pressure'], ['큰 스프링 C252', 3, 'spring:big'], ['73 기둥', 3, 'stl:73_cl_standoff']], CLU, explode=[0, 0, -50])
 step(CL, front_sub + G('cl_bolt*'), '앞판을 덮고 M4×60 3개로 앞판 → 기둥 → 뒷판 너트까지 끝까지 조이기. 축을 돌리지 말고 하루 두기',
@@ -195,7 +202,8 @@ step(KR, ['crank_arm', 'crank_peg'], '손잡이 축의 가는 끝에 에폭시�
 step(KR, ['crank_grip', 'crank_cap'], '손잡이 통을 축에 끼우고 뚜껑 + M3×12', [['35d 손잡이 통', 1, 'stl:35d_crank_grip'], ['35e 뚜껑', 1, 'stl:35e_crank_cap'], ['M3×12', 1, 'bolt:3:12']],
      CLU, ctx=['crank_arm', 'crank_peg'], explode=[0, 0, -50], keep=False)
 step(KR, ['crank_arm', 'crank_peg', 'crank_grip', 'crank_cap', 'crank_screw'], '크랭크를 앞판 핀 6개에 끝까지 끼우고, 옆 구멍에 M3×12를 핀에 닿을 때까지 조이기',
-     [['크랭크 묶음', 1, 'stl:35b_crank_arm'], ['M3×12', 1, 'bolt:3:12']], CLU, explode=[0, 0, -60])
+     [['크랭크 묶음', 1, 'stl:35b_crank_arm'], ['M3×12', 1, 'bolt:3:12']], CLU, explode=[0, 0, -60],
+     inset=dict(target=center('crank_screw'), size=40), note='M3×12는 핀을 누르기만 함. 세게 조이면 허브가 갈라짐')
 
 # ---------------- 11. 페달 ----------------
 PD = '11. 페달'

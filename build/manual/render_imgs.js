@@ -30,11 +30,11 @@ const srv = http.createServer((q, r) => { const f = path.join(ROOT, decodeURICom
   if (!only.length || process.env.EXTRA) {
     const all = steps[steps.length - 1];
     const ped = steps.find(s => s.new.includes('ped_cable'));
-    const hero = { ...all, new: [], ctx: [...all.ctx] , view: { dir: [-1.0, 0.85, -0.75], up: [0, 1, 0] } };
+    const hero = { ...all, new: [...all.ctx], ctx: [], explode: [0, 0, 0], view: { dir: [-1.0, 0.85, -0.75], up: [0, 1, 0] } };
     save('hero.png', await page.evaluate(([s]) => window.renderStep(s, 1800, 1160, false), [hero]));
-    const heroB = { ...all, new: [], ctx: [...all.ctx], view: { dir: [0.9, 0.85, 1.0], up: [0, 1, 0] } };
+    const heroB = { ...all, new: [...all.ctx], ctx: [], explode: [0, 0, 0], view: { dir: [0.9, 0.85, 1.0], up: [0, 1, 0] } };
     save('heroB.png', await page.evaluate(([s]) => window.renderStep(s, 1800, 1160, false), [heroB]));
-    const pedal = { ...ped, new: [], ctx: [...ped.ctx, 'ped_cable'] };
+    const pedal = { ...ped, new: [...ped.ctx, 'ped_cable'], ctx: [], explode: [0, 0, 0] };
     save('hero_pedal.png', await page.evaluate(([s]) => window.renderStep(s, 1000, 1000, false), [pedal]));
   }
   await browser.close(); srv.close();

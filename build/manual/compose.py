@@ -62,7 +62,7 @@ def cover():
 <div><span style="background:#f39a2b;margin-left:0"></span>이번에 붙이는 출력 부품</div><div><span style="background:#4f86c6;margin-left:0"></span>이번에 붙이는 쇠 부품</div>
 <div><span style="background:#d9dce1;margin-left:0"></span>이미 붙인 부품</div><div><span style="background:#d8342b;margin-left:0"></span>×6 = 같은 것을 6번 / 빨간 화살표 = 끼우는 방향</div></div>
 <p class="small" style="margin-top:10mm">2026-11 · 기어박스 17판은 출력 완료 (11/17 파일) · 클러치·크랭크·페달은 18~21판</p></div>
-<div style="flex:1;display:flex;align-items:center"><img src="img/hero.png" style="width:100%"></div></div></div>"""
+<div style="flex:1;display:flex;align-items:center;justify-content:center"><img src="img/hero.png" style="max-width:100%;max-height:180mm"></div></div></div>"""
 
 def rules():
     return """<div class="pg"><div class="pad"><h2>시작 전에 꼭</h2><div class="cols"><div><ol class="rules">
@@ -106,7 +106,7 @@ def parts_page():
             f'<tr><td><img src="{icon(k)}" style="width:9mm;height:9mm;object-fit:contain"></td><td>{E(v[0])}</td><td><b>{v[1]}</b></td><td class="small">{", ".join(map(str, sorted(set(v[2]))))}</td></tr>' for k, v in part) + '</table>'
     return f"""<div class="pg"><div class="pad"><h2>구매 부품 (설명서 단계에서 자동으로 센 개수)</h2>
 <div class="cols"><div>{tbl(items[:half])}</div><div>{tbl(items[half:])}</div></div>
-<p class="small">M3×10은 레일 칼라 6 + 케이블 1 = 7개가 필요합니다. 구매목록(bom.py)에는 1개만 있어서, 모자라면 더 사야 합니다 (보유 개수 미확인).</p></div></div>"""
+<p class="small">M3×10은 레일 칼라 6 + 케이블 1 = 7개가 필요합니다. 구매목록(bom.py)에는 1개만 있습니다 (보유 개수 미확인). 모자라면 레일 칼라에 M3×12를 써도 됩니다 (32단계 참고).</p></div></div>"""
 
 def end_page():
     return f"""<div class="pg"><div class="pad" style="display:flex;gap:6mm"><div style="width:110mm"><h2>완성 · 사용법</h2><ol class="rules">
@@ -118,6 +118,38 @@ def end_page():
 <p class="note" style="font-size:10pt">돌리는 중에는 클러치와 기어 사이에 손가락을 넣지 않습니다.</p></div>
 <div style="flex:1;display:flex;flex-direction:column;gap:3mm;justify-content:center"><img src="img/heroB.png" style="width:100%"><img src="img/hero_pedal.png" style="width:55%;align-self:center"></div></div></div>"""
 
-pages = [cover(), rules(), plates_page(), parts_page()] + [step_page(s, len(S)) for s in S if s['sec'] != '완성'] + [end_page()]
+
+def fit_page():
+    rows = [
+      ('베어링 6001 자리', f'Ø{tx.BRG_SEAT}', '손으로는 안 들어가고 바이스로 눌러 들어가면 정상'),
+      ('베어링 6003 자리 (캐리어)', f'Ø{tx.BRG3_SEAT}', '바이스로 눌러 넣기'),
+      ('축 구멍 (기어·허브·스페이서)', f'Ø{tx.SHAFT_HOLE}', 'Ø12 축이 손으로 들어가야 함 (에폭시 틈). 빡빡하면 사포를 감은 봉으로'),
+      ('레일 구멍', f'Ø{tx.RAIL_HOLE}', 'Ø6 레일이 걸림 없이 미끄러져야 함'),
+      ('평행핀 구멍 (기어·앞판)', f'Ø{tx.PIN_HOLE}', '인두로 데워 넣기. 망치 금지'),
+      ('크랭크 핀 구멍', f'Ø{tx.CRANK_PIN_HOLE}', '핀 6개에 손으로 끼워져야 함'),
+      ('손잡이 통 ↔ 축', f'Ø{2 * tx.CRANK_GRIP[1]:.1f} / Ø{2 * tx.CRANK_PEG[1]:.0f}', '손으로 가볍게 돌아야 함'),
+      ('슬리브 포켓 ↔ 고무 호스', f'{2 * (tx.CUSH_OD / 2 + tx.POCKET_CLR):.1f} / {tx.CUSH_OD:.0f}', '손가락으로 밀어 쑥 들어가야 함. 빡빡하면 포켓 둥근 벽만 사포'),
+    ]
+    t = ''.join(f'<tr><td>{E(a)}</td><td><b>{E(b)}</b></td><td>{E(d)}</td></tr>' for a, b, d in rows)
+    return f"""<div class="pg"><div class="pad"><h2>출력 후 손질 · 맞춤 확인</h2>
+<p style="font-size:10.5pt">조립 전에 부품마다 한 번씩 끼워 봅니다. 구멍 치수는 설계 값입니다 (mm).</p>
+<table><tr><th>자리</th><th>설계 치수</th><th>확인</th></tr>{t}</table>
+<p class="small" style="margin-top:4mm">브림은 칼로 떼고, 첫 층이 퍼진 턱(코끼리발)은 구멍 입구만 칼로 살짝 다듬습니다. 11번 판 러그 홈의 서포트는 끝까지 깨끗이 (핑거가 지나가는 길).</p></div></div>"""
+
+def trouble_page():
+    rows = [
+      ('레버가 단에 안 들어감', '핀과 슬리브 포켓 위치가 안 맞음', '페달을 밟은 채 크랭크를 아주 살짝 돌림'),
+      ('달리다 변속이 저절로 빠짐', '핀이 짧음 (걸리는 길이 = 나온 길이 − 1)', '그 기어 핀을 인두로 데워 6mm까지 빼거나, 그 기어만 다시 출력'),
+      ('중립인데 기어가 긁히거나 같이 돎', '핀이 7mm보다 김 → 슬리브에 닿음', '핀 나온 길이를 재서 7mm 넘는 핀을 줄로 갈기'),
+      ('크랭크를 돌려도 축이 안 돎', '페달을 안 밟았는데 케이블이 당겨져 있음 / 허브 에폭시가 안 붙음', '페달을 뗀 상태로 케이블을 다시 맞춤 (팽팽하되 포크를 당기지 않게)'),
+      ('페달을 밟아도 클러치가 안 끊김', '케이블이 느슨함', '페달을 뗀 채 속선을 당겨 M3×10 다시 조임'),
+      ('클러치가 너무 쉽게 미끄러짐', f'설정 미끄럼 토크 약 {0.58:.2f} N·m (손잡이에서 약 10N)', '정상 (기어 보호). 더 세게는 하지 않음 (M5×12 금지)'),
+      ('기어가 뻑뻑함', '축 끝 칼라가 끝판을 꽉 누름 / 그리스 없음', '칼라를 풀고 0.2mm쯤 틈을 둔 채 다시 조임, 톱니에 PTFE 그리스'),
+      ('레일 칼라가 밀림', 'M3 덜 조임', '슬릿이 닫힐 때까지 조임'),
+    ]
+    t = ''.join(f'<tr><td><b>{E(a)}</b></td><td>{E(b)}</td><td>{E(d)}</td></tr>' for a, b, d in rows)
+    return f"""<div class="pg"><div class="pad"><h2>문제 해결</h2><table><tr><th>증상</th><th>원인</th><th>해결</th></tr>{t}</table></div></div>"""
+
+pages = [cover(), rules(), plates_page(), parts_page(), fit_page()] + [step_page(s, len(S)) for s in S if s['sec'] != '완성'] + [trouble_page(), end_page()]
 open(os.path.join(HERE, 'manual.html'), 'w').write(f'<!doctype html><html><head><meta charset="utf-8"><style>{CSS}</style></head><body>{"".join(pages)}</body></html>')
 print(len(pages), 'pages')
