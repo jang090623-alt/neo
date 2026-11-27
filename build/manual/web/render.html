@@ -14,8 +14,8 @@ import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
 const COL = {
   newP: 0xf39a2b, newM: 0x4f86c6, oldP: 0xd9dce1, oldM: 0xb5bdc7, rubber: 0x3a3a3a, cork: 0xc9975a, arrow: 0xd8342b,
 };
-const METAL = /^(shaft_|brg_|rod$|rail_|cl_pilot|cl_relbrg|cl_washer|cpl_pin|cl_bolt|cl_adj|cl_push|cl_pivot_bolt|cl_spring|fspring|nutA|brkbolt|crank_screw|ped_bolt|ped_spring|shaft_idler|pinsteel|ped_cable)/;
-const RUBBER = /^pins_/; const CORK = /^cl_cork/;
+const METAL = /^(shaft_|brg_|rod$|rail_|cl_pilot|cl_relbrg|cl_washer|cpl_pin|cl_bolt|cl_adj|cl_push|cl_pivot_bolt|cl_spring|fspring|nutA|brkbolt|m_body|m_bracket|m_shaft|m_sprocket|ped_bolt|ped_spring|shaft_idler|pinsteel|ped_cable)/;
+const RUBBER = /^(pins_|hall_|mag_)/; const CORK = /^cl_cork/;
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
 renderer.setPixelRatio(1);
 document.body.appendChild(renderer.domElement);
@@ -160,6 +160,12 @@ function hwIcon(key) {
   else if (k === 'epoxy' || k === 'ca' || k === 'grease') { const col = k === 'epoxy' ? 0x2f9e5b : k === 'ca' ? 0x3b6fd8 : 0xe3e3e3; add(cylG(6, 26), col); const t = new THREE.ConeGeometry(6, 8, 32); t.rotateX(Math.PI / 2); t.translate(0, 0, 30); add(t, col); add(cylG(1.2, 6, 34), 0x444444); }
   else if (k === 'iron') { add(cylG(5, 40), 0x2b2b2b); add(cylG(2.2, 25, 40), 0xb0b6bd); const t = new THREE.ConeGeometry(2.2, 8, 24); t.rotateX(Math.PI / 2); t.translate(0, 0, 69); add(t, 0xb0b6bd); }
   else if (k === 'sand') add(new THREE.BoxGeometry(40, 1, 30), 0xb48a4a);
+  else if (k === 'hall') { add(new THREE.BoxGeometry(4.5, 1.5, 3.5).translate(0, 0, 13), 0x222222); for (const x of [-1.27, 0, 1.27]) add(new THREE.BoxGeometry(0.4, 0.4, 13).translate(x, 0, 6.5), 0xb0b6bd); }
+  else if (k === 'magnet') add(cylG(3, 3), 0x8a8f99);
+  else if (k === 'grub') { add(cylG(1.5, 8), S); }
+  else if (k === 'pot') { add(cylG(8.5, 7), 0x6b7280); add(cylG(3.5, 7, 7), S); add(cylG(3, 15, 14), 0xc8a04a); }
+  else if (k === 'sprocket') { const sh = new THREE.Shape(); for (let i = 0; i <= 24; i++) { const a = i / 24 * Math.PI * 2, r = i % 2 ? 16 : 20.5; i ? sh.lineTo(r * Math.cos(a), r * Math.sin(a)) : sh.moveTo(r, 0); } sh.holes.push(new THREE.Path().absarc(0, 0, 7.5, 0, Math.PI * 2, true)); add(new THREE.ExtrudeGeometry(sh, { depth: 4.3, bevelEnabled: false }), S); add(tubeG(12, 7.5, 10).translate(0, 0, -10), S); }
+  else if (k === 'motor') { add(new THREE.BoxGeometry(90, 90, 120).translate(0, 0, 60), 0x5b6b80); add(cylG(7.5, 25, 120), S); add(new THREE.BoxGeometry(150, 6, 60).translate(0, -48, 140), S); }
   else if (k === 'cable') { const pts = []; for (let i = 0; i <= 60; i++) { const t = i / 60 * Math.PI * 1.6; pts.push(new THREE.Vector3(20 * Math.cos(t), 20 * Math.sin(t), i * 0.5)); } add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 120, 1.8, 10), 0x222222); }
   return parts;
 }

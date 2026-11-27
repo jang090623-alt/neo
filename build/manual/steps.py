@@ -123,10 +123,19 @@ step('5. 끝판 B', ['plate_B'] + G('brg_B_*'), '끝판 B 안쪽 면에 베어�
      STAND, ctx=[], explode=[0, 0, 0], keep=False)
 step('5. 끝판 B', ['cage'], '바깥면에 케이지를 대고 M4×30 4개 (너트는 안쪽 면)',
      [['52 케이지', 1, 'stl:52_selector_cage'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], STAND, ctx=['plate_B'] + G('brg_B_*'), explode=[0, 0, 50], keep=False)
+step('5. 끝판 B', G('hall_12*', 'hall_34*', 'hall_5R*'), '케이지 홈 6곳에 홀센서 A3144를 평면이 바깥(러그 쪽)으로 넣고 순간접착제. 다리는 옆 홈으로',
+     [['홀센서 A3144', 6, 'hall'], ['순간접착제', 0, 'ca']], LIE_B, ctx=['cage'], explode=[0, 25, 0], keep=False,
+     note='각 레일에서 끝판 B에서 먼 쪽 = 1·3·5단, 가까운 쪽 = 2·4단·R. 선에 단 이름을 적어 두기 (배선 쪽 참고)',
+     inset=dict(target=[tx.RAIL_X['34'] + 5.5, 160, tx.LUG_Z], size=45))
 step('5. 끝판 B', ['plate_B', 'cage'] + G('brg_B_*'), '끝판 B를 두 축 위에 내려 끼우기 (아래 변끼리 같은 쪽)',
      [['끝판 B + 케이지', 1, 'stl:41_plate_B']], STAND, explode=[0, 0, 70])
 step('5. 끝판 B', G('pspacer_B_*', 'collar_B_*'), '끝판 B 바깥 두 축 끝: 스페이서 9 → 칼라를 밀어 붙이고 M3×12로 조이기',
      [['33 스페이서 9', 2, 'stl:33_spacer_plate_9'], ['34 칼라', 2, 'stl:34_collar_M3'], ['M3×12', 2, 'bolt:3:12']], STAND, explode=[0, 0, 40])
+step('5. 끝판 B', ['wheel_guard', 'hall_rpm'], '바퀴 덮개 아래쪽 홈에 A3144(평면이 위)를 순간접착제로 붙이고, 끝판 B 바깥면에 M3×16 2개(아래 받침) + M3×12 2개(위 탭)',
+     [['44 바퀴 덮개', 1, 'stl:44_wheel_guard'], ['홀센서 A3144', 1, 'hall'], ['M3×16', 2, 'bolt:3:16'], ['M3×12', 2, 'bolt:3:12']], STAND, explode=[0, 0, 40])
+step('5. 끝판 B', ['wheel'], '표시 바퀴 테 4곳에 자석 Ø6×3을 붙이고, 출력축 끝에 끼워 M3×8 무두볼트로 고정',
+     [['43 표시 바퀴', 1, 'stl:43_display_wheel'], ['자석 Ø6×3', 4, 'magnet'], ['M3×8 무두볼트', 1, 'grub']], STAND, explode=[0, 0, 40],
+     note='자석 면이 테와 같은 높이 (센서와 2.5mm 틈)')
 
 # ---------------- 6. 바닥판 ----------------
 step('6. 바닥판', G('foot_*'), '눕혀서 받침 브래킷 4개를 끝판에 M4×30 + 너트로 달고, MDF에 목재나사 4×16 8개로 고정',
@@ -141,8 +150,8 @@ step('7. 변속 포크', G('fwash_*', 'fspring_*', 'fcap_*'), '통마다 와셔 
 step('7. 변속 포크', G('rail_*', 'rcol_*'), f'레일 Ø6×{tx.RAIL_LEN:.0f}을 끝판 A 쪽에서 밀어 넣으며 칼라 → 포크 통 → 칼라. 포크를 가운데 두고 칼라 코를 와셔에 대고 M3×10 조이기',
      [[f'레일 Ø6×{tx.RAIL_LEN:.0f}', 3, 'rod:6:371'], ['50c 레일 칼라', 6, 'stl:50c_rail_collar'], ['M3×10', 6, 'bolt:3:10']], LIE_B, explode=[0, 0, 80],
      note='M3×10이 모자라면 M3×12도 됨: 끝이 칼라 밖으로 1.5mm 나오니 칼라를 돌려 나사 끝이 빈 쪽을 보게')
-step('7. 변속 포크', G('lug_*'), '케이지 안 레일 끝에 러그. 밑에 작은 스프링 + 쇠구슬, M3×25 2개로 고정 (세 러그 홈이 일직선)',
-     [['51 러그', 3, 'stl:51_lug'], ['M3×25', 6, 'bolt:3:25'], ['작은 스프링 C147', 3, 'spring:small'], ['쇠구슬 Ø6', 3, 'ball'], ['M3×8', 3, 'bolt:3:8']], LIE_B, explode=[0, 40, 0])
+step('7. 변속 포크', G('lug_*', 'mag_lug_*'), '러그 밑면 작은 구멍에 자석 Ø6×3을 순간접착제로 붙이고, 케이지 안 레일 끝에 러그. 밑에 작은 스프링 + 쇠구슬, M3×25 2개로 고정 (세 러그 홈이 일직선)',
+     [['51 러그', 3, 'stl:51_lug'], ['자석 Ø6×3', 3, 'magnet'], ['M3×25', 6, 'bolt:3:25'], ['작은 스프링 C147', 3, 'spring:small'], ['쇠구슬 Ø6', 3, 'ball'], ['M3×8', 3, 'bolt:3:8']], LIE_B, explode=[0, 40, 0])
 
 # ---------------- 8. 레버 ----------------
 lock_len = tx.SPRING_L0 - tx.LOCK_F0 / tx.SPRING_K
@@ -195,29 +204,34 @@ step(CL, front_sub + G('cl_bolt*'), '앞판을 덮고 M4×60 3개로 앞판 → 
 step(CL, ['cl_endsp', 'cl_endcollar'], '끝 와셔(1mm) → 끝 칼라를 파일럿 베어링에 밀어 붙이고 M3×12',
      [['79b 끝 와셔', 1, 'stl:79b_cl_end_spacer'], ['35 끝 칼라', 1, 'stl:35_collar_end_8'], ['M3×12', 1, 'bolt:3:12']], CLU, explode=[0, 0, -40])
 
-# ---------------- 10. 크랭크 ----------------
-KR = '10. 크랭크'
-step(KR, ['crank_arm', 'crank_peg'], '손잡이 축의 가는 끝에 에폭시를 바르고 팔 끝 구멍에 끝까지 (어깨가 팔에 닿게). 하루 굳히기',
-     [['35b 크랭크 팔', 1, 'stl:35b_crank_arm'], ['35c 손잡이 축', 1, 'stl:35c_crank_peg'], ['에폭시', 0, 'epoxy']], CLU, ctx=[], explode=[0, 0, -40], keep=False)
-step(KR, ['crank_grip', 'crank_cap'], '손잡이 통을 축에 끼우고 뚜껑 + M3×12', [['35d 손잡이 통', 1, 'stl:35d_crank_grip'], ['35e 뚜껑', 1, 'stl:35e_crank_cap'], ['M3×12', 1, 'bolt:3:12']],
-     CLU, ctx=['crank_arm', 'crank_peg'], explode=[0, 0, -50], keep=False)
-step(KR, ['crank_arm', 'crank_peg', 'crank_grip', 'crank_cap', 'crank_screw'], '크랭크를 앞판 핀 6개에 끝까지 끼우고, 옆 구멍에 M3×12를 핀에 닿을 때까지 조이기',
-     [['크랭크 묶음', 1, 'stl:35b_crank_arm'], ['M3×12', 1, 'bolt:3:12']], CLU, explode=[0, 0, -60],
-     inset=dict(target=center('crank_screw'), size=40), note='M3×12는 핀을 누르기만 함. 세게 조이면 허브가 갈라짐')
+# ---------------- 10. 모터 ----------------
+MO = '10. 모터'
+r0, r1 = from_A(tx.Z_RISER[1]), from_A(tx.Z_RISER[0])
+step(MO, ['m_riser'], f'모터 받침 밑면 홈 4곳에 M6 너트를 넣고, MDF에 목재나사 4×16 4개. 위치: 입력축 바로 아래, 끝판 A 바깥면에서 {r0}~{r1}mm',
+     [['45 모터 받침', 1, 'stl:45_motor_riser'], ['M6 너트', 4, 'nut:6'], ['목재나사 4×16', 4, 'wood']], CLU, explode=[0, 40, 0],
+     note='너트는 MDF에 붙이기 전에 넣기 (붙이면 못 넣음)')
+step(MO, ['m_sprocket'], '감속기 축의 스프로킷 바깥면을 브래킷 앞판 바깥면에서 15mm에 맞춰 멈춤나사로 고정',
+     [['스프로킷 12T (키트)', 1, 'sprocket']], CLUB, ctx=['m_body', 'm_bracket', 'm_shaft'], explode=[0, 0, 25], keep=False,
+     note='축 끝은 브래킷 앞판에서 23mm (실측). 15mm가 맞아야 핀과 4mm 틈')
+step(MO, ['m_body', 'm_bracket', 'm_shaft', 'm_sprocket'], '모터를 받침 위 30mm 뒤에 올려 M6×25 4개를 헐겁게 걸고, 앞으로 밀어 스프로킷이 핀 6개 사이에 들어가게. 긴 구멍 앞 끝에 닿은 곳에서 조이기',
+     [['GGM 모터+감속기+브래킷', 1, 'motor'], ['M6×25', 4, 'bolt:6:25']], CLU, explode=[0, 0, -30],
+     note='브래킷 볼트 끝과 클러치 앞판 틈 4mm. 볼트가 30mm보다 길게 나와 있으면 앞판에 닿음 → 먼저 재기')
 
 # ---------------- 11. 페달 ----------------
 PD = '11. 페달'
 step(PD, ['ped_base'], '페달 받침을 MDF(남는 판)에 목재나사 4×16 4개로 고정', [['82 페달 받침', 1, 'stl:82_pedal_base'], ['목재나사 4×16', 4, 'wood']], PED, ctx=[], explode=[0, 40, 0], keep=False)
 step(PD, ['ped_arm', 'ped_bolt'], '팔 왼쪽 면 육각 홈에 M6 나일론 너트, 왼쪽 볼에서 M6×25를 머리가 볼에 닿을 때까지만',
      [['80 페달 팔', 1, 'stl:80_pedal_arm'], ['M6×25', 1, 'bolt:6:25'], ['M6 나일론 너트', 1, 'nut:6']], PED, ctx=['ped_base'], explode=[-40, 0, 0], keep=False)
+step(PD, ['ped_arm', 'ped_bolt'], '오른쪽 볼 구멍으로 가변저항 B10K 축을 팔 구멍에 4mm 밀어 넣고, 몸통을 볼 바깥 자리에 에폭시. 굳기 전 페달을 뗀 채 몸통을 돌려 한쪽 끝 근처로',
+     [['가변저항 B10K', 1, 'pot'], ['에폭시', 0, 'epoxy']], PED, ctx=['ped_base'], explode=[0, 0, 0], keep=False,
+     note='아두이노가 클러치를 뗐는지 이 값으로 판단 (A1)')
 step(PD, ['ped_spring', 'ped_pad'], f'팔 앞면 자리와 받침 보스 사이에 큰 스프링, 발판을 M4×25 2개 (너트는 팔 앞면 홈)',
      [['큰 스프링 C252', 1, 'spring:big'], ['81 발판', 1, 'stl:81_pedal_pad'], ['M4×25', 2, 'bolt:4:25'], ['M4 너트', 2, 'nut:4']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt'], explode=[0, 0, -30], keep=False)
 step(PD, ['ped_cable'], '케이블 속선을 팔 앞면 구멍에 넣어 니플을 걸고, 아우터를 받침 자리에 꽂기',
      [['자전거 브레이크 케이블', 1, 'cable']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt', 'ped_spring', 'ped_pad'], keep=False)
 step(PD, [], '아우터를 끝판 B 구멍(Ø6) → 기어박스 안 → 끝판 A 안쪽 홈까지 넣고, 속선을 포크 위 구멍으로. 페달을 뗀 채 속선을 팽팽하게 당겨 M3×10 + 와셔로 누르기',
      [['M3×10', 1, 'bolt:3:10'], ['M3 와셔', 1, 'washer3']], CLU, note='끝판 B 구멍은 입력축 바로 위 92mm', inset=dict(target=[0, tx.FORK_CABLE_Y, -20], size=60))
-step('완성', [], '페달을 떼고 크랭크를 돌리면 기어가 돎. 페달을 밟은 채 변속 → 천천히 떼기',
-     [], CLU, note='돌리는 중에는 클러치에 손가락 넣지 않기')
+step('완성', [], '배선·펌웨어 쪽을 따라 연결한 뒤 시운전', [], CLU, note='모터가 돌 때 클러치·스프로킷에 손가락 넣지 않기')
 
 json.dump(S, open(os.path.join(HERE, 'steps.json'), 'w'), ensure_ascii=False, indent=0)
 print(len(S), 'steps')

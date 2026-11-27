@@ -14,7 +14,7 @@ def save(m, name):
     return [list(map(float, t.bounds[0])), list(map(float, t.bounds[1]))]
 
 P = asm.assemble('N', carrier_side=1)
-for k in ('acr_left', 'acr_right', 'acr_top', 'wheel', 'wheel_guard'):
+for k in ('acr_left', 'acr_right', 'acr_top'):
     P.pop(k, None)
 H = tx.H
 # 끝판 A 안쪽 면 M4 너트 4 (클러치 브래킷) + 브래킷 볼트 M4x16
@@ -24,9 +24,13 @@ for i, (xb, yb) in enumerate(tx.FORK_BRK_HOLES):
 zb = -tx.PLATE_T - 5.0
 for i, (xb, yb) in enumerate(tx.FORK_BRK_HOLES):
     P[f'brkbolt_{i}'] = (cyl(2.0, 16.0, zb + 3.0) + cyl(3.5, 4.0, zb + 3.0 - 4.0)).translate([xb, yb, 0])
-# 크랭크 멈춤나사
-P['crank_screw'] = along_x(cyl(1.5, 12.0, 0) + cyl(2.75, 3.0, 12.0)).rotate([0, 0, tx.CPL_PIN_A[0] + 180]).translate(
-    [ (tx.CPL_PIN_R + 2.5 + 7.5) * math.cos(math.radians(tx.CPL_PIN_A[0])), H + (tx.CPL_PIN_R + 2.5 + 7.5) * math.sin(math.radians(tx.CPL_PIN_A[0])), (tx.CRANK_Z[0] + 1 + tx.CRANK_Z[1] - 4) / 2])
+# 홀센서 A3144 (케이지 홈 6, 바퀴 덮개 1) · 자석 Ø6x3 (러그 밑면 3)
+for g, xr in tx.RAIL_X.items():
+    for dz in (-tx.TRAVEL, tx.TRAVEL):
+        P[f'hall_{g}_{int(dz):+d}'] = boxm(xr + 5.5 - 2.0, xr + 5.5 + 2.0, 161 - 1.5, 161.9, tx.LUG_Z + dz - 1.5, tx.LUG_Z + dz + 1.5)
+    P[f'mag_lug_{g}'] = along_y(cyl(3.0, 3.0, 0)).translate([xr + 5.5, tx.RAIL_Y - 8 + 0.1, tx.LUG_Z])
+ys = H - tx.GUARD_R[0]; zw = tx.Z_WHEEL + tx.WHEEL_T / 2
+P['hall_rpm'] = boxm(tx.C - 2.0, tx.C + 2.0, ys - 1.6, ys - 0.1, zw - 1.5, zw + 1.5)
 # 출력 1단 기어의 강철 핀 (Ø5, 나온 길이 PIN_OUT) — 핀 박기 그림용
 ph = asm.mesh_phase((0, H), tx.PAIRS['1'][0], 0.0, (tx.C, H), tx.PAIRS['1'][1])
 face = tx.PLANE['1']

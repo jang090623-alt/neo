@@ -82,12 +82,13 @@ def clutch(P, state='in'):
     # 커플링 핀 6 (Ø5x40, 앞판에 15 박힘) + 스프로킷(이뿌리 원판으로 근사) + 감속기 축·몸체 + 모터
     for k, (x, y) in enumerate(tx._ring_pts(tx.CPL_PIN_R, tx.CPL_PIN_A)):
         P[f'cpl_pin{k}'] = cyl(2.5, tx.CPL_PIN_LEN - 15.0, tx.Z_FRONT[0] - (tx.CPL_PIN_LEN - 15.0)).translate([x, H + y, 0])
-    # 2026-11: 모터 대신 손 크랭크 (핀 6에 끼움, 앞판과 같이 돎). 손잡이 축·통·뚜껑
-    P['crank_arm'] = tx.crank_arm().translate([0, H, 0])
-    zp = tx.CRANK_Z[0]
-    P['crank_peg'] = tx.crank_peg().translate([tx.CRANK_R, H, zp])
-    P['crank_grip'] = tx.crank_grip().translate([tx.CRANK_R, H, zp - tx.CRANK_PEG[2] + 0.5])
-    P['crank_cap'] = tx.crank_cap().translate([tx.CRANK_R, H, zp - tx.CRANK_PEG[2] - 3.0])
+    rr = tx.CPL_PIN_R - 2.54 - 0.06
+    P['m_sprocket'] = cyl(rr, tx.Z_SPROCKET[1] - tx.Z_SPROCKET[0], tx.Z_SPROCKET[0]).translate([0, H, 0])
+    P['m_shaft'] = cyl(7.5, tx.Z_SHAFT_IN_END - 2.0 - tx.Z_GEARHEAD_FRONT, tx.Z_GEARHEAD_FRONT).translate([0, H, 0])
+    # 감속기·모터 몸체: □90 (축 중심), 위는 60 까지 여유, 브래킷 앞판 뒤 (정확한 외형 미확인 → 직육면체 근사)
+    P['m_body'] = boxm(-45, 45, H - 45, H + 60, tx.Z_GEARHEAD_FRONT - tx.MOTOR_LEN, tx.Z_GEARHEAD_FRONT - 9.0)
+    P['m_bracket'] = tx.motor_bracket()
+    P['m_riser'] = tx.motor_riser()
 
 def assemble(state='N', push=False, carrier_side=0, clutch_state='in', blocked=False):
     P = {}
@@ -217,7 +218,7 @@ ALLOWED = [('shaft_idler', 'plate_A'), ('rod', 'lower_lever'), ('rod', 'knob'), 
            ('cl_bolt', 'cl_standoff'), ('cl_bolt', 'cl_front'), ('cl_bolt', 'cl_back'),
            ('cl_push', 'cl_ring'), ('cl_adj', 'cl_front'), ('cl_relbrg', 'cl_ring'), ('cl_relbrg', 'cl_carrier'),
            ('cl_bracket', 'plate_A'),
-           ('cl_pilot', 'cl_front'), ('cpl_pin', 'cl_front'), ('crank_peg', 'crank_arm'),
+           ('cl_pilot', 'cl_front'), ('cpl_pin', 'cl_front'), ('cpl_pin', 'm_sprocket'),
            ('m_shaft', 'm_sprocket'), ('m_shaft', 'm_body'), ('m_shaft', 'm_bracket'), ('m_body', 'm_bracket'),
            ('rcol', 'rail'), ('fwash', 'rail'), ('rail', 'lug'), ('fcap', 'fork'),
            ('cl_spring', 'cl_cup'), ('cl_spring', 'cl_press'), ('cl_cup', 'cl_adj')]
