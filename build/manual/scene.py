@@ -62,7 +62,8 @@ py = tx.PEDAL_PIV_Y
 Q['ped_bolt'] = along_x(cyl(3.0, 25, -22.5) + cyl(5.0, 4, -26.5)).translate([0, py, 0])
 cab0, cab1, spr0, spr1, nb, nfm = tx.pedal_points()
 d = spr1 - spr0; L = float(np.linalg.norm(d))
-Q['ped_spring'] = tx._yz_cyl(spr0, d / L, 9.0, L) - tx._yz_cyl(spr0 - d / L, d / L, 7.6, L + 2)
+sp1 = tx._yz_cyl(spr0, d / L, 9.0, L) - tx._yz_cyl(spr0 - d / L, d / L, 7.6, L + 2)
+Q['ped_spring'] = sum((sp1.translate([xs, 0, 0]) for xs in tx.PEDAL_SPR_X), tx.M())   # 2026-11: 3개
 d = cab1 - cab0; L = float(np.linalg.norm(d))
 Q['ped_cable'] = tx._yz_cyl(cab0, d / L, 0.9, L + 40.0)
 for n, m in Q.items():

@@ -163,14 +163,22 @@ step('8. 레버', ['pivot_lo'], '아래 피벗을 케이지 두 벽 사이에 �
 step('8. 레버', ['rod', 'lower_lever'], f'레버봉 Ø12×{tx.ROD_LEN:.0f} 끝에 핑거를 에폭시로 붙이고, 위에서 피벗 구멍으로 내리기',
      [[f'레버봉 Ø12×{tx.ROD_LEN:.0f}', 1, 'rod:12:160'], ['57 핑거', 1, 'stl:57_lower_lever_finger'], ['에폭시', 0, 'epoxy']], LIE_B, explode=[0, 70, 0])
 step('8. 레버', ['ball'], '볼 반쪽 2개를 레버봉에 끼워 피벗 자리에 앉히기', [['55 볼 반쪽', 2, 'stl:55_ball_half']], LIE_B, explode=[0, 40, 0])
-step('8. 레버', ['pivot_hi'], '위 피벗으로 볼을 덮고 M4×30 4개', [['54 위 피벗', 1, 'stl:54_pivot_upper'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], LIE_B, explode=[0, 40, 0])
-step('8. 레버', ['spring_spacer', 'lock_collar'], f'스페이서 → 큰 스프링 → 잠금 칼라. 스프링을 {lock_len:.1f}mm로 누르고 M3×12 조이기',
+CEN = ['cen_piston_l', 'cen_piston_r']; CENS = ['cen_spring_l', 'cen_spring_r', 'cen_pin_l', 'cen_pin_r']
+step('8. 레버', CEN, '책상에서 위 피벗(54)에: 피스톤 앞쪽 2개를 가운데 빈 곳에서 양쪽 작은 구멍에 대를 꽂고, 바깥 큰 구멍으로 턱 링(넓은 면이 안쪽)을 넣어 대 끝과 같은 면이 되게 에폭시. 하루 굳히기',
+     [['56b 피스톤 앞쪽', 2, 'stl:56b_cen_piston'], ['56d 턱 링', 2, 'stl:56d_cen_shoulder'], ['에폭시', 0, 'epoxy']], LIE_B, ctx=['pivot_hi'], explode=[0, 35, 0], keep=False,
+     note='에폭시는 대 끝 3mm에만 (벽 구멍에 묻으면 피스톤이 안 움직임)', tip='굳은 뒤 면 판을 눌러 보기: 양쪽 다 부드럽게 들어갔다 나와야 함')
+step('8. 레버', CENS, f'바깥 큰 구멍마다 큰 스프링 2개 → 스프링을 손가락으로 밀어 넣은 채 위 구멍 2곳에 필라멘트 토막 {2 * tx.CEN_BORE + 5:.0f}mm를 끝까지 꽂기 (순간접착제 한 방울)',
+     [['큰 스프링 C252', 4, 'spring:big'], [f'필라멘트 2.85 토막 {2 * tx.CEN_BORE + 5:.0f}mm', 4, 'filament'], ['순간접착제', 0, 'ca']], LIE_B, ctx=['pivot_hi'] + CEN, explode=[0, 35, 0], keep=False,
+     inset=dict(target=center('cen_pin_r', 'cen_spring_r'), size=50), note='손을 떼면 피스톤 면 판이 가운데 쪽 벽에 닿아 멈춰야 함')
+step('8. 레버', ['pivot_hi'] + CEN + CENS, '중립 복귀를 끼운 위 피벗으로 볼을 덮고 M4×30 4개', [['54 위 피벗 (중립 복귀 포함)', 1, 'stl:54_pivot_upper'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], LIE_B, explode=[0, 40, 0])
+step('8. 레버', ['spring_spacer', 'lock_collar'], f'스페이서(모따기 쪽이 아래, 두 피스톤 면 사이로 밀어 내림) → 큰 스프링 → 잠금 칼라. 스프링을 {lock_len:.1f}mm로 누르고 M3×12 조이기',
      [['58 스프링 스페이서', 1, 'stl:58_spring_spacer'], ['큰 스프링 C252', 1, 'spring:big'], ['59 잠금 칼라', 1, 'stl:59_lock_collar'], ['M3×12', 1, 'bolt:3:12']], LIE_B, explode=[0, 40, 0],
      inset=dict(target=center('spring_spacer', 'lock_collar'), size=45), tip='스프링 길이는 스페이서 윗면 ~ 칼라 아랫면 사이를 자로 잼')
 step('8. 레버', ['gate'], '게이트를 레버봉에 꿰어 케이지 위에 얹고 M4×30 4개', [['60 게이트', 1, 'stl:60_gate'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], LIE_B, explode=[0, 50, 0])
 step('8. 레버', ['knob'], '손잡이 안에 에폭시를 바르고 레버봉 끝에 끝까지 끼우기', [['61 손잡이', 1, 'stl:61_knob'], ['에폭시', 0, 'epoxy']], LIE_B, explode=[0, 40, 0])
-step('8. 레버', [], 'PTFE 그리스를 톱니·허브·레일에만 얇게 바르고, 입력축을 손으로 돌리며 1~5단·R 넣어 보기 (짧은 핀 단은 세게 돌려 안 빠지는지)',
-     [['PTFE 그리스', 0, 'grease']], LIE_A, note='베어링(이미 그리스 있음), 핀, 에폭시 자리에는 바르지 않기')
+step('8. 레버', [], 'PTFE 그리스를 톱니·허브·레일·게이트 밑면 홈에 얇게 바르고, 입력축을 손으로 돌리며 1~5단·R 넣어 보기 (짧은 핀 단은 세게 돌려 안 빠지는지)',
+     [['PTFE 그리스', 0, 'grease']], LIE_A, note='베어링(이미 그리스 있음), 핀, 에폭시 자리에는 바르지 않기',
+     tip='확인: 단에 넣으면 딸깍 걸려 손을 떼도 그대로 / 중립 줄에서 손을 떼면 3-4단 줄로 돌아옴 / R은 누르지 않으면 안 들어감')
 
 # ---------------- 9. 클러치 ----------------
 CL = '9. 클러치'
@@ -234,8 +242,8 @@ step(PD, ['ped_arm', 'ped_bolt'], '팔 왼쪽 면 육각 홈에 M6 나일론 너
 step(PD, ['ped_arm', 'ped_bolt'], '오른쪽 볼 구멍으로 가변저항 B10K 축을 팔 구멍에 4mm 밀어 넣고, 몸통을 볼 바깥 자리에 에폭시. 굳기 전 페달을 뗀 채 몸통을 돌려 한쪽 끝 근처로',
      [['가변저항 B10K', 1, 'pot'], ['에폭시', 0, 'epoxy']], PED, ctx=['ped_base'], explode=[0, 0, 0], keep=False,
      note='아두이노가 클러치를 뗐는지 이 값으로 판단 (A1)')
-step(PD, ['ped_spring', 'ped_pad'], f'팔 앞면 자리와 받침 보스 사이에 큰 스프링, 발판을 M4×25 2개 (너트는 팔 앞면 홈)',
-     [['큰 스프링 C252', 1, 'spring:big'], ['81 발판', 1, 'stl:81_pedal_pad'], ['M4×25', 2, 'bolt:4:25'], ['M4 너트', 2, 'nut:4']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt'], explode=[0, 0, -30], keep=False)
+step(PD, ['ped_spring', 'ped_pad'], f'팔 앞면 자리 3곳과 받침 보스 3곳 사이에 큰 스프링 3개, 발판을 M4×25 2개 (너트는 팔 앞면 홈)',
+     [['큰 스프링 C252', 3, 'spring:big'], ['81 발판', 1, 'stl:81_pedal_pad'], ['M4×25', 2, 'bolt:4:25'], ['M4 너트', 2, 'nut:4']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt'], explode=[0, 0, -30], keep=False)
 step(PD, ['ped_cable'], '케이블 속선을 팔 앞면 구멍에 넣어 니플을 걸고, 아우터를 받침 자리에 꽂기',
      [['자전거 브레이크 케이블', 1, 'cable']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt', 'ped_spring', 'ped_pad'], keep=False)
 step(PD, [], '아우터를 끝판 B 구멍(Ø6) → 기어박스 안 → 끝판 A 안쪽 홈까지 넣고, 속선을 포크 위 구멍으로. 페달을 뗀 채 속선을 팽팽하게 당겨 M3×10 + 와셔로 누르기',

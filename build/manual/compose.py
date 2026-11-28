@@ -88,7 +88,7 @@ def rules():
 def plates_page():
     rows = ''.join(f"<tr><td>{p['no']}</td><td>{E(p['file'])}</td><td>{E(p['parts'])}</td><td>{E(p['set'])}</td><td>{E(p['time'])}</td><td>{E(p['state'])}</td></tr>" for p in PL)
     return f"""<div class="pg"><div class="pad"><h2>출력 판 목록</h2>
-<p class="small">Cura 프로파일 Normal #5 (층 0.28, 벽 1.6, 위·아래 1.0, 채움 Lines) · 베드 75℃ · 노즐 210℃ · 브림 8mm · 팬 3mm부터 50%. 18~21판 시간·무게는 PrusaSlicer 같은 설정 추정 (기존 판으로 Cura와 5% 안에서 일치 확인).</p>
+<p class="small">Cura 프로파일 Normal #5 (층 0.28, 벽 1.6, 위·아래 1.0, 채움 Lines) · 베드 75℃ · 노즐 210℃ · 브림 8mm · 팬 3mm부터 50%. 15~23판 시간·무게는 PrusaSlicer 같은 설정 추정 (기존 판으로 Cura와 5% 안에서 일치 확인).</p>
 <table><tr><th>번호</th><th>파일</th><th>부품</th><th>설정</th><th>시간 · 무게</th><th>상태</th></tr>{rows}</table></div></div>"""
 
 def parts_page():
@@ -108,7 +108,7 @@ def parts_page():
             f'<tr><td><img src="{icon(k)}" style="width:9mm;height:9mm;object-fit:contain"></td><td>{E(v[0])}</td><td><b>{v[1]}</b></td><td class="small">{", ".join(map(str, sorted(set(v[2]))))}</td></tr>' for k, v in part) + '</table>'
     return f"""<div class="pg"><div class="pad"><h2>구매 부품 (설명서 단계에서 자동으로 센 개수)</h2>
 <div class="cols"><div>{tbl(items[:half])}</div><div>{tbl(items[half:])}</div></div>
-<p class="small">M3×10은 레일 칼라 6 + 케이블 1 = 7개가 필요합니다. 구매목록(bom.py)에는 1개만 있습니다 (보유 개수 미확인). 모자라면 레일 칼라에 M3×12를 써도 됩니다 (32단계 참고).</p></div></div>"""
+<p class="small">M3×10은 레일 칼라 6 + 케이블 1 = 7개가 필요합니다. 구매목록(bom.py)에는 1개만 있습니다 (보유 개수 미확인). 모자라면 레일 칼라에 M3×12를 써도 됩니다 ({next(s['n'] for s in S if s['text'].startswith('레일 Ø6'))}단계 참고).</p></div></div>"""
 
 def end_page():
     return f"""<div class="pg"><div class="pad" style="display:flex;gap:6mm"><div style="width:110mm"><h2>완성 · 사용법</h2><ol class="rules">

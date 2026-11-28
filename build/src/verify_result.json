@@ -23,7 +23,7 @@
    [
     "gate",
     "lock_collar",
-    98.67
+    423.3
    ]
   ],
   "1 막힘": [],
@@ -75,35 +75,33 @@
    0
   ]
  ],
- "sweep_total": 6,
+ "sweep_total": 4,
  "sweep_non_reverse_lock": [],
  "reverse_blocked_at": [
   -8.0,
   -7.0,
   -6.0,
-  -5.0,
-  -4.0,
-  -3.0
+  -5.0
  ],
  "pedal": {
-  "travel_deg": 10.74,
+  "travel_deg": 14.34,
   "arm^base": {
    "24.0": 59.78,
    "25.0": 0.0,
-   "30.4": 0.0,
-   "35.7": 0.0,
-   "36.7": 42.67
+   "32.2": 0.0,
+   "39.3": 0.0,
+   "40.3": 124.56
   },
   "bolt^base": 0.0,
-  "pot^base": -0.0,
+  "pot^base": 0.0,
   "bolt^arm": -0.0,
   "pot_shaft_tip_in_D_mm": 4.0,
   "release_ring_travel_mm": 3.07,
   "cable_rest^base": 0.0,
   "cable_stop^base": 0.0,
   "spring_len_rest_stop": [
-   22.26,
-   14.49
+   22.5,
+   12.21
   ]
  },
  "clutch": {
@@ -126,8 +124,111 @@
    "flat_overhang_mm2": 0.0
   }
  },
+ "shifter": {
+  "L2_knob_mm": 131.5,
+  "finger_captured_both_ways": {
+   "1": true,
+   "2": true,
+   "3": true,
+   "4": true,
+   "5": true,
+   "R": true
+  },
+  "R_unpushed_blocked_by_lip": true,
+  "R_pushed_clear": true,
+  "lock_spring": {
+   "lane": {
+    "len": 22.14,
+    "F_N": 8.0,
+    "ok": true
+   },
+   "gear": {
+    "len": 22.94,
+    "F_N": 5.76,
+    "ok": true
+   },
+   "R_pushed": {
+    "len": 17.64,
+    "F_N": 20.6,
+    "ok": true
+   }
+  },
+  "click_hold_at_knob_N": 4.95,
+  "lane_drag_at_knob_N(mu0.2~0.3)": [
+   0.97,
+   1.45
+  ],
+  "reverse_push_at_knob_N": 20.6,
+  "centering": {
+   "N": {
+    "push_mm": 0.0,
+    "per_spring_defl": 6.35,
+    "spring_len": 18.65,
+    "ok": true,
+    "return_at_knob_N": 2.97
+   },
+   "1": {
+    "push_mm": 13.83,
+    "per_spring_defl": 13.27,
+    "spring_len": 11.73,
+    "ok": true,
+    "return_at_knob_N": 6.21
+   },
+   "2": {
+    "push_mm": 13.83,
+    "per_spring_defl": 13.27,
+    "spring_len": 11.73,
+    "ok": true,
+    "return_at_knob_N": 6.21
+   },
+   "3": {
+    "push_mm": 0.0,
+    "per_spring_defl": 6.35,
+    "spring_len": 18.65,
+    "ok": true,
+    "return_at_knob_N": 2.97
+   },
+   "4": {
+    "push_mm": 0.0,
+    "per_spring_defl": 6.35,
+    "spring_len": 18.65,
+    "ok": true,
+    "return_at_knob_N": 2.97
+   },
+   "5": {
+    "push_mm": 13.83,
+    "per_spring_defl": 13.27,
+    "spring_len": 11.73,
+    "ok": true,
+    "return_at_knob_N": 6.21
+   },
+   "R": {
+    "push_mm": 13.83,
+    "per_spring_defl": 13.27,
+    "spring_len": 11.73,
+    "ok": true,
+    "return_at_knob_N": 6.21
+   }
+  },
+  "centering_preload_at_knob_N": 2.97,
+  "pedal_spring": {
+   "len_rest_stop": [
+    22.5,
+    12.21
+   ],
+   "ok": true,
+   "F_rest_stop_total_N": [
+    21.0,
+    107.4
+   ],
+   "F_return_springs_at_pad_stop_N": 25.1,
+   "travel_deg": 14.34,
+   "pad_stroke_mm": 45.1
+  },
+  "all_ok": true
+ },
  "stl_bad": [],
- "stl_count": 74,
+ "stl_count": 77,
  "stl_multi_body": [
   "01_fit_hub_sleeve.stl"
  ]

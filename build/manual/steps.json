@@ -3940,7 +3940,126 @@
 "n": 42,
 "sec": "8. 레버",
 "new": [
+"cen_piston_l",
+"cen_piston_r"
+],
+"ctx": [
 "pivot_hi"
+],
+"text": "책상에서 위 피벗(54)에: 피스톤 앞쪽 2개를 가운데 빈 곳에서 양쪽 작은 구멍에 대를 꽂고, 바깥 큰 구멍으로 턱 링(넓은 면이 안쪽)을 넣어 대 끝과 같은 면이 되게 에폭시. 하루 굳히기",
+"call": [
+[
+"56b 피스톤 앞쪽",
+2,
+"stl:56b_cen_piston"
+],
+[
+"56d 턱 링",
+2,
+"stl:56d_cen_shoulder"
+],
+[
+"에폭시",
+0,
+"epoxy"
+]
+],
+"view": {
+"dir": [
+0.9,
+0.8,
+1.1
+],
+"up": [
+0,
+1,
+0
+]
+},
+"explode": [
+0,
+35,
+0
+],
+"rep": null,
+"note": "에폭시는 대 끝 3mm에만 (벽 구멍에 묻으면 피스톤이 안 움직임)",
+"inset": null,
+"fit": null,
+"tip": "굳은 뒤 면 판을 눌러 보기: 양쪽 다 부드럽게 들어갔다 나와야 함"
+},
+{
+"n": 43,
+"sec": "8. 레버",
+"new": [
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r"
+],
+"ctx": [
+"pivot_hi",
+"cen_piston_l",
+"cen_piston_r"
+],
+"text": "바깥 큰 구멍마다 큰 스프링 2개 → 스프링을 손가락으로 밀어 넣은 채 위 구멍 2곳에 필라멘트 토막 24mm를 끝까지 꽂기 (순간접착제 한 방울)",
+"call": [
+[
+"큰 스프링 C252",
+4,
+"spring:big"
+],
+[
+"필라멘트 2.85 토막 24mm",
+4,
+"filament"
+],
+[
+"순간접착제",
+0,
+"ca"
+]
+],
+"view": {
+"dir": [
+0.9,
+0.8,
+1.1
+],
+"up": [
+0,
+1,
+0
+]
+},
+"explode": [
+0,
+35,
+0
+],
+"rep": null,
+"note": "손을 떼면 피스톤 면 판이 가운데 쪽 벽에 닿아 멈춰야 함",
+"inset": {
+"target": [
+148.5250015258789,
+257.2999954223633,
+341.0
+],
+"size": 50
+},
+"fit": null,
+"tip": null
+},
+{
+"n": 44,
+"sec": "8. 레버",
+"new": [
+"pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r"
 ],
 "ctx": [
 "plate_A",
@@ -4066,10 +4185,10 @@
 "lower_lever",
 "ball"
 ],
-"text": "위 피벗으로 볼을 덮고 M4×30 4개",
+"text": "중립 복귀를 끼운 위 피벗으로 볼을 덮고 M4×30 4개",
 "call": [
 [
-"54 위 피벗",
+"54 위 피벗 (중립 복귀 포함)",
 1,
 "stl:54_pivot_upper"
 ],
@@ -4108,7 +4227,7 @@
 "tip": null
 },
 {
-"n": 43,
+"n": 45,
 "sec": "8. 레버",
 "new": [
 "spring_spacer",
@@ -4237,9 +4356,15 @@
 "rod",
 "lower_lever",
 "ball",
-"pivot_hi"
+"pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r"
 ],
-"text": "스페이서 → 큰 스프링 → 잠금 칼라. 스프링을 19.7mm로 누르고 M3×12 조이기",
+"text": "스페이서(모따기 쪽이 아래, 두 피스톤 면 사이로 밀어 내림) → 큰 스프링 → 잠금 칼라. 스프링을 22.1mm로 누르고 M3×12 조이기",
 "call": [
 [
 "58 스프링 스페이서",
@@ -4284,7 +4409,7 @@
 "inset": {
 "target": [
 99.0,
-302.93438720703125,
+282.8343811035156,
 341.0122833251953
 ],
 "size": 45
@@ -4293,7 +4418,7 @@
 "tip": "스프링 길이는 스페이서 윗면 ~ 칼라 아랫면 사이를 자로 잼"
 },
 {
-"n": 44,
+"n": 46,
 "sec": "8. 레버",
 "new": [
 "gate"
@@ -4422,6 +4547,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar"
 ],
@@ -4467,7 +4598,7 @@
 "tip": null
 },
 {
-"n": 45,
+"n": 47,
 "sec": "8. 레버",
 "new": [
 "knob"
@@ -4596,6 +4727,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate"
@@ -4637,7 +4774,7 @@
 "tip": null
 },
 {
-"n": 46,
+"n": 48,
 "sec": "8. 레버",
 "new": [],
 "ctx": [
@@ -4764,12 +4901,18 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
 "knob"
 ],
-"text": "PTFE 그리스를 톱니·허브·레일에만 얇게 바르고, 입력축을 손으로 돌리며 1~5단·R 넣어 보기 (짧은 핀 단은 세게 돌려 안 빠지는지)",
+"text": "PTFE 그리스를 톱니·허브·레일·게이트 밑면 홈에 얇게 바르고, 입력축을 손으로 돌리며 1~5단·R 넣어 보기 (짧은 핀 단은 세게 돌려 안 빠지는지)",
 "call": [
 [
 "PTFE 그리스",
@@ -4798,10 +4941,10 @@
 "note": "베어링(이미 그리스 있음), 핀, 에폭시 자리에는 바르지 않기",
 "inset": null,
 "fit": null,
-"tip": null
+"tip": "확인: 단에 넣으면 딸깍 걸려 손을 떼도 그대로 / 중립 줄에서 손을 떼면 3-4단 줄로 돌아옴 / R은 누르지 않으면 안 들어감"
 },
 {
-"n": 47,
+"n": 49,
 "sec": "9. 클러치",
 "new": [
 "cl_bracket",
@@ -4934,6 +5077,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -4976,7 +5125,7 @@
 "tip": null
 },
 {
-"n": 48,
+"n": 50,
 "sec": "9. 클러치",
 "new": [
 "cl_ring",
@@ -5039,7 +5188,7 @@
 "tip": null
 },
 {
-"n": 49,
+"n": 51,
 "sec": "9. 클러치",
 "new": [
 "cl_ring",
@@ -5173,6 +5322,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -5215,7 +5370,7 @@
 "tip": null
 },
 {
-"n": 50,
+"n": 52,
 "sec": "9. 클러치",
 "new": [
 "cl_fork",
@@ -5345,6 +5500,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -5403,7 +5564,7 @@
 "tip": null
 },
 {
-"n": 51,
+"n": 53,
 "sec": "9. 클러치",
 "new": [
 "cl_back",
@@ -5457,7 +5618,7 @@
 "tip": null
 },
 {
-"n": 52,
+"n": 54,
 "sec": "9. 클러치",
 "new": [
 "cl_hub",
@@ -5506,7 +5667,7 @@
 "tip": null
 },
 {
-"n": 53,
+"n": 55,
 "sec": "9. 클러치",
 "new": [
 "cl_press",
@@ -5555,7 +5716,7 @@
 "tip": null
 },
 {
-"n": 54,
+"n": 56,
 "sec": "9. 클러치",
 "new": [
 "cl_front",
@@ -5631,7 +5792,7 @@
 "tip": null
 },
 {
-"n": 55,
+"n": 57,
 "sec": "9. 클러치",
 "new": [
 "cl_sleeve"
@@ -5760,6 +5921,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -5815,7 +5982,7 @@
 "tip": "축 끝에서 자로 63.5mm를 재 유성펜으로 표시하고 슬리브 끝을 맞추기"
 },
 {
-"n": 56,
+"n": 58,
 "sec": "9. 클러치",
 "new": [
 "cl_back",
@@ -5945,6 +6112,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -5996,7 +6169,7 @@
 "tip": null
 },
 {
-"n": 57,
+"n": 59,
 "sec": "9. 클러치",
 "new": [
 "cl_hub",
@@ -6126,6 +6299,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -6179,7 +6358,7 @@
 "tip": null
 },
 {
-"n": 58,
+"n": 60,
 "sec": "9. 클러치",
 "new": [
 "cl_press",
@@ -6315,6 +6494,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -6380,7 +6565,7 @@
 "tip": null
 },
 {
-"n": 59,
+"n": 61,
 "sec": "9. 클러치",
 "new": [
 "cl_front",
@@ -6525,6 +6710,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -6593,7 +6784,7 @@
 "tip": null
 },
 {
-"n": 60,
+"n": 62,
 "sec": "9. 클러치",
 "new": [
 "cl_endsp",
@@ -6723,6 +6914,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -6813,7 +7010,7 @@
 "tip": null
 },
 {
-"n": 61,
+"n": 63,
 "sec": "10. 모터",
 "new": [
 "m_riser"
@@ -6942,6 +7139,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -7034,7 +7237,7 @@
 "tip": null
 },
 {
-"n": 62,
+"n": 64,
 "sec": "10. 모터",
 "new": [
 "m_sprocket"
@@ -7076,7 +7279,7 @@
 "tip": null
 },
 {
-"n": 63,
+"n": 65,
 "sec": "10. 모터",
 "new": [
 "m_body",
@@ -7208,6 +7411,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -7296,7 +7505,7 @@
 "tip": null
 },
 {
-"n": 64,
+"n": 66,
 "sec": "11. 페달",
 "new": [
 "ped_base"
@@ -7339,7 +7548,7 @@
 "tip": null
 },
 {
-"n": 65,
+"n": 67,
 "sec": "11. 페달",
 "new": [
 "ped_arm",
@@ -7390,7 +7599,7 @@
 "tip": null
 },
 {
-"n": 66,
+"n": 68,
 "sec": "11. 페달",
 "new": [
 "ped_arm",
@@ -7436,7 +7645,7 @@
 "tip": null
 },
 {
-"n": 67,
+"n": 69,
 "sec": "11. 페달",
 "new": [
 "ped_spring",
@@ -7447,11 +7656,11 @@
 "ped_arm",
 "ped_bolt"
 ],
-"text": "팔 앞면 자리와 받침 보스 사이에 큰 스프링, 발판을 M4×25 2개 (너트는 팔 앞면 홈)",
+"text": "팔 앞면 자리 3곳과 받침 보스 3곳 사이에 큰 스프링 3개, 발판을 M4×25 2개 (너트는 팔 앞면 홈)",
 "call": [
 [
 "큰 스프링 C252",
-1,
+3,
 "spring:big"
 ],
 [
@@ -7494,7 +7703,7 @@
 "tip": null
 },
 {
-"n": 68,
+"n": 70,
 "sec": "11. 페달",
 "new": [
 "ped_cable"
@@ -7538,7 +7747,7 @@
 "tip": null
 },
 {
-"n": 69,
+"n": 71,
 "sec": "11. 페달",
 "new": [],
 "ctx": [
@@ -7665,6 +7874,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",
@@ -7764,7 +7979,7 @@
 "tip": null
 },
 {
-"n": 70,
+"n": 72,
 "sec": "완성",
 "new": [],
 "ctx": [
@@ -7891,6 +8106,12 @@
 "lower_lever",
 "ball",
 "pivot_hi",
+"cen_piston_l",
+"cen_piston_r",
+"cen_spring_l",
+"cen_spring_r",
+"cen_pin_l",
+"cen_pin_r",
 "spring_spacer",
 "lock_collar",
 "gate",

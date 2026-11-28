@@ -14,7 +14,7 @@ import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
 const COL = {
   newP: 0xf39a2b, newM: 0x4f86c6, oldP: 0xd9dce1, oldM: 0xb5bdc7, rubber: 0x3a3a3a, cork: 0xc9975a, arrow: 0xd8342b,
 };
-const METAL = /^(shaft_|brg_|rod$|rail_|cl_pilot|cl_relbrg|cl_washer|cpl_pin|cl_bolt|cl_adj|cl_push|cl_pivot_bolt|cl_spring|fspring|nutA|brkbolt|m_body|m_bracket|m_shaft|m_sprocket|ped_bolt|ped_spring|shaft_idler|pinsteel|ped_cable)/;
+const METAL = /^(shaft_|brg_|rod$|rail_|cl_pilot|cl_relbrg|cl_washer|cpl_pin|cl_bolt|cl_adj|cl_push|cl_pivot_bolt|cl_spring|fspring|nutA|brkbolt|m_body|m_bracket|m_shaft|m_sprocket|ped_bolt|ped_spring|cen_spring|shaft_idler|pinsteel|ped_cable)/;
 const RUBBER = /^(pins_|hall_|mag_)/; const CORK = /^cl_cork/;
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
 renderer.setPixelRatio(1);
@@ -168,6 +168,7 @@ function hwIcon(key) {
   else if (k === 'resistor') { add(cylG(1.2, 6, 0), 0xc8a87a); add(cylG(0.25, 22, -8), 0xb0b6bd); }
   else if (k === 'meter') { add(new THREE.BoxGeometry(40, 70, 14), 0xf2c94c); add(new THREE.BoxGeometry(30, 18, 2).translate(0, 18, 7.5), 0x9fb7a5); }
   else if (k === 'magnet') add(cylG(3, 3), 0x8a8f99);
+  else if (k === 'filament') add(cylG(1.425, 24), 0x2f80ed);
   else if (k === 'grub') { add(cylG(1.5, 8), S); }
   else if (k === 'pot') { add(cylG(8.5, 7), 0x6b7280); add(cylG(3.5, 7, 7), S); add(cylG(3, 15, 14), 0xc8a04a); }
   else if (k === 'sprocket') { const sh = new THREE.Shape(); for (let i = 0; i <= 24; i++) { const a = i / 24 * Math.PI * 2, r = i % 2 ? 16 : 20.5; i ? sh.lineTo(r * Math.cos(a), r * Math.sin(a)) : sh.moveTo(r, 0); } sh.holes.push(new THREE.Path().absarc(0, 0, 7.5, 0, Math.PI * 2, true)); add(new THREE.ExtrudeGeometry(sh, { depth: 4.3, bevelEnabled: false }), S); add(tubeG(12, 7.5, 10).translate(0, 0, -10), S); }

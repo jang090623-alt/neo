@@ -183,8 +183,9 @@ def assemble(state='N', push=False, carrier_side=0, clutch_state='in', blocked=F
     dz = sh
     R = tx.lever_rot(dx, dz)
     piv = tx.PIVOT
+    rise = tx.RISE_LANE + (tx.POCKET_D if (state in '12345' and not blocked) else 0.0)   # 칼라가 게이트 밑면(홈)에 붙어 레버가 올라간 양
     def lev(m, slide=True):
-        m = m.translate([0, -pdn, 0]) if slide else m
+        m = m.translate([0, rise - pdn, 0]) if slide else m
         return xf(m.translate(list(-piv)), R, piv)
     P['ball'] = lev(tx.ball_half(True) + tx.ball_half(False), slide=False)
     P['lower_lever'] = lev(tx.lower_lever())
@@ -193,9 +194,19 @@ def assemble(state='N', push=False, carrier_side=0, clutch_state='in', blocked=F
     P['spring_spacer'] = lev(sp, slide=False)
     P['lock_collar'] = lev(tx.lock_collar())
     P['knob'] = lev(tx.knob())
-    fx = tx.lever_point(dx, dz, tx.FINGER_YC - tx.PIVOT_Y, push=pdn)[0]
+    dl, dr = tx.cen_push(P['spring_spacer'])
+    for nm, s, d in (('cen_piston_l', -1, dl), ('cen_piston_r', 1, dr)):
+        pm = (tx.cen_piston() + tx.cen_shoulder()).translate([d, 0, 0])
+        pm = pm.mirror([1, 0, 0]) if s < 0 else pm
+        P[nm] = pm.translate([C, tx.PIVOT_Y + tx.CEN_H, tx.LUG_Z])
+        L = tx.CEN_N * tx.SPRING_L0 - tx.CEN_D0 - d                                   # 스프링 묶음 길이
+        sp = tx.along_x(tube(9.0, 7.6, L - 0.2, 0)).translate([tx.CEN_SH + 3.0 + d + 0.1, 0, 0])
+        sp = sp.mirror([1, 0, 0]) if s < 0 else sp
+        P[nm.replace('piston', 'spring')] = sp.translate([C, tx.PIVOT_Y + tx.CEN_H, tx.LUG_Z])
+        P[nm.replace('piston', 'pin')] = (tx.cen_pins().mirror([1, 0, 0]) if s < 0 else tx.cen_pins()).translate([C, tx.PIVOT_Y + tx.CEN_H, tx.LUG_Z])
+    fx = tx.lever_point(dx, 0.0, tx.FINGER_YC - tx.PIVOT_Y, push=-tx.RISE_LANE)[0]   # 잠금판은 길(중립 줄)에서 핑거가 민 자리에 남음
     side = carrier_side if carrier_side else (1 if dx < 0 else -1)
-    P['carrier'] = tx.carrier().translate([fx + side * (tx.WIN - tx.FINGER_HALF), 0, 0])
+    P['carrier'] = tx.carrier().translate([fx + side * (tx.WIN - tx.finger_half(dx)), 0, 0])
     P['wheel'] = tx.display_wheel().rotate([0, 0, PSI]).translate([C, H, tx.Z_WHEEL])
     P['wheel_guard'] = tx.wheel_guard()
     clutch(P, clutch_state)
@@ -222,7 +233,8 @@ ALLOWED = [('shaft_idler', 'plate_A'), ('rod', 'lower_lever'), ('rod', 'knob'), 
            ('cl_pilot', 'cl_front'), ('cpl_pin', 'cl_front'), ('cpl_pin', 'm_sprocket'),
            ('m_shaft', 'm_sprocket'), ('m_shaft', 'm_body'), ('m_shaft', 'm_bracket'), ('m_body', 'm_bracket'),
            ('rcol', 'rail'), ('fwash', 'rail'), ('rail', 'lug'), ('fcap', 'fork'),
-           ('cl_spring', 'cl_cup'), ('cl_spring', 'cl_press'), ('cl_cup', 'cl_adj')]
+           ('cl_spring', 'cl_cup'), ('cl_spring', 'cl_press'), ('cl_cup', 'cl_adj'),
+           ('cen_spring', 'cen_piston'), ('cen_pin', 'pivot_hi'), ('cen_spring', 'cen_pin'), ('cen_piston', 'spring_spacer')]
 
 def allowed(a, b):
     for x, y in ALLOWED:
@@ -282,14 +294,16 @@ def lever_sweep(step=2.0):
             col = min(tx.RAIL_X, key=lambda g: abs(tx.RAIL_X[g] - C - dx))
             on_col = abs(tx.RAIL_X[col] - C - dx) < 1e-6
             R = tx.lever_rot(dx, dz); piv = tx.PIVOT
-            def lev(m):
+            rise = tx.RISE_LANE + (tx.POCKET_D if (on_col and abs(abs(dz) - tx.TRAVEL) < 1e-6 and not (col == '5R' and dz < 0)) else 0.0)
+            def lev(m, slide=True):
+                m = m.translate([0, rise, 0]) if slide else m
                 return xf(m.translate(list(-piv)), R, piv)
-            parts = {'lower_lever': lev(tx.lower_lever()), 'ball': lev(tx.ball_half(True) + tx.ball_half(False)),
+            parts = {'lower_lever': lev(tx.lower_lever()), 'ball': lev(tx.ball_half(True) + tx.ball_half(False), False),
                      'rod': lev(tx.along_y(cyl(6.0, tx.ROD_LEN, 0)).translate([C, tx.ROD_Y0, tx.LUG_Z])),
-                     'spring_spacer': lev(tx.spring_spacer()[0]), 'lock_collar': lev(tx.lock_collar()), 'knob': lev(tx.knob())}
-            fx = tx.lever_point(dx, dz, tx.FINGER_YC - tx.PIVOT_Y)[0]
+                     'spring_spacer': lev(tx.spring_spacer()[0], False), 'lock_collar': lev(tx.lock_collar()), 'knob': lev(tx.knob())}
+            fx = tx.lever_point(dx, 0.0, tx.FINGER_YC - tx.PIVOT_Y, push=-tx.RISE_LANE)[0]
             side = 1 if dx < 0 else -1
-            mov = {'carrier': tx.carrier().translate([fx + side * (tx.WIN - tx.FINGER_HALF), 0, 0])}
+            mov = {'carrier': tx.carrier().translate([fx + side * (tx.WIN - tx.finger_half(dx)), 0, 0])}
             for g in tx.RAIL_X:
                 s = dz if (on_col and g == col) else 0.0
                 mov[f'lug_{g}'] = tx.lug(g).translate([0, 0, s])

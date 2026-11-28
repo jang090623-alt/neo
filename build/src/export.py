@@ -2,6 +2,7 @@
 import os
 import numpy as np, trimesh, manifold3d as mf
 import tx
+from tx import M
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, '..', 'stl')   # v4/stl (배포 폴더에 바로 저장)
@@ -20,9 +21,12 @@ def bed_film(m, t=0.4):
     return m + film.extrude(t)
 
 def save(m, name):
+    parts = [p for p in m.decompose() if p.volume() > 1.0]      # 불리언 찌꺼기 (부피 0 조각) 버림
+    m = parts[0] if len(parts) == 1 else M.batch_boolean(parts, mf.OpType.Add)
     mesh = m.to_mesh()
-    t = trimesh.Trimesh(vertices=np.array(mesh.vert_properties)[:, :3], faces=np.array(mesh.tri_verts))
-    t.merge_vertices(digits_vertex=5)
+    t = trimesh.Trimesh(vertices=np.array(mesh.vert_properties)[:, :3], faces=np.array(mesh.tri_verts), process=False)
+    if not t.is_watertight:                                       # manifold 출력은 이미 정점 공유: 합치면 가까운 정점이 뭉개짐
+        t.merge_vertices(digits_vertex=5)
     path = os.path.join(OUT, name + '.stl'); t.export(path)
     return path
 
@@ -73,9 +77,11 @@ def parts():
     add('51_lug', to_print(tx.lug('34')), 3, '5 변속', '세 레일 공통 (자석 1, M3x25 자가탭 2: 끝이 레일을 누름)')
     add('52_selector_cage', to_print(tx.cage()), 1, '5 변속', '플랜지 바닥')
     add('53_pivot_lower', to_print(tx.pivot_half(False), (90, 0, 0)), 1, '5 변속', '')
-    add('54_pivot_upper', to_print(tx.pivot_half(True), (-90, 0, 0)), 1, '5 변속', '')
+    add('54_pivot_upper', to_print(tx.pivot_half(True), (90, 0, 0)), 1, '5 변속', '2026-11: 볼 자리 면이 바닥 (중립 복귀 하우징이 위)')
     add('55_ball_half', to_print(tx.ball_half(True), (90, 0, 0)), 2, '5 변속', '평면 바닥')
     add('56_carrier_lockplate', to_print(tx.carrier(), (-90, 0, 0)), 1, '5 변속', '브리지 바닥')
+    add('56b_cen_piston', to_print(tx.cen_piston(), (0, -90, 0)), 2, '5 변속', '중립 복귀 피스톤 앞쪽: 면 판이 바닥, 대가 위')
+    add('56d_cen_shoulder', to_print(tx.cen_shoulder(), (0, -90, 0)), 2, '5 변속', '피스톤 턱 링: 넓은 턱이 바닥 (대 끝에 에폭시)')
     add('57_lower_lever_finger', to_print(tx.lower_lever(), (-90, 0, 0)), 1, '5 변속', '핑거 바닥 (레버봉 접착)')
     add('58_spring_spacer', to_print(tx.spring_spacer()[0], (-90, 0, 0)), 1, '5 변속', '')
     add('59_lock_collar', to_print(tx.lock_collar(), (90, 0, 0)), 1, '5 변속', '구면이 위')

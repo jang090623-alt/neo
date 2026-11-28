@@ -83,12 +83,13 @@ RAIL_Y = H + 86.0
 RAIL_X = {'12': 119.0, '34': 99.0, '5R': 79.0}     # 운전자 기준 왼쪽 열(1-2)이 핑거 +x
 RAIL_Z0, RAIL_LEN = -15.0, STACK + 80.0             # 레일: 끝판 A 바깥면 ~ 러그 끝
 LUG_Z = STACK + PLATE_T + 35.0                      # 셀렉터 러그 중심 z (중립)
-LUG_W, LUG_L = 19.0, 24.0
+LUG_W, LUG_L = 18.0, 24.0                           # 2026-11: 폭 19 → 18 (피벗을 낮춰 바깥 단에서 핑거 끝이 가운데 러그에 가까워짐, 러그 다시 출력)
 SLOT_W, SLOT_Y0, SLOT_Y1 = 10.6, RAIL_Y + 11, RAIL_Y + 31
-FINGER_Y0 = SLOT_Y0 + 8                             # 핑거 바닥 (중립)
-PIVOT_Y = FINGER_Y0 + 6 + 60                        # 볼 피벗 중심
-L1 = PIVOT_Y - (FINGER_Y0 + 6)                      # 피벗→핑거 중심 60
-REV_PUSH = 5.5                                      # 후진 때 레버를 누르는 깊이
+FINGER_Y0 = SLOT_Y0 + 2.8                           # 핑거 바닥 (중립). 2026-11: 8 → 4 (피벗을 낮추면 바깥 단에서 핑거가 5.3 올라감 → 홈 안에 깊게. 후진 누름 5.5 에도 홈 바닥 위)
+L1_SET = 45.0                                       # 2026-11: 피벗→핑거 60 → 45 (노브 거리 ×1.33)
+PIVOT_Y = FINGER_Y0 + 6 + L1_SET                    # 볼 피벗 중심
+L1 = PIVOT_Y - (FINGER_Y0 + 6)                      # 피벗→핑거 중심
+REV_PUSH = 4.5                                      # 후진 때 레버를 누르는 깊이 (2026-11: 5.5 → 4.5, 낮춘 피벗에서 목이 러그 위를 지나가게)
 GATE_Y = PIVOT_Y + 84.0                             # 게이트 판 가운데 높이
 GATE_T = 8.0                                        # 게이트 판 두께 (v3 6 → 8: 손잡이 400N 기준)
 ROD_Y0, ROD_LEN = PIVOT_Y - 28.0, 160.0             # 12mm 강철 레버봉
@@ -611,26 +612,38 @@ def lever_point(dx, dz, local_y, push=0.0):
     return PIVOT + lever_rot(dx, dz) @ np.array([0.0, local_y - push, 0.0])
 
 WIN = 12.8
-FINGER_HALF = 10.63
+FINGER_HALF = 10.63                 # v4 (L1 60, 평평한 끝) 값. 2026-11 부터는 finger_half(dx)
+BRIDGE_HW = 24.0                    # 2026-11: 잠금판 다리 창 반폭 15.5 → 24
+def finger_half(dx):
+    """핑거가 좌우로 기울었을 때 x 방향 반폭 = 단면 꼭짓점 (±8, 5), (±9.8, 1.5) 의 최대 |x| cos a + r sin a"""
+    a = math.asin(dx / L1)
+    return max(x * math.cos(a) + r * math.sin(abs(a)) for x, r in ((FIN_X1, 5.0), (FIN_X2, FIN_TIP)))
+
 def carrier():
     zc = LUG_Z
     plate = boxm(-46.0, 46.0, SLOT_Y0 + 0.3, 204.0, zc - 5.0, zc + 5.0)
     plate -= boxm(-WIN, WIN, SLOT_Y0, 204.5, zc - 6, zc + 6)
-    bridge = boxm(-22, 22, 204.0, 211.0, zc - 20, zc + 20)
-    bridge -= boxm(-15.5, 15.5, 203, 212, zc - 13, zc + 13)
+    bridge = boxm(-BRIDGE_HW - 6.5, BRIDGE_HW + 6.5, 204.0, 211.0, zc - 20, zc + 20)
+    bridge -= boxm(-BRIDGE_HW, BRIDGE_HW, 203, 212, zc - 15, zc + 15)          # 2026-11: 창 ±15.5x±13 → ±24x±15 (피벗을 낮춰 목·소켓이 더 기욺)
     return plate + bridge
 
 def lower_lever():
     zc = LUG_Z
-    fin = along_x(cyl(5.0, LUG_W, -LUG_W / 2)).translate([C, FINGER_YC, zc])
+    fin = along_x(cyl(5.0, 2 * FIN_X1, -FIN_X1)) + along_x(M.cylinder(FIN_X2 - FIN_X1, 5.0, FIN_TIP, 64)).translate([FIN_X1, 0, 0]) \
+        + along_x(M.cylinder(FIN_X2 - FIN_X1, 5.0, FIN_TIP, 64)).mirror([1, 0, 0]).translate([-FIN_X1, 0, 0])
+    fin = fin.translate([C, FINGER_YC, zc])   # 2026-11: 끝 위·아래 모서리를 깎음 (똑바로 반폭 9.5 = 러그 반폭, 26° 기울면 10.0 → 옆 러그(10.5)에 안 닿고 잠금판도 고른 러그 밖)
     sock_y0 = PIVOT_Y - BALL_R - 14.0
-    neck = boxm(C - 7, C + 7, FINGER_YC, sock_y0 + 1, zc - 3, zc + 3)
+    neck = boxm(C - NECK_HW, C + NECK_HW, FINGER_YC, sock_y0 + 1, zc - 3, zc + 3)   # 2026-11: 폭 ±7 → ±4 (바깥 단에서 가운데 러그 위를 지나감)
     sock = along_y(cyl(7.5, 14.0, 0)).translate([C, sock_y0, zc])
     sock -= along_y(cyl(SHAFT_HOLE / 2, 13, 0)).translate([C, ROD_Y0, zc])      # 레버봉 접착 구멍 = SHAFT_HOLE (쿠폰 결과를 따라감)
     fin -= boxm(C - 20, C + 20, FINGER_YC - 6, FINGER_YC - 4.4, zc - 6, zc + 6)
     return fin + neck + sock
 
 BALL_R = 16.0
+NECK_HW = 4.0
+FIN_L = 19.6
+FIN_X1, FIN_X2, FIN_TIP = 7.6, 9.4, 2.0   # 핑거: 반지름 5 원통 ±7.6 + 끝 원뿔대 (반지름 5 → 2, ±7.6 → ±9.4). 똑바로 반폭 9.4, 26° 기울면 9.3 (러그 반폭 9.0 ~ 옆 러그 11 사이)
+PIVLO_CONE = (22.0, 14.5, 11.0)      # 2026-11: 아래 피벗 구멍 원뿔 (바닥 반지름, 위 반지름, 높이) — 피벗을 낮춰 소켓이 더 기욺
 def pivot_half(upper):
     x0, x1 = WALL_X[0][1], WALL_X[1][0]
     y0, y1 = (PIVOT_Y, PIVOT_Y + 18) if upper else (PIVOT_Y - 18, PIVOT_Y)
@@ -639,7 +652,10 @@ def pivot_half(upper):
     if upper:
         b -= M.cylinder(18.01, 15.0, 19.5).rotate([-90, 0, 0]).translate([C, PIVOT_Y, LUG_Z])
     else:
-        b -= M.cylinder(10.4, 17.4, 13.5).rotate([-90, 0, 0]).translate([C, PIVOT_Y - 19, LUG_Z])
+        b -= M.cylinder(PIVLO_CONE[2], PIVLO_CONE[0], PIVLO_CONE[1]).rotate([-90, 0, 0]).translate([C, PIVOT_Y - 19, LUG_Z])
+    if upper:
+        b += cen_housing() - swept(PIVOT_Y + 13.0, PIVOT_Y + 52.0, 9.2)        # 2026-11: 중립 복귀 하우징 (스페이서가 지나가는 자리는 비움)
+        b -= cen_bores()
     yb = PIVOT_Y + 9 if upper else PIVOT_Y - 9
     for zz in (LUG_Z - 15, LUG_Z + 15):
         for xe, sgn in ((x0, 1), (x1, -1)):
@@ -654,16 +670,37 @@ def ball_half(upper):
     keep = boxm(-20, 20, 0, 20, -20, 20) if upper else boxm(-20, 20, -20, 0, -20, 20)
     return (s ^ keep).translate(list(PIVOT))
 
-LOCK_F0 = 2.555 * (32.0 - 26.15)    # 후진 잠금 스프링이 쉴 때 레버를 미는 힘 (v4.1 C252 값 14.9N 유지)
+LOCK_F0 = 8.0                       # 후진 잠금 스프링이 쉴 때 레버를 미는 힘. 2026-11: 14.9 → 8 (이 힘이 잠금 칼라를 게이트 밑면 홈에 눌러 '딸깍'을 만듦 → 길에서 끌림이 중립 복귀보다 작게)
 def spring_spacer():
     """볼 위 ~ 후진 잠금 스프링 아래 스페이서. 길이 = 스프링이 쉴 때 LOCK_F0 를 내는 길이가 남게 (v4.1 C252: 30)"""
     rb = SHAFT_HOLE / 2 + 0.05                                                   # 레버봉 위로 미끄러짐 (Ø12.4)
     y0 = PIVOT_Y + math.sqrt(BALL_R ** 2 - rb ** 2)
     L = (PIVOT_Y + LOCK_RHO - 8.5) - y0 - (SPRING_L0 - LOCK_F0 / SPRING_K)      # 잠금 칼라 밑면까지에서 스프링 쉴 때 길이를 뺌
-    return along_y(tube(8.0, rb, L)).translate([C, y0, LUG_Z]), y0 + L
+    s = tube(8.0, rb, L) - (cyl(8.5, 1.5, -0.01) - M.cylinder(1.52, 6.8, 8.32, 96).translate([0, 0, -0.01]))   # 아래 끝 모따기 1.2: 끼울 때 중립 피스톤 2개를 밀어 벌림
+    return along_y(s).translate([C, y0, LUG_Z]), y0 + L
 
 LOCK_RHO = GATE_Y - GATE_T / 2 - 0.6 - PIVOT_Y
 LIP_Y0 = GATE_Y - GATE_T / 2 - 8.0
+GATE_RU = LOCK_RHO + 0.2                     # 게이트 밑면 구면 반지름: 칼라가 붙으면 레버가 0.2 올라가 소켓-볼 틈 0.2 (스프링 힘이 칼라→게이트로)
+RISE_LANE, POCKET_D = 0.2, 0.8               # 레버가 올라가는 양: 중립·길 0.2, 단 홈 안 1.0 (올라가면 핑거가 가운데 쪽으로 0.44 움직임 → 작게)
+LIP_R0 = LOCK_RHO + RISE_LANE - REV_PUSH + 0.7   # 누른 칼라 위면보다 0.7 위 → 74.9. 누르지 않은 칼라(71.2~79.7)는 턱에 걸림
+GEAR_POS = {'1': ('12', 8.0), '2': ('12', -8.0), '3': ('34', 8.0), '4': ('34', -8.0), '5': ('5R', 8.0), 'R': ('5R', -8.0)}
+
+def detent_pocket(dx, dz):
+    """단 홈: 그 단에서 레버봉 축과 같은 축의 원뿔대 (45°). 칼라(반지름 14, 윗면 구면) 테두리가
+    레버가 RISE_LANE + POCKET_D 올라간 자리에서 0.1 틈. 칼라가 들어가면 1.0 더 올라가 걸림"""
+    u = lever_rot(dx, dz) @ np.array([0.0, 1.0, 0.0])
+    rc = LOCK_RHO + RISE_LANE + POCKET_D                       # 홈 안에서 칼라 윗면 반지름 80.7
+    t_rim = math.sqrt(rc ** 2 - 14.0 ** 2)                     # 그때 칼라 테두리의 축 방향 위치
+    t0, t1 = t_rim - 1.6, rc + 0.1
+    r0, r1 = 14.1 + 0.7 * (t_rim - t0), 14.1 - 0.7 * (t1 - t_rim)   # 축 방향 1 에 반지름 0.7 (벽 55°: 걸림 힘 = 누르는 힘 x 1.43)
+    c = M.cylinder(t1 - t0, r0, r1, 96)
+    ax = np.cross([0, 0, 1], u); sn = np.linalg.norm(ax); ang = math.atan2(sn, u[2]); k = ax / sn
+    K = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+    Rm = np.eye(3) + math.sin(ang) * K + (1 - math.cos(ang)) * K @ K
+    A = np.zeros((3, 4)); A[:, :3] = Rm; A[:, 3] = PIVOT + u * t0
+    return c.transform(A)
+LIP_DZ = 21.0                                 # 턱 시작 z (러그 중심에서): 중립에서 칼라 끝(14)보다 바깥
 def lock_collar():
     c = along_y(collar(w=9.0, r=14.0)).translate([C, PIVOT_Y + LOCK_RHO - 8.5, LUG_Z])
     return c ^ M.sphere(LOCK_RHO, 256).translate(list(PIVOT))
@@ -700,9 +737,19 @@ def gate():
     """H 게이트 판 (두께 GATE_T): 레버봉이 실제로 지나가는 자리 + 0.8 여유를 파냄. 후진 칸 앞 턱."""
     x0, x1 = WALL_X[0][0], WALL_X[1][1]
     g = boxm(x0, x1, GATE_Y - GATE_T / 2, GATE_Y + GATE_T / 2, CAGE_Z0 + 3, CAGE_Z1 + 3)
+    # 2026-11: 밑면을 피벗 중심 구면 (반지름 GATE_RU) 으로 → 잠금 칼라 윗면(구면)이 어디서나 같은 틈으로 붙어 미끄러짐
+    under = boxm(C - 56.0, C + 56.0, PIVOT_Y + 45.0, GATE_Y - GATE_T / 2 + 0.01, CAGE_Z0 + 3, CAGE_Z1 + 3)
+    g += (under ^ M.sphere(GATE_RU + 7.0, 256).translate(list(PIVOT))) - M.sphere(GATE_RU, 256).translate(list(PIVOT))   # 두께 7 껍질
+    # 단 홈 (1~5단): 칼라가 끝까지 들어가면 1.0 올라가 걸림 (45° 벽)
+    for k in ('1', '2', '3', '4', '5'):
+        grp, sh = GEAR_POS[k]
+        g -= detent_pocket(RAIL_X[grp] - C, sh)
     xR = gate_x('5R')
-    g += boxm(xR - 12, xR + 18, LIP_Y0, GATE_Y - GATE_T / 2, LUG_Z + 17.2, CAGE_Z1 + 3)
-    g -= swept(LIP_Y0 - 8, GATE_Y + GATE_T + 10, 6.8)
+    # 2026-11: 후진 턱을 잠금 칼라가 도는 구면에 맞춤 (피벗을 낮추니 평평한 턱 밑으로 칼라가 지나가 잠금이 풀렸음).
+    # 누르지 않은 칼라 위면 r = LOCK_RHO, 누르면 LOCK_RHO - REV_PUSH 아래로 → 턱은 r LIP_R0 ~ 게이트 밑면, 후진 쪽 칸에만
+    zone = boxm(C + 20.0, C + 60.0, PIVOT_Y + 40.0, GATE_Y - GATE_T / 2 + 0.01, LUG_Z + LIP_DZ, CAGE_Z1 + 3)
+    g += zone - M.sphere(LIP_R0, 256).translate(list(PIVOT))
+    g -= swept(LIP_Y0 - 20, GATE_Y + GATE_T + 30, 6.8)   # 2026-11: 기울기가 커져 (29°) 끝 단면이 게이트 면 밖까지 가게 더 길게
     for (wx0, wx1) in WALL_X:
         x = (wx0 + wx1) / 2
         for zz in (CAGE_Z0 + 12, CAGE_Z1 - 12):
@@ -993,12 +1040,15 @@ PEDAL_L = 195.0
 PEDAL_PIV_Y = 30.0
 PEDAL_T = 18.0                 # 팔 두께 (피벗 축 방향, 받침 x)
 PEDAL_W = 18.0                 # 팔 폭 (a)
-PEDAL_CABLE_B = 30.0           # 케이블 구멍 (피벗에서)
+PEDAL_CABLE_B = 22.0           # 케이블 구멍 (피벗에서). 2026-11: 30 → 22 (밟는 거리 28 → 약 46mm)
 PEDAL_PAD_B = 180.0            # 발판 가운데
 PEDAL_SPR_B = 42.0             # 복귀 스프링(C252 압축) 자리
 PEDAL_REST = 25.0              # 쉬는 각 (수직에서 운전자 반대쪽 +z 로 기움, 도)
-PEDAL_TRAVEL = math.degrees(3.0 * (FORK_CABLE_Y - FORK_PIV_Y) / (FORK_PIV_Y - H) / PEDAL_CABLE_B)   # 끝 멈춤: 릴리스 링 3.0 이동 (뒷판까지 3.5)
-PEDAL_SPR_F0 = 2.555 * (32.0 - 29.0)                 # 쉴 때 복귀 힘 (v4.1 C252 7.7N 유지)
+PEDAL_TRAVEL = 14.6                                   # 끝 멈춤 각 (아래 solve_pedal_travel 로 릴리스 링 3.07 이 되게 다시 계산)
+PEDAL_RING = 3.07                                     # 끝 멈춤에서 릴리스 링 이동 (19번 판 허브 끝과 0.93 틈의 기준)
+PEDAL_SPR_X = (-20.0, 0.0, 20.0)                     # 2026-11: 복귀 스프링 3개 (피벗 축 방향으로 나란히)
+PEDAL_STOP_B = 60.0                                   # 끝 멈춤이 닿는 팔 위치 (케이블 니플이 b 22 앞면에 있어 16~28 에서 옮김)
+PEDAL_SPR_F0 = 7.0                                    # 쉴 때 복귀 힘 (1개). 끝까지 밟으면 + b x 각 만큼 더 눌림
 PEDAL_SPR_L = SPRING_L0 - PEDAL_SPR_F0 / SPRING_K    # 쉴 때 복귀 스프링 길이 (v4.1: 29). 끝까지 밟으면 7.8 더 눌림
 PEDAL_POT_P = 2.5              # 가변저항 몸통 자리 깊이 (축 15mm 기준: 축 끝이 D 구멍에 4 물림)
 POT_HOLE = 5.85               # 가변저항 축 구멍: 2026-10-22 고른 WH148 은 톱니 축 Ø6 (D축 국내품 없음) → 압입. 받으면 톱니 바깥지름 -0.15 로
@@ -1024,7 +1074,9 @@ def pedal_arm():
     arm -= cyl(3.2, 12.0, -0.5)                                              # M6 Ø6.4 (볼트 끝 z=11.5)
     arm -= ext(pot_hole_poly(), 5.01, PEDAL_T - 5.0)                         # 톱니 축 압입
     arm -= along_x(cyl(1.7, 30, -15)).translate([0, PEDAL_CABLE_B, zc])     # 케이블 (a 방향)
-    arm -= along_x(cyl(10.0, 2.0, hw - 1.5)).translate([0, PEDAL_SPR_B, zc])  # 스프링 끝 자리 (앞면 Ø20 깊이 1.5)
+    arm += boxm(-hw, hw, PEDAL_SPR_B - 11.0, PEDAL_SPR_B + 11.0, zc + min(PEDAL_SPR_X) - 11.0, zc + max(PEDAL_SPR_X) + 11.0)   # 2026-11: 스프링 3개 가로대
+    for xs in PEDAL_SPR_X:
+        arm -= along_x(cyl(9.5, 2.0, hw - 1.5)).translate([0, PEDAL_SPR_B, zc + xs])   # 스프링 끝 자리 (앞면 Ø19 깊이 1.5: 이웃 자리와 1 벽)
     for bb in (172.0, 188.0):
         arm -= along_x(cyl(2.2, 30, -15)).translate([0, bb, zc])
         arm -= along_x(ext(hexagon(7.2), 3.4, 0)).translate([hw - 3.4 + 0.01, bb, zc])   # M4 너트 홈 (앞면)
@@ -1036,7 +1088,8 @@ def pedal_arm_placed(th_deg, solid=False):
     R0 = np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]], float)                 # a→z, b→y, 두께→x
     Rx = np.array([[1, 0, 0], [0, math.cos(t), -math.sin(t)], [0, math.sin(t), math.cos(t)]])
     A = np.zeros((3, 4)); A[:, :3] = Rx @ R0; A[:, 3] = Rx @ np.array([-PEDAL_T / 2, 0, 0]) + np.array([0, PEDAL_PIV_Y, 0])
-    arm = ext(box(-PEDAL_W / 2, 0, PEDAL_W / 2, PEDAL_L).union(Point(0, 0).buffer(13, 64)), PEDAL_T) if solid else pedal_arm()
+    arm = (ext(box(-PEDAL_W / 2, 0, PEDAL_W / 2, PEDAL_L).union(Point(0, 0).buffer(13, 64)), PEDAL_T)
+           + boxm(-PEDAL_W / 2, PEDAL_W / 2, PEDAL_SPR_B - 11.0, PEDAL_SPR_B + 11.0, PEDAL_T / 2 + min(PEDAL_SPR_X) - 11.0, PEDAL_T / 2 + max(PEDAL_SPR_X) + 11.0)) if solid else pedal_arm()
     return arm.transform(A)
 
 def pedal_pad():
@@ -1092,8 +1145,8 @@ def pedal_base():
         blk = M.batch_hull([boxm(x0, x1, 0, 6, -40, 10),
                             boxm(x0, x1, py + 26 * u[0] + 9 * nb[0] - 1, py + 26 * u[0] + 9 * nb[0], 26 * u[1] + 9 * nb[1] - 12, 26 * u[1] + 9 * nb[1] + 2)])
         b += blk - swept
-    # 끝 멈춤: 팔 b=16~28 의 앞쪽 (끝까지 밟으면 닿음)
-    pt = np.array([py, 0.0]) + 22 * us + 9 * nfs
+    # 끝 멈춤: 팔 b=PEDAL_STOP_B 앞쪽 (끝까지 밟으면 닿음). 2026-11: 케이블 니플(b 22 앞면)을 피해 위로
+    pt = np.array([py, 0.0]) + PEDAL_STOP_B * us + 9 * nfs
     blk = M.batch_hull([boxm(-8.5, 8.5, 0, 6, pt[1] - 4, pt[1] + 16), boxm(-8.5, 8.5, pt[0] - 6, pt[0] + 2, pt[1] - 2, pt[1] + 10)])
     b += blk - swept
     cab0, cab1, spr0, spr1, nbr, nfm = pedal_points()
@@ -1106,8 +1159,11 @@ def pedal_base():
     b += seat
     # 복귀 스프링 받침: spr1 에 원판 Ø22 두께 5 + 보스 Ø12x3 (팔 쪽), 바닥까지 채움
     disk = _yz_cyl(spr1 + 3.0 * nfm, nfm, 11.0, 5.0)
-    post = M.batch_hull([disk, boxm(-11, 11, 0, 6, spr1[1] + 3 * nfm[1] - 8, spr1[1] + 3 * nfm[1] + 14)])
-    b += post + _yz_cyl(spr1, nfm, 6.0, 3.0)
+    disks = [disk.translate([xs, 0, 0]) for xs in PEDAL_SPR_X]
+    post = M.batch_hull(disks + [boxm(min(PEDAL_SPR_X) - 11, max(PEDAL_SPR_X) + 11, 0, 6, spr1[1] + 3 * nfm[1] - 8, spr1[1] + 3 * nfm[1] + 14)])
+    b += post
+    for xs in PEDAL_SPR_X:
+        b += _yz_cyl(spr1, nfm, 6.0, 3.0).translate([xs, 0, 0])
     for (x, zz) in ((-50, -45), (50, -45), (-50, 75), (50, 75)):
         b -= along_y(cyl(2.2, 10, -1)).translate([x, 0, zz])
     return b
@@ -1343,3 +1399,94 @@ def acrylic_panels():
 def d_hole_poly(dia=None, *a, **k):
     # D컷 없음 (2026-11 실제 제작): 부품 구멍은 둥근 SHAFT_HOLE + 에폭시. 지름을 주면 그 지름의 둥근 단면 (축 모델 12.0)
     return Point(0, 0).buffer((SHAFT_HOLE if dia is None else dia) / 2, 128)
+
+# ======================= 중립 복귀 (2026-11) =======================
+# 위 피벗(54) 위에 좌우 피스톤 2개. 각각 큰 스프링 2개를 직렬로 넣어 레버봉 스페이서(58)를 가운데(3-4단 줄)로 밂.
+# 피스톤은 가운데에서 턱(안쪽 벽)에 걸려 멈춤 → 가운데에서는 양쪽이 같은 힘으로 맞섬, 옆 줄로 가면 그쪽 피스톤만 눌림.
+# 단에 들어가 있으면 레버가 게이트 칸 벽에 막혀 옆으로 못 가므로 그 단에 머묾.
+CEN_H = 22.0                         # 피스톤 축 높이 (피벗 위)
+CEN_FACE = 8.0                       # 가운데에서 피스톤 면 (스페이서 반지름)
+CEN_BORE = 9.6                       # 스프링 구멍 반지름 (스프링 바깥 18)
+CEN_WALL_IN = 24.4                   # 안쪽 벽 (x, 가운데에서) 24.4 ~ 26.4: 바깥 줄에서 밀린 피스톤 판(8+2+13.8)과 0.6 틈
+CEN_N, CEN_K = 2, SPRING_K / 2       # 직렬 2개
+CEN_D0 = 12.7                        # 가운데에서 스프링 묶음 눌림 (자유 50 → 37.3). 바깥 줄에서 +13.8 → 26.5 (1개 13.3 = 허용힘/1.1 이내)
+CEN_SH = CEN_WALL_IN + 2.0          # 피스톤 턱 시작 (26.4) → 스프링은 턱 끝(+3) 부터
+CEN_END = CEN_SH + 3.0 + (CEN_N * SPRING_L0 - CEN_D0)   # 스프링 바깥 끝 x (66.7)
+CEN_X1 = WALL_X[1][0] - C            # 하우징 끝 = 피벗 블록 끝 (71, 케이지 벽에 붙음)
+CEN_PIN_R, CEN_PIN_HOLE, CEN_PIN_Z = 1.425, 1.55, 6.0   # 2026-11: 마개 대신 필라멘트(2.85) 핀 2개 (위에서 꽂음). 마개는 스프링이 밀어내 케이지 벽 사이에 넣을 수 없음
+CEN_PIN_X = CEN_END + CEN_PIN_R      # 핀 중심 x: 핀 면 = 스프링 끝
+
+def _teardrop(r, length, x0):
+    """x 축 방향 구멍 (출력할 때 위가 될 -y 쪽이 뾰족) — 조립 좌표 원점 기준"""
+    c = along_x(cyl(r, length, 0)) + along_x(ext(Polygon([(0, 0), (r * 0.7071, -r * 0.7071), (0, -r * 1.4142), (-r * 0.7071, -r * 0.7071)]), length, 0)).rotate([0, 0, 0])
+    return c.translate([x0, 0, 0])
+
+def cen_housing():
+    """위 피벗 위 하우징 2개 (조립 좌표). 안쪽 벽 25~27 (구멍 r4.5), 스프링 구멍 r9.6 27~CEN_END, 끝벽 CEN_END~+3 (마개)."""
+    yc, zc = PIVOT_Y + CEN_H, LUG_Z
+    h = None
+    for s in (-1, 1):
+        x0, x1 = CEN_WALL_IN, CEN_X1
+        body = boxm(x0, x1, -CEN_BORE - 2, CEN_BORE + 2, -CEN_BORE - 2, CEN_BORE + 2)
+        body = body.mirror([1, 0, 0]) if s < 0 else body
+        body = body.translate([C, yc, zc])
+        h = body if h is None else h + body
+    return h
+
+def cen_bores():
+    """하우징 구멍 (피벗 블록과 합친 뒤 뚫음): 스프링 구멍 r9.6 (바깥 끝 열림) + 피스톤 대 구멍 r4.5 (둘 다 출력 때 위가 되는 +y 쪽 뾰족) + 핀 구멍 2"""
+    yc, zc = PIVOT_Y + CEN_H, LUG_Z
+    h = None
+    for s in (-1, 1):
+        c = (_teardrop(CEN_BORE, CEN_X1 - CEN_SH + 1.0, CEN_SH) + _teardrop(4.5, 8.0, CEN_WALL_IN - 6.0)).mirror([0, 1, 0])   # 뾰족한 쪽 +y (출력 때 위)
+        for zp in (-CEN_PIN_Z, CEN_PIN_Z):                                                    # 핀 구멍: 위에서 구멍 아래 3까지
+            c += along_y(cyl(CEN_PIN_HOLE, 2 * CEN_BORE + 8.0, -CEN_BORE - 3.0)).translate([CEN_PIN_X, 0, zp])
+        c = c.mirror([1, 0, 0]) if s < 0 else c
+        c = c.translate([C, yc, zc])
+        h = c if h is None else h + c
+    return h
+
+def cen_piston():
+    """피스톤 앞쪽 (로컬: x = 가운데에서 거리, 피스톤 면 x=CEN_FACE). 면 판 2 x 8(y) x 22(z) + 대 r4 (턱 끝까지 관통).
+    한 덩어리면 면 판·턱 둘 다 벽 구멍(r4.5)보다 커서 끼울 수 없음 → 대를 가운데 쪽에서 벽 구멍에 꽂고, 뒤에서 턱 링(cen_shoulder)을 에폭시"""
+    p = boxm(CEN_FACE, CEN_FACE + 2.0, -4.0, 4.0, -11.0, 11.0)
+    p += along_x(cyl(4.0, CEN_SH + 6.0 - (CEN_FACE + 2.0) + 0.01, CEN_FACE + 2.0))
+    return p
+
+def cen_shoulder():
+    """피스톤 턱 링 (로컬 x 같음): 턱 r9.2 x 3 (안쪽 벽에 걸림) + 스프링 받침 r7 x 3 (스프링 안), 대 구멍 r4.15 (에폭시)"""
+    return along_x(cyl(9.2, 3.0, CEN_SH) + cyl(7.0, 3.0, CEN_SH + 3.0) - cyl(4.15, 8.0, CEN_SH - 1.0))
+
+def cen_pins():
+    """스프링 멈춤 핀 2개 (필라멘트 Ø2.85, 길이 = 하우징 윗면 ~ 구멍 바닥). 로컬 x = 가운데에서 거리, 축 높이 y=0"""
+    L = 2 * CEN_BORE + 2.0 + 3.0
+    return sum((along_y(cyl(CEN_PIN_R, L, -CEN_BORE - 3.0)).translate([CEN_PIN_X, 0, zp]) for zp in (-CEN_PIN_Z, CEN_PIN_Z)), M())
+
+
+def cen_push(spacer_world):
+    """레버 자세에서 피스톤 2개가 밀려나는 양 (왼쪽 -x, 오른쪽 +x) = 피스톤 면 높이 띠(±4) 안 스페이서 x 끝 - CEN_FACE"""
+    band = boxm(-500, 500, PIVOT_Y + CEN_H - 4.0, PIVOT_Y + CEN_H + 4.0, LUG_Z - 11.0, LUG_Z + 11.0)
+    b = (spacer_world ^ band).bounding_box()
+    return max(0.0, (C - b[0]) - CEN_FACE), max(0.0, (b[3] - C) - CEN_FACE)
+
+
+def _ring_travel(travel):
+    """페달 각 travel 일 때 릴리스 링 이동 (케이블 실제 기하, asm.pedal_check 와 같은 식)"""
+    global PEDAL_TRAVEL
+    old = PEDAL_TRAVEL; PEDAL_TRAVEL = travel
+    cab0, cab1, spr0, spr1, nb, nfm = pedal_points()
+    PEDAL_TRAVEL = old
+    u, nbs, nfs = pedal_dirs(PEDAL_REST + travel)
+    cab0s = np.array([PEDAL_PIV_Y, 0.0]) + PEDAL_CABLE_B * u + PEDAL_W / 2 * nbs
+    pull = float(np.linalg.norm(cab1 - cab0s) - np.linalg.norm(cab1 - cab0))
+    return pull * (FORK_PIV_Y - H) / (FORK_CABLE_Y - FORK_PIV_Y)
+
+def solve_pedal_travel():
+    lo, hi = 1.0, 40.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        (lo, hi) = (mid, hi) if _ring_travel(mid) < PEDAL_RING else (lo, mid)
+    return (lo + hi) / 2
+
+PEDAL_TRAVEL = solve_pedal_travel()
+PEDAL_SPR_L = SPRING_L0 - PEDAL_SPR_F0 / SPRING_K
