@@ -374,7 +374,7 @@
 25
 ],
 "rep": null,
-"note": "홈(6.4mm)이 너트(7mm)보다 좁게 설계됨 → 데워서 넣으면 빠지지 않음",
+"note": "홈 폭 6.4mm가 너트(맞변 7mm)보다 0.6mm 좁음 → 인두로 데워 녹여 넣기. 끝판이 이미 출력됐다면 하나 먼저 시험",
 "inset": {
 "target": [
 0,
@@ -1902,6 +1902,59 @@
 {
 "n": 27,
 "sec": "5. 끝판 B",
+"new": [],
+"ctx": [
+"cage"
+],
+"text": "자석 7개의 극 고르기: A3144 1개를 5V·GND에 잇고 OUT과 5V 사이에 10kΩ, OUT에 멀티미터. 자석을 센서 글자면에 댔을 때 0V로 떨어지는 면에 유성펜 표시",
+"call": [
+[
+"홀센서 A3144",
+1,
+"hall"
+],
+[
+"자석 Ø6×3",
+7,
+"magnet"
+],
+[
+"저항 10kΩ",
+1,
+"resistor"
+],
+[
+"멀티미터",
+0,
+"meter"
+]
+],
+"view": {
+"dir": [
+0.9,
+0.8,
+1.1
+],
+"up": [
+0,
+1,
+0
+]
+},
+"explode": [
+0,
+0,
+0
+],
+"rep": null,
+"note": "A3144는 한쪽 극에만 반응. 반대로 붙이면 단 표시가 안 되고 모터가 5초마다 꺼짐. 표시한 면이 센서 쪽을 보게 붙이기",
+"inset": null,
+"fit": null,
+"tip": null
+},
+{
+"n": 28,
+"sec": "5. 끝판 B",
 "new": [
 "hall_12_+8",
 "hall_12_-8",
@@ -1957,7 +2010,7 @@
 "tip": null
 },
 {
-"n": 28,
+"n": 29,
 "sec": "5. 끝판 B",
 "new": [
 "plate_B",
@@ -2071,7 +2124,7 @@
 "tip": null
 },
 {
-"n": 29,
+"n": 30,
 "sec": "5. 끝판 B",
 "new": [
 "pspacer_B_0",
@@ -2199,7 +2252,7 @@
 "tip": null
 },
 {
-"n": 30,
+"n": 31,
 "sec": "5. 끝판 B",
 "new": [
 "wheel_guard",
@@ -2334,7 +2387,7 @@
 "tip": null
 },
 {
-"n": 31,
+"n": 32,
 "sec": "5. 끝판 B",
 "new": [
 "wheel"
@@ -2423,7 +2476,7 @@
 "wheel_guard",
 "hall_rpm"
 ],
-"text": "표시 바퀴 테 4곳에 자석 Ø6×3을 붙이고, 출력축 끝에 끼워 M3×8 무두볼트로 고정",
+"text": "표시 바퀴 테 4곳에 자석 Ø6×3을 표시한 면이 바깥(센서 쪽)으로 오게 붙이고, 출력축 끝에 끼워 M3×8 무두볼트로 고정",
 "call": [
 [
 "43 표시 바퀴",
@@ -2465,7 +2518,7 @@
 "tip": null
 },
 {
-"n": 32,
+"n": 33,
 "sec": "6. 바닥판",
 "new": [
 "foot_A_-12",
@@ -2610,7 +2663,7 @@
 "tip": null
 },
 {
-"n": 33,
+"n": 34,
 "sec": "7. 변속 포크",
 "new": [
 "fork_12",
@@ -2738,7 +2791,7 @@
 "tip": null
 },
 {
-"n": 34,
+"n": 35,
 "sec": "7. 변속 포크",
 "new": [
 "fwash_a_12",
@@ -2893,7 +2946,7 @@
 "tip": null
 },
 {
-"n": 35,
+"n": 36,
 "sec": "7. 변속 포크",
 "new": [
 "rail_12",
@@ -3052,7 +3105,7 @@
 "tip": null
 },
 {
-"n": 36,
+"n": 37,
 "sec": "7. 변속 포크",
 "new": [
 "lug_12",
@@ -3175,7 +3228,7 @@
 "rcol_b_34",
 "rcol_b_5R"
 ],
-"text": "러그 밑면 작은 구멍에 자석 Ø6×3을 순간접착제로 붙이고, 케이지 안 레일 끝에 러그. 밑에 작은 스프링 + 쇠구슬, M3×25 2개로 고정 (세 러그 홈이 일직선)",
+"text": "러그 밑면 작은 구멍에 자석 Ø6×3을 표시한 면이 밖으로 오게 순간접착제로 붙이고, 케이지 안 레일 끝에 러그. 밑에 작은 스프링 + 쇠구슬, M3×25 2개로 고정 (세 러그 홈이 일직선)",
 "call": [
 [
 "51 러그",
@@ -3232,7 +3285,7 @@
 "tip": null
 },
 {
-"n": 37,
+"n": 38,
 "sec": "8. 레버",
 "new": [
 "carrier"
@@ -3388,7 +3441,7 @@
 "tip": null
 },
 {
-"n": 38,
+"n": 39,
 "sec": "8. 레버",
 "new": [
 "pivot_lo"
@@ -3555,7 +3608,7 @@
 "tip": null
 },
 {
-"n": 39,
+"n": 40,
 "sec": "8. 레버",
 "new": [
 "rod",
@@ -3724,7 +3777,7 @@
 "tip": null
 },
 {
-"n": 40,
+"n": 41,
 "sec": "8. 레버",
 "new": [
 "ball"
@@ -3884,7 +3937,7 @@
 "tip": null
 },
 {
-"n": 41,
+"n": 42,
 "sec": "8. 레버",
 "new": [
 "pivot_hi"
@@ -4055,7 +4108,7 @@
 "tip": null
 },
 {
-"n": 42,
+"n": 43,
 "sec": "8. 레버",
 "new": [
 "spring_spacer",
@@ -4240,7 +4293,7 @@
 "tip": "스프링 길이는 스페이서 윗면 ~ 칼라 아랫면 사이를 자로 잼"
 },
 {
-"n": 43,
+"n": 44,
 "sec": "8. 레버",
 "new": [
 "gate"
@@ -4414,7 +4467,7 @@
 "tip": null
 },
 {
-"n": 44,
+"n": 45,
 "sec": "8. 레버",
 "new": [
 "knob"
@@ -4584,7 +4637,7 @@
 "tip": null
 },
 {
-"n": 45,
+"n": 46,
 "sec": "8. 레버",
 "new": [],
 "ctx": [
@@ -4748,7 +4801,7 @@
 "tip": null
 },
 {
-"n": 46,
+"n": 47,
 "sec": "9. 클러치",
 "new": [
 "cl_bracket",
@@ -4923,7 +4976,7 @@
 "tip": null
 },
 {
-"n": 47,
+"n": 48,
 "sec": "9. 클러치",
 "new": [
 "cl_ring",
@@ -4986,7 +5039,7 @@
 "tip": null
 },
 {
-"n": 48,
+"n": 49,
 "sec": "9. 클러치",
 "new": [
 "cl_ring",
@@ -5162,7 +5215,7 @@
 "tip": null
 },
 {
-"n": 49,
+"n": 50,
 "sec": "9. 클러치",
 "new": [
 "cl_fork",
@@ -5350,7 +5403,7 @@
 "tip": null
 },
 {
-"n": 50,
+"n": 51,
 "sec": "9. 클러치",
 "new": [
 "cl_back",
@@ -5404,7 +5457,7 @@
 "tip": null
 },
 {
-"n": 51,
+"n": 52,
 "sec": "9. 클러치",
 "new": [
 "cl_hub",
@@ -5453,7 +5506,7 @@
 "tip": null
 },
 {
-"n": 52,
+"n": 53,
 "sec": "9. 클러치",
 "new": [
 "cl_press",
@@ -5502,7 +5555,7 @@
 "tip": null
 },
 {
-"n": 53,
+"n": 54,
 "sec": "9. 클러치",
 "new": [
 "cl_front",
@@ -5578,7 +5631,7 @@
 "tip": null
 },
 {
-"n": 54,
+"n": 55,
 "sec": "9. 클러치",
 "new": [
 "cl_back",
@@ -5758,11 +5811,10 @@
 "tip": null
 },
 {
-"n": 55,
+"n": 56,
 "sec": "9. 클러치",
 "new": [
-"cl_hub",
-"cl_washer"
+"cl_sleeve"
 ],
 "ctx": [
 "plate_A",
@@ -5908,12 +5960,12 @@
 "cl_back",
 "cl_cork_b"
 ],
-"text": "입력축의 끝판 A 바깥면에서 40~73mm 구간에 에폭시를 얇게 바르고, 허브를 와셔가 뒷판 코르크에 닿을 때까지 밀기",
+"text": "육각 슬리브 안쪽에 에폭시를 얇게 바르고, 입력축의 끝판 A 바깥면에서 52~72mm 자리에 끼워 하루 굳히기",
 "call": [
 [
-"허브+와셔",
+"74b 육각 슬리브",
 1,
-"stl:74_cl_disc_hub"
+"stl:74b_cl_hub_sleeve"
 ],
 [
 "에폭시",
@@ -5939,13 +5991,196 @@
 -50
 ],
 "rep": null,
-"note": "와셔를 코르크에 손으로 붙인 채 몇 분 잡고, 하루 굳힌 뒤 다음 단계. 에폭시가 릴리스 링 쪽(바깥면에서 14~30mm)으로 흐르지 않게",
+"note": "슬리브 바깥과 축의 다른 곳에는 에폭시가 묻지 않게 (허브가 미끄러져야 함)",
 "inset": null,
 "fit": "new",
-"tip": "축에 유성펜으로 40mm·73mm 두 곳을 표시하고 그 사이에만 바르기"
+"tip": "축에 유성펜으로 52mm·72mm 두 곳을 표시하고 그 사이에 맞추기"
 },
 {
-"n": 56,
+"n": 57,
+"sec": "9. 클러치",
+"new": [
+"cl_hub",
+"cl_washer"
+],
+"ctx": [
+"plate_A",
+"brg_A_0",
+"brg_A_99",
+"nutA_0",
+"nutA_1",
+"nutA_2",
+"nutA_3",
+"shaft_idler",
+"idler_spacer",
+"g_idler",
+"idler_collar",
+"brg_idler_20",
+"brg_idler_3",
+"shaft_in",
+"shaft_out",
+"pspacer_A_0",
+"pspacer_A_99",
+"collar_A_0",
+"collar_A_99",
+"sp_in_end_0",
+"sp_out_end_0",
+"gin_R",
+"gout_R",
+"pins_R",
+"brg_gR_20",
+"brg_gR_3",
+"sp_in_5R",
+"hubw_a_5R",
+"slv_5R",
+"hub_5R",
+"hubw_b_5R",
+"gin_5",
+"gout_5",
+"pins_5",
+"brg_g5_71",
+"brg_g5_88",
+"sp_in_end_96",
+"sp_out_end_96",
+"gin_4",
+"gout_4",
+"pins_4",
+"brg_g4_116",
+"brg_g4_99",
+"sp_in_34",
+"hubw_a_34",
+"slv_34",
+"hub_34",
+"hubw_b_34",
+"gin_3",
+"gout_3",
+"pins_3",
+"brg_g3_167",
+"brg_g3_184",
+"sp_in_end_192",
+"sp_out_end_192",
+"gin_2",
+"gout_2",
+"pins_2",
+"brg_g2_195",
+"brg_g2_212",
+"sp_in_12",
+"hubw_a_12",
+"slv_12",
+"hub_12",
+"hubw_b_12",
+"gin_1",
+"gout_1",
+"pins_1",
+"brg_g1_263",
+"brg_g1_280",
+"sp_in_end_288",
+"sp_out_end_288",
+"plate_B",
+"cage",
+"brg_B_0",
+"brg_B_99",
+"pspacer_B_0",
+"pspacer_B_99",
+"collar_B_0",
+"collar_B_99",
+"wheel_guard",
+"hall_rpm",
+"wheel",
+"foot_A_-12",
+"foot_A_165",
+"foot_B_-12",
+"foot_B_165",
+"fork_12",
+"fork_34",
+"fork_5R",
+"fwash_a_12",
+"fwash_a_34",
+"fwash_a_5R",
+"fwash_b_12",
+"fwash_b_34",
+"fwash_b_5R",
+"fspring_12",
+"fspring_34",
+"fspring_5R",
+"fcap_12",
+"fcap_34",
+"fcap_5R",
+"rail_12",
+"rail_34",
+"rail_5R",
+"rcol_a_12",
+"rcol_a_34",
+"rcol_a_5R",
+"rcol_b_12",
+"rcol_b_34",
+"rcol_b_5R",
+"lug_12",
+"lug_34",
+"lug_5R",
+"mag_lug_12",
+"mag_lug_34",
+"mag_lug_5R",
+"carrier",
+"pivot_lo",
+"rod",
+"lower_lever",
+"ball",
+"pivot_hi",
+"spring_spacer",
+"lock_collar",
+"gate",
+"knob",
+"cl_bracket",
+"brkbolt_0",
+"brkbolt_1",
+"brkbolt_2",
+"brkbolt_3",
+"cl_ring",
+"cl_relbrg",
+"cl_carrier",
+"cl_push0",
+"cl_push1",
+"cl_push2",
+"cl_fork",
+"cl_pivot_bolt",
+"cl_back",
+"cl_cork_b",
+"cl_sleeve"
+],
+"text": "허브(와셔 붙인 것)를 슬리브에 끼워 와셔가 뒷판 코르크에 닿을 때까지 밀기. 접착하지 않음",
+"call": [
+[
+"허브+와셔",
+1,
+"stl:74_cl_disc_hub"
+]
+],
+"view": {
+"dir": [
+-0.75,
+0.55,
+-1.0
+],
+"up": [
+0,
+1,
+0
+]
+},
+"explode": [
+0,
+0,
+-50
+],
+"rep": null,
+"note": "허브가 슬리브 위에서 손으로 앞뒤로 쉽게 미끄러져야 함 → 그래야 페달을 밟으면 클러치가 끊김",
+"inset": null,
+"fit": "new",
+"tip": null
+},
+{
+"n": 58,
 "sec": "9. 클러치",
 "new": [
 "cl_press",
@@ -6100,6 +6335,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer"
 ],
@@ -6145,7 +6381,7 @@
 "tip": null
 },
 {
-"n": 57,
+"n": 59,
 "sec": "9. 클러치",
 "new": [
 "cl_front",
@@ -6309,6 +6545,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -6357,7 +6594,7 @@
 "tip": null
 },
 {
-"n": 58,
+"n": 60,
 "sec": "9. 클러치",
 "new": [
 "cl_endsp",
@@ -6506,6 +6743,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -6576,7 +6814,7 @@
 "tip": null
 },
 {
-"n": 59,
+"n": 61,
 "sec": "10. 모터",
 "new": [
 "m_riser"
@@ -6724,6 +6962,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -6796,7 +7035,7 @@
 "tip": null
 },
 {
-"n": 60,
+"n": 62,
 "sec": "10. 모터",
 "new": [
 "m_sprocket"
@@ -6838,7 +7077,7 @@
 "tip": null
 },
 {
-"n": 61,
+"n": 63,
 "sec": "10. 모터",
 "new": [
 "m_body",
@@ -6989,6 +7228,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -7057,7 +7297,7 @@
 "tip": null
 },
 {
-"n": 62,
+"n": 64,
 "sec": "11. 페달",
 "new": [
 "ped_base"
@@ -7100,7 +7340,7 @@
 "tip": null
 },
 {
-"n": 63,
+"n": 65,
 "sec": "11. 페달",
 "new": [
 "ped_arm",
@@ -7151,7 +7391,7 @@
 "tip": null
 },
 {
-"n": 64,
+"n": 66,
 "sec": "11. 페달",
 "new": [
 "ped_arm",
@@ -7197,7 +7437,7 @@
 "tip": null
 },
 {
-"n": 65,
+"n": 67,
 "sec": "11. 페달",
 "new": [
 "ped_spring",
@@ -7255,7 +7495,7 @@
 "tip": null
 },
 {
-"n": 66,
+"n": 68,
 "sec": "11. 페달",
 "new": [
 "ped_cable"
@@ -7299,7 +7539,7 @@
 "tip": null
 },
 {
-"n": 67,
+"n": 69,
 "sec": "11. 페달",
 "new": [],
 "ctx": [
@@ -7445,6 +7685,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -7524,7 +7765,7 @@
 "tip": null
 },
 {
-"n": 68,
+"n": 70,
 "sec": "완성",
 "new": [],
 "ctx": [
@@ -7670,6 +7911,7 @@
 "cl_pivot_bolt",
 "cl_back",
 "cl_cork_b",
+"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",

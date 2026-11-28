@@ -165,6 +165,8 @@ function hwIcon(key) {
   else if (k === 'iron') { add(cylG(5, 40), 0x2b2b2b); add(cylG(2.2, 25, 40), 0xb0b6bd); const t = new THREE.ConeGeometry(2.2, 8, 24); t.rotateX(Math.PI / 2); t.translate(0, 0, 69); add(t, 0xb0b6bd); }
   else if (k === 'sand') add(new THREE.BoxGeometry(40, 1, 30), 0xb48a4a);
   else if (k === 'hall') { add(new THREE.BoxGeometry(4.5, 1.5, 3.5).translate(0, 0, 13), 0x222222); for (const x of [-1.27, 0, 1.27]) add(new THREE.BoxGeometry(0.4, 0.4, 13).translate(x, 0, 6.5), 0xb0b6bd); }
+  else if (k === 'resistor') { add(cylG(1.2, 6, 0), 0xc8a87a); add(cylG(0.25, 22, -8), 0xb0b6bd); }
+  else if (k === 'meter') { add(new THREE.BoxGeometry(40, 70, 14), 0xf2c94c); add(new THREE.BoxGeometry(30, 18, 2).translate(0, 18, 7.5), 0x9fb7a5); }
   else if (k === 'magnet') add(cylG(3, 3), 0x8a8f99);
   else if (k === 'grub') { add(cylG(1.5, 8), S); }
   else if (k === 'pot') { add(cylG(8.5, 7), 0x6b7280); add(cylG(3.5, 7, 7), S); add(cylG(3, 15, 14), 0xc8a04a); }
