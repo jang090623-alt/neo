@@ -84,24 +84,44 @@
   -5.0
  ],
  "pedal": {
-  "travel_deg": 14.34,
+  "travel_deg": 14.1,
   "arm^base": {
-   "24.0": 59.78,
+   "24.0": 95.39,
    "25.0": 0.0,
-   "32.2": 0.0,
-   "39.3": 0.0,
-   "40.3": 124.56
+   "32.1": 0.0,
+   "39.1": 0.0,
+   "40.1": 179.57
   },
-  "bolt^base": 0.0,
-  "pot^base": 0.0,
+  "bolt^base": -0.0,
+  "pot^base": -0.0,
   "bolt^arm": 0.0,
   "pot_shaft_tip_in_D_mm": 4.0,
   "release_ring_travel_mm": 3.07,
   "cable_rest^base": 0.0,
   "cable_stop^base": 0.0,
+  "nipple^base": {
+   "25.0": 0.0,
+   "32.1": 0.0,
+   "39.1": 0.0
+  },
+  "foot^": {
+   "25.0": {
+    "heel_z": -71.3,
+    "base": 0.0,
+    "cable": 0.0,
+    "arm_below_pad": 0.0
+   },
+   "39.1": {
+    "heel_z": -59.3,
+    "base": 279.0,
+    "cable": 0.0,
+    "arm_below_pad": 0.0
+   }
+  },
+  "arm_lowest_y": 11.91,
   "spring_len_rest_stop": [
    22.5,
-   12.21
+   12.37
   ]
  },
  "clutch": {
@@ -214,16 +234,16 @@
   "pedal_spring": {
    "len_rest_stop": [
     22.5,
-    12.21
+    12.37
    ],
    "ok": true,
    "F_rest_stop_total_N": [
     21.0,
-    107.4
+    106.1
    ],
-   "F_return_springs_at_pad_stop_N": 25.1,
-   "travel_deg": 14.34,
-   "pad_stroke_mm": 45.1
+   "F_return_springs_at_pad_stop_N": 24.8,
+   "travel_deg": 14.1,
+   "pad_stroke_mm": 44.3
   },
   "all_ok": true
  },
