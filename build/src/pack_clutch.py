@@ -8,10 +8,10 @@ HALF, GAP = 95.0, 6.0
 PLATES = {
     'C1_clutch_front_press': [('70_cl_front', 1), ('72_cl_pressure', 1), ('35_collar_end_8', 1), ('79_cl_spring_cup', 3), ('73_cl_standoff', 3), ('79b_cl_end_spacer', 1)],
     'C2_clutch_back_release': [('71_cl_back', 1), ('77_cl_fork', 1), ('75_cl_ring', 1), ('76_cl_carrier', 1), ('74_cl_disc_hub', 1), ('74b_cl_hub_sleeve', 1)],
-    'C3_pedal_arm_wheel': [('80_pedal_arm', 1), ('43_display_wheel', 1), ('78_cl_fork_bracket', 1)],
+    'C3_pedal_arm_wheel': [('80_pedal_arm', 1), ('78_cl_fork_bracket', 1)],
     'C4_pedal_base': [('82_pedal_base', 1), ('81_pedal_pad', 1)],
     'C5_motor_riser': [('45_motor_riser', 1)],
-    'C6_wheel_guard': [('44_wheel_guard', 1)],
+    'C6_wheel_guard': [('44_wheel_guard', 1), ('43_display_wheel', 1)],
 }
 def foot(m):
     return MultiPoint(m.vertices[:, :2]).convex_hull

@@ -1037,10 +1037,12 @@ def motor_bracket():
     return b
 
 PEDAL_L = 195.0
-PEDAL_PIV_Y = 30.0
+PEDAL_PIV_Y = 42.0             # 2026-11: 30 → 42 (피벗 아래 꼬리가 바닥판 위로 지나가게)
 PEDAL_T = 18.0                 # 팔 두께 (피벗 축 방향, 받침 x)
 PEDAL_W = 18.0                 # 팔 폭 (a)
-PEDAL_CABLE_B = 22.0           # 케이블 구멍 (피벗에서). 2026-11: 30 → 22 (밟는 거리 28 → 약 46mm)
+PEDAL_CABLE_B = -22.0          # 케이블 구멍 = 피벗 아래 꼬리 (2026-11: 위쪽 b 22 는 케이블이 운전자 쪽으로 나가 발에 걸림 → 꼬리에 달아 앞으로 뺌)
+PEDAL_TAIL = -29.0             # 꼬리 끝 b
+PEDAL_CAB_Z1 = 70.0            # 아우터 멈춤 z (받침 앞쪽 블록 안, 아우터는 앞면 z=85 에서 꽂음)
 PEDAL_PAD_B = 180.0            # 발판 가운데
 PEDAL_SPR_B = 42.0             # 복귀 스프링(C252 압축) 자리
 PEDAL_REST = 25.0              # 쉬는 각 (수직에서 운전자 반대쪽 +z 로 기움, 도)
@@ -1061,14 +1063,14 @@ def pedal_dirs(th_deg):
     t = math.radians(th_deg)
     return np.array([math.cos(t), math.sin(t)]), np.array([math.sin(t), -math.cos(t)]), np.array([-math.sin(t), math.cos(t)])
 
-PEDAL_TRIM = boxm(-PEDAL_W / 2, PEDAL_W / 2, -20.0, PEDAL_L + 1.0, -60.0, 80.0)   # 2026-11: 피벗 보스(r13)를 팔 면(±9)에 맞춰 자름 → 운전자 쪽 면을 바닥에 눕혀 출력
+PEDAL_TRIM = boxm(-PEDAL_W / 2, PEDAL_W / 2, PEDAL_TAIL - 1.0, PEDAL_L + 1.0, -60.0, 80.0)   # 2026-11: 피벗 보스(r13)를 팔 면(±9)에 맞춰 자름 → 운전자 쪽 면을 바닥에 눕혀 출력
 def pedal_arm():
     """페달 팔 (클러치·브레이크 공용, 2개). 로컬: a=x(-9 운전자 쪽 면 ~ +9 앞면), b=y(피벗 0 ~ 195), 두께 z 0~18 (z=0 = 받침 왼쪽).
     피벗: z=0 면 M6 나일론 너트 홈(맞변 10.2, 깊이 6.2) + Ø6.4, z=18 면 가변저항 축 구멍 (톱니 축 압입 POT_HOLE, 깊이 5).
     케이블 구멍 b=30 (a 방향 Ø3.4, 니플은 앞면), 복귀 스프링 자리 b=42 (앞면 Ø20 깊이 1.5),
     발판 M4 2개 (b=172, 188, a 방향, 앞면 너트 홈). 출력: 운전자 쪽 면(a=-9)이 바닥"""
     hw = PEDAL_W / 2
-    prof = box(-hw, 0, hw, PEDAL_L).union(Point(0, 0).buffer(13, 64))
+    prof = box(-hw, PEDAL_TAIL, hw, PEDAL_L).union(Point(0, 0).buffer(13, 64))
     arm = ext(prof, PEDAL_T)
     zc = PEDAL_T / 2
     arm -= ext(hexagon(10.2), 6.2, -0.01)                                    # 나일론 너트 (DIN985 M6 두께 6)
@@ -1089,7 +1091,7 @@ def pedal_arm_placed(th_deg, solid=False):
     R0 = np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]], float)                 # a→z, b→y, 두께→x
     Rx = np.array([[1, 0, 0], [0, math.cos(t), -math.sin(t)], [0, math.sin(t), math.cos(t)]])
     A = np.zeros((3, 4)); A[:, :3] = Rx @ R0; A[:, 3] = Rx @ np.array([-PEDAL_T / 2, 0, 0]) + np.array([0, PEDAL_PIV_Y, 0])
-    arm = (ext(box(-PEDAL_W / 2, 0, PEDAL_W / 2, PEDAL_L).union(Point(0, 0).buffer(13, 64)), PEDAL_T)
+    arm = (ext(box(-PEDAL_W / 2, PEDAL_TAIL, PEDAL_W / 2, PEDAL_L).union(Point(0, 0).buffer(13, 64)), PEDAL_T)
            + boxm(-PEDAL_W / 2, PEDAL_W / 2, PEDAL_SPR_B - 11.0, PEDAL_SPR_B + 11.0, PEDAL_T / 2 + min(PEDAL_SPR_X) - 11.0, PEDAL_T / 2 + max(PEDAL_SPR_X) + 11.0)) ^ PEDAL_TRIM if solid else pedal_arm()
     return arm.transform(A)
 
@@ -1108,12 +1110,17 @@ def _pedal_sweep(th0, th1, n=12):
     """팔이 지나가는 공간 (구멍을 메운 외형으로: 받침 블록이 팔 구멍 안에 남지 않게)"""
     return M.batch_boolean([pedal_arm_placed(th0 + (th1 - th0) * k / n, True) for k in range(n + 1)], mf.OpType.Add)
 
+def cable_exit(th):
+    """각 th 에서 속선이 팔 꼬리 앞면(nf 쪽)에서 나가는 점 (y, z). 니플은 운전자 쪽 면"""
+    u, nb, nf = pedal_dirs(th)
+    return np.array([PEDAL_PIV_Y, 0.0]) + PEDAL_CABLE_B * u + (PEDAL_W / 2) * nf
+
 def pedal_points():
-    """받침 좌표 (y, z): 케이블 속선 나가는 점·받침 끝, 스프링 자리 (쉴 때 기준)"""
+    """받침 좌표 (y, z): 케이블 속선 나가는 점·아우터 멈춤(앞쪽 수평), 스프링 자리 (쉴 때 기준)"""
     py = np.array([PEDAL_PIV_Y, 0.0])
     u, nb, nf = pedal_dirs(PEDAL_REST)
-    cab0 = py + PEDAL_CABLE_B * u + (PEDAL_W / 2) * nb                    # 운전자 쪽 면에서 나가는 점
-    cab1 = cab0 + 40.0 * nb                                                # 케이블 받침(속선 구멍 끝)
+    cab0 = cable_exit(PEDAL_REST)
+    cab1 = np.array([cab0[0], PEDAL_CAB_Z1])                               # 앞으로 수평 (발에서 멀어짐)
     um, _, nfm = pedal_dirs(PEDAL_REST + PEDAL_TRAVEL / 2)
     spr0 = py + PEDAL_SPR_B * u + (PEDAL_W / 2 - 1.5) * nf                 # 팔 스프링 자리 바닥 (쉴 때)
     spr1 = spr0 + (PEDAL_SPR_L - 3.0) * nfm                                # 받침 스프링 보스 끝 (보스 3 이 스프링 안)
@@ -1125,7 +1132,7 @@ def _yz_cyl(p, d, r, h):
     return cyl(r, h).rotate([-ang, 0, 0]).translate([0, p[0], p[1]])
 
 def pedal_base():
-    """페달 받침 (조립 좌표: 바닥 y=0, 피벗 축 = x 축, 높이 30, z=0). 운전자는 -z 쪽, 팔은 +z 로 25° 기움, 밟으면 +z 로 PEDAL_TRAVEL°.
+    """페달 받침 (조립 좌표: 바닥 y=0, 피벗 축 = x 축, 높이 PEDAL_PIV_Y(42), z=0). 운전자는 -z 쪽, 팔은 +z 로 25° 기움, 밟으면 +z 로 PEDAL_TRAVEL°.
     바닥판 120x(z)140 / 볼 2개 (x ±9.5~±22.5): 왼쪽 M6 Ø6.4, 오른쪽 가변저항 (부싱 Ø7.4 + 바깥 몸통 자리 Ø17.5 깊이 2.5, 에폭시) /
     쉬는 위치 받침(운전자 쪽 면, x ±2.5~±8.5 → 가운데로 케이블) / 끝 멈춤(앞면) / 케이블 받침(아우터 Ø5.6 깊이 8, 속선 Ø2.2) /
     복귀 스프링 C252 받침(보스 Ø12x3, 쉴 때 길이 27 → 끝 18.8) / 목재나사 4. 출력: 바닥판이 바닥"""
@@ -1142,7 +1149,7 @@ def pedal_base():
     us, nbs, nfs = pedal_dirs(PEDAL_REST + PEDAL_TRAVEL)
     # 쉬는 위치 받침: 팔 b=16~28 의 운전자 쪽 (쉴 때 닿음)
     for s in (-1, 1):
-        x0, x1 = (2.5, 8.5) if s > 0 else (-8.5, -2.5)                    # 팔(±9) 안쪽: 면이 겹치지 않게
+        x0, x1 = (4.5, 8.5) if s > 0 else (-8.5, -4.5)                    # 팔(±9) 안쪽. 가운데 9 틈 = 꼬리 니플(Ø6.5) 지나감
         blk = M.batch_hull([boxm(x0, x1, 0, 6, -40, 10),
                             boxm(x0, x1, py + 26 * u[0] + 9 * nb[0] - 1, py + 26 * u[0] + 9 * nb[0], 26 * u[1] + 9 * nb[1] - 12, 26 * u[1] + 9 * nb[1] + 2)])
         b += blk - swept
@@ -1151,22 +1158,27 @@ def pedal_base():
     blk = M.batch_hull([boxm(-8.5, 8.5, 0, 6, pt[1] - 4, pt[1] + 16), boxm(-8.5, 8.5, pt[0] - 6, pt[0] + 2, pt[1] - 2, pt[1] + 10)])
     b += blk - swept
     cab0, cab1, spr0, spr1, nbr, nfm = pedal_points()
-    # 케이블 받침: 속선 구멍 끝 cab1 에서 nb 방향 14 (아우터 자리는 바깥 끝 8)
-    seat = _yz_cyl(cab1, nbr, 7.0, 14.0)
-    seat = M.batch_hull([seat, boxm(-7, 7, 0, 6, cab1[1] + 14 * nbr[1] - 7, cab1[1] + 7)])
-    seat -= _yz_cyl(cab1 - 2 * nbr, nbr, 1.1, 20.0)                        # 속선
-    seat -= _yz_cyl(cab1 + 6 * nbr, nbr, 2.8, 20.0)                        # 아우터 자리 (깊이 8)
-    seat -= _yz_cyl(cab0, nbr, 2.0, float(np.linalg.norm(cab1 - cab0)) - 1.0)   # 속선 지나가는 길 (Ø4)
-    b += seat
+    # 케이블 받침 (2026-11): 앞쪽 블록 (바닥판 앞 끝까지). 아우터는 앞면에서 Ø5.6 으로 꽂아 cab1 에서 멈춤
+    b += boxm(-7, 7, 0, cab1[0] + 7.0, cab1[1] - 12.0, 85.0)
     # 복귀 스프링 받침: spr1 에 원판 Ø22 두께 5 + 보스 Ø12x3 (팔 쪽), 바닥까지 채움
     disk = _yz_cyl(spr1 + 3.0 * nfm, nfm, 11.0, 5.0)
     disks = [disk.translate([xs, 0, 0]) for xs in PEDAL_SPR_X]
     post = M.batch_hull(disks + [boxm(min(PEDAL_SPR_X) - 11, max(PEDAL_SPR_X) + 11, 0, 6, spr1[1] + 3 * nfm[1] - 8, spr1[1] + 3 * nfm[1] + 14)])
     b += post
     for xs in PEDAL_SPR_X:
-        b += _yz_cyl(spr1, nfm, 6.0, 3.0).translate([xs, 0, 0])
+        b += _yz_cyl(spr1, nfm, 6.0, 3.5).translate([xs, 0, 0])   # 원판 안으로 0.5 겹침 (맞닿은 면이 메시를 깨뜨림)
     for (x, zz) in ((-50, -45), (50, -45), (-50, 75), (50, 75)):
         b -= along_y(cyl(2.2, 10, -1)).translate([x, 0, zz])
+    # 케이블 길 (스프링 받침·끝 멈춤 블록을 지나감): 쉴 때~끝까지 속선이 지나는 띠 Ø5, 멈춤 바로 앞 6mm 는 Ø2.4, 아우터 Ø5.6
+    zs = cab1[1] - 6.0
+    lane = []
+    for k in range(7):
+        p = cable_exit(PEDAL_REST + PEDAL_TRAVEL * k / 6)
+        d = np.array([cab1[0], zs]) - p
+        lane.append(_yz_cyl(p - 3.0 * d / np.linalg.norm(d), d / np.linalg.norm(d), 2.5, float(np.linalg.norm(d)) + 3.0))
+    b -= M.batch_hull(lane)
+    b -= _yz_cyl(np.array([cab1[0], zs - 1.0]), np.array([0.0, 1.0]), 1.2, 8.0)
+    b -= _yz_cyl(cab1, np.array([0.0, 1.0]), 2.8, 20.0)
     return b
 
 
@@ -1478,7 +1490,7 @@ def _ring_travel(travel):
     cab0, cab1, spr0, spr1, nb, nfm = pedal_points()
     PEDAL_TRAVEL = old
     u, nbs, nfs = pedal_dirs(PEDAL_REST + travel)
-    cab0s = np.array([PEDAL_PIV_Y, 0.0]) + PEDAL_CABLE_B * u + PEDAL_W / 2 * nbs
+    cab0s = cable_exit(PEDAL_REST + travel)
     pull = float(np.linalg.norm(cab1 - cab0s) - np.linalg.norm(cab1 - cab0))
     return pull * (FORK_PIV_Y - H) / (FORK_CABLE_Y - FORK_PIV_Y)
 

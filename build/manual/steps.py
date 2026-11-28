@@ -244,7 +244,7 @@ step(PD, ['ped_arm', 'ped_bolt'], '오른쪽 볼 구멍으로 가변저항 B10K 
      note='아두이노가 클러치를 뗐는지 이 값으로 판단 (A1)')
 step(PD, ['ped_spring', 'ped_pad'], f'팔 앞면 자리 3곳과 받침 보스 3곳 사이에 큰 스프링 3개, 발판을 M4×25 2개 (너트는 팔 앞면 홈)',
      [['큰 스프링 C252', 3, 'spring:big'], ['81 발판', 1, 'stl:81_pedal_pad'], ['M4×25', 2, 'bolt:4:25'], ['M4 너트', 2, 'nut:4']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt'], explode=[0, 0, -30], keep=False)
-step(PD, ['ped_cable'], '케이블 속선을 팔 앞면 구멍에 넣어 니플을 걸고, 아우터를 받침 자리에 꽂기',
+step(PD, ['ped_cable'], '케이블 속선을 팔 아래 꼬리 구멍에 운전자 쪽에서 넣어 니플을 걸고, 받침 가운데 길로 앞쪽까지 빼서 아우터를 받침 앞면 구멍에 끝까지 꽂기',
      [['자전거 브레이크 케이블', 1, 'cable']], PED, ctx=['ped_base', 'ped_arm', 'ped_bolt', 'ped_spring', 'ped_pad'], keep=False)
 step(PD, [], '아우터를 끝판 B 구멍(Ø6) → 기어박스 안 → 끝판 A 안쪽 홈까지 넣고, 속선을 포크 위 구멍으로. 페달을 뗀 채 속선을 팽팽하게 당겨 M3×10 + 와셔로 누르기',
      [['M3×10', 1, 'bolt:3:10'], ['M3 와셔', 1, 'washer3']], CLU, note='끝판 B 구멍은 입력축 바로 위 92mm', inset=dict(target=[0, tx.FORK_CABLE_Y, -20], size=60))

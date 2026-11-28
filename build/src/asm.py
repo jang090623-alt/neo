@@ -330,12 +330,33 @@ def pedal_check():
     R['pot_shaft_tip_in_D_mm'] = round(tx.PEDAL_T / 2 - (face - 15.0), 2)                    # 축 15 (부싱 포함) 가 D 구멍에 들어간 깊이
     cab0, cab1, spr0, spr1, nb, nfm = tx.pedal_points()
     u, nbs, nfs = tx.pedal_dirs(ts)
-    cab0s = np.array([py, 0.0]) + tx.PEDAL_CABLE_B * u + tx.PEDAL_W / 2 * nbs
+    cab0s = tx.cable_exit(ts)
     pull = float(np.linalg.norm(cab1 - cab0s) - np.linalg.norm(cab1 - cab0))
     R['release_ring_travel_mm'] = round(pull * (tx.FORK_PIV_Y - tx.H) / (tx.FORK_CABLE_Y - tx.FORK_PIV_Y), 2)
     for nm, p in (('rest', cab0), ('stop', cab0s)):
         d = cab1 - p; L = float(np.linalg.norm(d))
         R[f'cable_{nm}^base'] = round((tx._yz_cyl(p + 0.5 * d / L, d / L, 0.8, L - 0.5) ^ base).volume(), 2)
+    # 2026-11: 니플 (Ø6.5 x 8, 꼬리 운전자 쪽 면) / 발 (뒤꿈치 바닥 ~ 발판, 폭 100, 두께 50) 과 받침·케이블
+    nip = {}
+    for th in (tr, (tr + ts) / 2, ts):
+        uu, nbb, nff = tx.pedal_dirs(th)
+        p = np.array([py, 0.0]) + tx.PEDAL_CABLE_B * uu + tx.PEDAL_W / 2 * nbb
+        nip[f'{th:.1f}'] = round((tx._yz_cyl(p, nbb, 3.25, 8.0) ^ base).volume(), 2)
+    R['nipple^base'] = nip
+    foot = {}
+    for th in (tr, ts):
+        uu, nbb, nff = tx.pedal_dirs(th)
+        P = np.array([py, 0.0]) + tx.PEDAL_PAD_B * uu + (tx.PEDAL_W / 2 + 8.0) * nbb      # 발판 윗면 가운데
+        Hh = np.array([0.0, P[1] - math.sqrt(250.0 ** 2 - P[0] ** 2)])                       # 뒤꿈치 (발 길이 250)
+        s = (P - Hh) / np.linalg.norm(P - Hh); n = np.array([s[1], -s[0]])                 # n: 운전자·위쪽
+        L = float(np.linalg.norm(P - Hh)) - 20.0
+        pts = [Hh + 2.0 * n, Hh + 2.0 * n + L * s, Hh + 52.0 * n, Hh + 52.0 * n + L * s]
+        slab = M.batch_hull([tx.boxm(-50, 50, q[0] - 0.01, q[0] + 0.01, q[1] - 0.01, q[1] + 0.01) for q in pts])
+        cab = tx._yz_cyl(tx.cable_exit(th), np.array([0.0, 1.0]), 0.8, cab1[1] - tx.cable_exit(th)[1] + 40.0)
+        foot[f'{th:.1f}'] = {'heel_z': round(float(Hh[1]), 1), 'base': round((slab ^ base).volume(), 1), 'cable': round((slab ^ cab).volume(), 2),
+                             'arm_below_pad': round((slab ^ tx.pedal_arm_placed(th)).volume(), 1)}
+    R['foot^'] = foot
+    R['arm_lowest_y'] = round(min(tx.pedal_arm_placed(th).bounding_box()[1] for th in (tr, ts)), 2)
     spr0s = np.array([py, 0.0]) + tx.PEDAL_SPR_B * u + (tx.PEDAL_W / 2 - 1.5) * nfs
     R['spring_len_rest_stop'] = [round(float(np.linalg.norm(spr1 - p)) + 3.0, 2) for p in (spr0, spr0s)]
     return R
