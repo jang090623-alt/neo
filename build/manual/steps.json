@@ -5634,8 +5634,7 @@
 "n": 55,
 "sec": "9. 클러치",
 "new": [
-"cl_back",
-"cl_cork_b"
+"cl_sleeve"
 ],
 "ctx": [
 "plate_A",
@@ -5779,12 +5778,17 @@
 "cl_fork",
 "cl_pivot_bolt"
 ],
-"text": "뒷판을 입력축에 끼우기 (코르크가 바깥쪽)",
+"text": "육각 슬리브 안쪽에 에폭시를 얇게 바르고, 입력축 모터 쪽 끝에서 밀어 넣어 슬리브의 모터 쪽 끝이 축 끝에서 63.5mm (±1)에 오게. 하루 굳히기",
 "call": [
 [
-"뒷판",
+"74b 육각 슬리브",
 1,
-"stl:71_cl_back"
+"stl:74b_cl_hub_sleeve"
+],
+[
+"에폭시",
+0,
+"epoxy"
 ]
 ],
 "view": {
@@ -5802,19 +5806,20 @@
 "explode": [
 0,
 0,
--60
+-50
 ],
 "rep": null,
-"note": null,
+"note": "뒷판을 끼우기 전에 붙여 굳힘 (뒷판이 젖은 슬리브에 닿지 않게). 슬리브 바깥과 축의 다른 곳에는 에폭시가 묻지 않게",
 "inset": null,
 "fit": "new",
-"tip": null
+"tip": "축 끝에서 자로 63.5mm를 재 유성펜으로 표시하고 슬리브 끝을 맞추기"
 },
 {
 "n": 56,
 "sec": "9. 클러치",
 "new": [
-"cl_sleeve"
+"cl_back",
+"cl_cork_b"
 ],
 "ctx": [
 "plate_A",
@@ -5957,20 +5962,14 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
-"cl_back",
-"cl_cork_b"
+"cl_sleeve"
 ],
-"text": "육각 슬리브 안쪽에 에폭시를 얇게 바르고, 입력축 모터 쪽 끝에서 밀어 넣어 슬리브의 모터 쪽 끝이 축 끝에서 62mm (±1)에 오게. 하루 굳히기",
+"text": "뒷판을 입력축에 끼우기 (코르크가 바깥쪽)",
 "call": [
 [
-"74b 육각 슬리브",
+"뒷판",
 1,
-"stl:74b_cl_hub_sleeve"
-],
-[
-"에폭시",
-0,
-"epoxy"
+"stl:71_cl_back"
 ]
 ],
 "view": {
@@ -5988,13 +5987,13 @@
 "explode": [
 0,
 0,
--50
+-60
 ],
 "rep": null,
-"note": "슬리브 바깥과 축의 다른 곳에는 에폭시가 묻지 않게 (허브가 미끄러져야 함). 뒷판 구멍 안쪽까지 들어감",
+"note": null,
 "inset": null,
 "fit": "new",
-"tip": "축 끝에서 자로 62mm를 재 유성펜으로 표시하고 슬리브 끝을 맞추기"
+"tip": null
 },
 {
 "n": 57,
@@ -6144,9 +6143,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
-"cl_cork_b",
-"cl_sleeve"
+"cl_cork_b"
 ],
 "text": "허브(와셔 붙인 것)를 육각 구멍이 앞으로 가게 끼워 슬리브를 덮고, 와셔가 뒷판 코르크에 닿을 때까지 밀기. 접착하지 않음",
 "call": [
@@ -6174,7 +6173,7 @@
 -50
 ],
 "rep": null,
-"note": "와셔가 코르크에 틈 없이 닿아야 함 (안 닿으면 슬리브가 모터 쪽으로 치우친 것 → 다시). 허브는 손으로 앞뒤로 쉽게 움직여야 함",
+"note": "허브는 손으로 앞뒤로 쉽게 움직여야 함 (그래야 페달을 밟으면 끊김)",
 "inset": null,
 "fit": "new",
 "tip": null
@@ -6333,9 +6332,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer"
 ],
@@ -6543,9 +6542,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -6741,9 +6740,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -6772,7 +6771,7 @@
 "cl_bolt1",
 "cl_bolt2"
 ],
-"text": "끝 와셔(1mm) → 끝 칼라를 파일럿 베어링에 밀어 붙이고 M3×12",
+"text": "끝 와셔(1mm) → 끝 칼라를 파일럿 베어링에 밀어 붙이고 M3×12. 칼라 바깥면이 축 끝과 같은 면이 되어야 함",
 "call": [
 [
 "79b 끝 와셔",
@@ -6808,7 +6807,7 @@
 -40
 ],
 "rep": null,
-"note": null,
+"note": "확인: 기둥 사이로 옆에서 보면 와셔가 두 코르크 사이에 틈 없이 끼어 있어야 함. 틈이 있으면 슬리브가 모터 쪽으로 치우친 것",
 "inset": null,
 "fit": "new",
 "tip": null
@@ -6960,9 +6959,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -7226,9 +7225,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -7683,9 +7682,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
@@ -7909,9 +7908,9 @@
 "cl_push2",
 "cl_fork",
 "cl_pivot_bolt",
+"cl_sleeve",
 "cl_back",
 "cl_cork_b",
-"cl_sleeve",
 "cl_hub",
 "cl_washer",
 "cl_press",
