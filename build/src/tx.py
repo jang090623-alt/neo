@@ -739,7 +739,7 @@ def gate():
     g = boxm(x0, x1, GATE_Y - GATE_T / 2, GATE_Y + GATE_T / 2, CAGE_Z0 + 3, CAGE_Z1 + 3)
     # 2026-11: 밑면을 피벗 중심 구면 (반지름 GATE_RU) 으로 → 잠금 칼라 윗면(구면)이 어디서나 같은 틈으로 붙어 미끄러짐
     under = boxm(C - 56.0, C + 56.0, PIVOT_Y + 45.0, GATE_Y - GATE_T / 2 + 0.01, CAGE_Z0 + 3, CAGE_Z1 + 3)
-    g += (under ^ M.sphere(GATE_RU + 7.0, 256).translate(list(PIVOT))) - M.sphere(GATE_RU, 256).translate(list(PIVOT))   # 두께 7 껍질
+    g += under - M.sphere(GATE_RU, 256).translate(list(PIVOT))   # 판까지 꽉 채움 (얇은 껍질은 뒤집어 출력할 때 바깥 면이 20~45° 처마가 됨)
     # 단 홈 (1~5단): 칼라가 끝까지 들어가면 1.0 올라가 걸림 (45° 벽)
     for k in ('1', '2', '3', '4', '5'):
         grp, sh = GEAR_POS[k]
@@ -1061,11 +1061,12 @@ def pedal_dirs(th_deg):
     t = math.radians(th_deg)
     return np.array([math.cos(t), math.sin(t)]), np.array([math.sin(t), -math.cos(t)]), np.array([-math.sin(t), math.cos(t)])
 
+PEDAL_TRIM = boxm(-PEDAL_W / 2, PEDAL_W / 2, -20.0, PEDAL_L + 1.0, -60.0, 80.0)   # 2026-11: 피벗 보스(r13)를 팔 면(±9)에 맞춰 자름 → 운전자 쪽 면을 바닥에 눕혀 출력
 def pedal_arm():
     """페달 팔 (클러치·브레이크 공용, 2개). 로컬: a=x(-9 운전자 쪽 면 ~ +9 앞면), b=y(피벗 0 ~ 195), 두께 z 0~18 (z=0 = 받침 왼쪽).
     피벗: z=0 면 M6 나일론 너트 홈(맞변 10.2, 깊이 6.2) + Ø6.4, z=18 면 가변저항 축 구멍 (톱니 축 압입 POT_HOLE, 깊이 5).
     케이블 구멍 b=30 (a 방향 Ø3.4, 니플은 앞면), 복귀 스프링 자리 b=42 (앞면 Ø20 깊이 1.5),
-    발판 M4 2개 (b=172, 188, a 방향, 앞면 너트 홈). 출력: z=0 면이 바닥"""
+    발판 M4 2개 (b=172, 188, a 방향, 앞면 너트 홈). 출력: 운전자 쪽 면(a=-9)이 바닥"""
     hw = PEDAL_W / 2
     prof = box(-hw, 0, hw, PEDAL_L).union(Point(0, 0).buffer(13, 64))
     arm = ext(prof, PEDAL_T)
@@ -1080,7 +1081,7 @@ def pedal_arm():
     for bb in (172.0, 188.0):
         arm -= along_x(cyl(2.2, 30, -15)).translate([0, bb, zc])
         arm -= along_x(ext(hexagon(7.2), 3.4, 0)).translate([hw - 3.4 + 0.01, bb, zc])   # M4 너트 홈 (앞면)
-    return arm
+    return arm ^ PEDAL_TRIM
 
 def pedal_arm_placed(th_deg, solid=False):
     """팔을 받침 좌표로 (z=0 면 → x=-9, a → 회전 후 z, b → 위). solid=True: 구멍·보스 없는 외형"""
@@ -1089,7 +1090,7 @@ def pedal_arm_placed(th_deg, solid=False):
     Rx = np.array([[1, 0, 0], [0, math.cos(t), -math.sin(t)], [0, math.sin(t), math.cos(t)]])
     A = np.zeros((3, 4)); A[:, :3] = Rx @ R0; A[:, 3] = Rx @ np.array([-PEDAL_T / 2, 0, 0]) + np.array([0, PEDAL_PIV_Y, 0])
     arm = (ext(box(-PEDAL_W / 2, 0, PEDAL_W / 2, PEDAL_L).union(Point(0, 0).buffer(13, 64)), PEDAL_T)
-           + boxm(-PEDAL_W / 2, PEDAL_W / 2, PEDAL_SPR_B - 11.0, PEDAL_SPR_B + 11.0, PEDAL_T / 2 + min(PEDAL_SPR_X) - 11.0, PEDAL_T / 2 + max(PEDAL_SPR_X) + 11.0)) if solid else pedal_arm()
+           + boxm(-PEDAL_W / 2, PEDAL_W / 2, PEDAL_SPR_B - 11.0, PEDAL_SPR_B + 11.0, PEDAL_T / 2 + min(PEDAL_SPR_X) - 11.0, PEDAL_T / 2 + max(PEDAL_SPR_X) + 11.0)) ^ PEDAL_TRIM if solid else pedal_arm()
     return arm.transform(A)
 
 def pedal_pad():

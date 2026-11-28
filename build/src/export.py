@@ -101,7 +101,7 @@ def parts():
     add('79_cl_spring_cup', to_print(tx.cl_spring_cup()), 3, '6 클러치', '스프링 컵')
     add('79b_cl_end_spacer', to_print(tx.cl_end_spacer()), 1, '6 클러치', '파일럿 베어링 끝 와셔 (두께 1)')
     # 7 페달
-    add('80_pedal_arm', to_print(tx.pedal_arm()), 2, '7 페달', '클러치·브레이크 공용, 너트 홈 면이 바닥 (M6 나일론 너트, 가변저항 톱니 축 압입)')
+    add('80_pedal_arm', to_print(tx.pedal_arm(), (0, -90, 0)), 2, '7 페달', '운전자 쪽 면이 바닥 (2026-11: 스프링 가로대 때문에 눕힘)')
     add('81_pedal_pad', to_print(tx.pedal_pad()), 2, '7 페달', '발판 (M4x25 2, 너트는 팔 앞면 홈)')
     add('82_pedal_base', to_print(tx.pedal_base(), (90, 0, 0)), 2, '7 페달', '바닥판이 바닥 (M6x25 피벗, 가변저항 에폭시, 복귀 스프링, 목재나사 4)')
     # 8 핸들 받침 (v4.2)

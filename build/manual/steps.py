@@ -167,7 +167,7 @@ CEN = ['cen_piston_l', 'cen_piston_r']; CENS = ['cen_spring_l', 'cen_spring_r', 
 step('8. 레버', CEN, '책상에서 위 피벗(54)에: 피스톤 앞쪽 2개를 가운데 빈 곳에서 양쪽 작은 구멍에 대를 꽂고, 바깥 큰 구멍으로 턱 링(넓은 면이 안쪽)을 넣어 대 끝과 같은 면이 되게 에폭시. 하루 굳히기',
      [['56b 피스톤 앞쪽', 2, 'stl:56b_cen_piston'], ['56d 턱 링', 2, 'stl:56d_cen_shoulder'], ['에폭시', 0, 'epoxy']], LIE_B, ctx=['pivot_hi'], explode=[0, 35, 0], keep=False,
      note='에폭시는 대 끝 3mm에만 (벽 구멍에 묻으면 피스톤이 안 움직임)', tip='굳은 뒤 면 판을 눌러 보기: 양쪽 다 부드럽게 들어갔다 나와야 함')
-step('8. 레버', CENS, f'바깥 큰 구멍마다 큰 스프링 2개 → 스프링을 손가락으로 밀어 넣은 채 위 구멍 2곳에 필라멘트 토막 {2 * tx.CEN_BORE + 5:.0f}mm를 끝까지 꽂기 (순간접착제 한 방울)',
+step('8. 레버', CENS, f'바깥 큰 구멍마다 큰 스프링 2개 → 일자 드라이버를 위 틈으로 넣어 스프링 끝을 안쪽으로 밀어 둔 채, 위 구멍에 필라멘트 토막 {2 * tx.CEN_BORE + 5:.0f}mm를 1개씩 끝까지 꽂기 (순간접착제 한 방울)',
      [['큰 스프링 C252', 4, 'spring:big'], [f'필라멘트 2.85 토막 {2 * tx.CEN_BORE + 5:.0f}mm', 4, 'filament'], ['순간접착제', 0, 'ca']], LIE_B, ctx=['pivot_hi'] + CEN, explode=[0, 35, 0], keep=False,
      inset=dict(target=center('cen_pin_r', 'cen_spring_r'), size=50), note='손을 떼면 피스톤 면 판이 가운데 쪽 벽에 닿아 멈춰야 함')
 step('8. 레버', ['pivot_hi'] + CEN + CENS, '중립 복귀를 끼운 위 피벗으로 볼을 덮고 M4×30 4개', [['54 위 피벗 (중립 복귀 포함)', 1, 'stl:54_pivot_upper'], ['M4×30', 4, 'bolt:4:30'], ['M4 너트', 4, 'nut:4']], LIE_B, explode=[0, 40, 0])
