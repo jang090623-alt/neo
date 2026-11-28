@@ -302,7 +302,7 @@ for k, (zi, zo) in list(tx.PAIRS.items()) + [('R', (17, 41))]:
                      '키 6개 면압 MPa': round(T_out / 15.2 / 6 / (tx.SLV_HALF * 4.4), 2),
                      '입력기어 D면 MPa(L25)': round(pD(TC_MAX, tx.FW), 1)})
 R['hubs'] = hub_rows
-R['disc_hub_D_MPa'] = round(pD(TC_MAX, tx.Z_HUB[1] - tx.Z_HUB[0]), 1)
+R['disc_hub_D_MPa'] = round(pD(TC_MAX, tx.Z_HUB[1] - tx.Z_HUB[0]), 1)   # v4 D축 값 (2026-11 실제는 육각 슬리브)
 R['washer_epoxy_MPa'] = round(TC_MAX / (math.pi * (11 ** 2 - 8.5 ** 2)) / 9.8, 3)      # 플랜지 접착면, 평균 반지름 9.8
 
 # ================= 9. 베어링 =================

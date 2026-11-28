@@ -811,7 +811,7 @@ def cl_pressure():
     디스크 허브 통과 Ø22 / 기둥 홈 3 (바깥으로 열림, 회전 전달) / 스프링 자리 Ø19 깊이 2"""
     T = Z_PRESS[1] - Z_PRESS[0]
     p = cyl(CL_R, T)
-    p -= cyl(12.0, T + 2, -1)                                   # 2026-11: 허브 몸통 r11 이 지나감 (1 틈)
+    p -= cyl(11.0, T + 2, -1)
     for (x, y) in _ring_pts(CL_STANDOFF_R, STANDOFF_A):
         slot = Point(x, y).buffer(5.6, 32).union(Point(x * 1.5, y * 1.5).buffer(5.6, 32)).convex_hull
         p -= ext(slot, T + 2, -1)
@@ -827,24 +827,25 @@ def cl_standoff():
 # 허브가 붙어 버리면 밟아도 뒷판 쪽 코르크가 계속 눌려 클러치가 안 끊김 (검토 2026-11-28).
 HEX_AF = 16.0                       # 슬리브 육각 맞변 (벽: 면 1.75)
 HEX_CLR = 0.2                       # 허브 육각 구멍 한쪽 틈
-HEXSLV_Z = (-86.5, -66.5)           # 슬리브 z (허브 육각 구멍 -88~-64 안, 양쪽 1.5 미끄럼 여유)
-HUB_HEX_Z = (-88.0, -64.0)          # 허브 육각 구멍·굵은 몸통 (r11) 구간
+HUB2_Z = (-60.0, -49.0)             # 허브 z: 목 -60~-57 (와셔가 끼움) + 몸통 -57~-49 (뒷판 구멍 r15 안, 밟을 때 릴리스 링 -47.5 와 1.5 틈)
+HEXSLV_Z = (-55.5, -50.5)           # 슬리브 z (허브 육각 구멍 -57~-49 안, 양쪽 1.5 미끄럼 여유)
 def hexprism(af, h, z0=0.0):
     return ext(hexagon(af), h, z0)
 
 def cl_hub_sleeve():
-    """육각 슬리브 (조립 좌표 z 그대로): 맞변 16, 구멍 SHAFT_HOLE, 길이 20. 입력축에 에폭시. 출력: 세워서"""
+    """육각 슬리브 (조립 좌표 z 그대로): 맞변 16, 구멍 SHAFT_HOLE, 길이 5. 입력축에 에폭시 (뒷판을 끼운 뒤). 출력: 세워서"""
     z0, z1 = HEXSLV_Z
     return (hexprism(HEX_AF, z1 - z0, z0) - cyl(SHAFT_HOLE / 2, z1 - z0 + 2, z0 - 1))
 
 def cl_disc_hub():
-    """디스크 허브 (로컬 z=0 = 모터 쪽 끝, 조립 Z_HUB[0]). 몸통 r11 + 육각 구멍(맞변 16.4) 길이 24 → 원뿔(45°) → 가는 관 r8.4 (와셔 안지름 8.5 가 끼움)
-    → 플랜지 r11 두께 2. 플랜지의 모터 쪽 면에 강철 와셔(DIN9021 M16)를 에폭시. 출력: 플랜지가 바닥 (원뿔이라 서포트 없음)"""
-    L = Z_HUB[1] - Z_HUB[0]
-    lh = HUB_HEX_Z[1] - HUB_HEX_Z[0]                       # 24
-    h = cyl(11.0, lh) + M.cylinder(2.6, 11.0, 8.4, 128).translate([0, 0, lh]) + cyl(8.4, L - lh - 2.6, lh + 2.6) + cyl(11.0, 2.0, L - 2.0)
-    h -= hexprism(HEX_AF + 2 * HEX_CLR, lh + 0.01, -0.01)
-    h -= cyl(SHAFT_HOLE / 2 + 0.25, L + 2, -1)              # 축과 닿지 않음 (토크는 육각으로만)
+    """디스크 허브 (로컬 z=0 = 모터 쪽 끝, 조립 HUB2_Z[0]). 목 r8.4 x 3 (구멍 SHAFT_HOLE: 축에 끼워 기울지 않게, 와셔 안지름 8.5 가 끼움)
+    → 몸통 r11 x 8 + 육각 구멍(맞변 16.4, 끝판 쪽으로 열림). 와셔는 목에 끼워 몸통 어깨(모터 쪽 면)에 에폭시.
+    허브는 모터 쪽에서 축에 끼우면 열린 육각 구멍이 먼저 슬리브를 덮음. 출력: 목이 바닥 (육각 구멍이 위로 열려 천장 없음)"""
+    L = HUB2_Z[1] - HUB2_Z[0]
+    ln = Z_WASH[1] - HUB2_Z[0]                               # 3
+    h = cyl(8.4, ln) + cyl(11.0, L - ln, ln)
+    h -= hexprism(HEX_AF + 2 * HEX_CLR, L - ln + 0.01, ln)
+    h -= cyl(SHAFT_HOLE / 2, L + 2, -1)
     return h
 
 def cl_ring():

@@ -47,7 +47,7 @@ def clutch(P, state='in'):
     for k, (x, y) in enumerate(tx._ring_pts(tx.CL_STANDOFF_R, tx.STANDOFF_A)):
         P[f'cl_standoff{k}'] = tx.cl_standoff().translate([x, H + y, tx.Z_FRONT[1]])
         P[f'cl_bolt{k}'] = cyl(2.0, tx.Z_BACK[1] - tx.Z_FRONT[0] + 3.0, tx.Z_FRONT[0] - 0.5).translate([x, H + y, 0])
-    P['cl_hub'] = tx.cl_disc_hub().translate([0, H, tx.Z_HUB[0]])
+    P['cl_hub'] = tx.cl_disc_hub().translate([0, H, tx.HUB2_Z[0]])
     P['cl_sleeve'] = tx.cl_hub_sleeve().translate([0, H, 0])
     P['cl_washer'] = tx.steel_washer().translate([0, H, tx.Z_WASH[0]])
     P['cl_cork_b'] = tx.cork_ring().translate([0, H, tx.Z_BACK[0] - tx.CORK[2]])
