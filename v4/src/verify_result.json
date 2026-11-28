@@ -1,0 +1,185 @@
+{
+ "states": {
+  "N/1/in": [],
+  "N/1/out": [],
+  "N/-1/in": [],
+  "N/-1/out": [],
+  "1/0/in": [],
+  "1/0/out": [],
+  "2/0/in": [],
+  "2/0/out": [],
+  "3/1/in": [],
+  "3/1/out": [],
+  "3/-1/in": [],
+  "3/-1/out": [],
+  "4/1/in": [],
+  "4/1/out": [],
+  "4/-1/in": [],
+  "4/-1/out": [],
+  "5/0/in": [],
+  "5/0/out": [],
+  "R(눌러서)": [],
+  "R(안 누름)": [
+   [
+    "gate",
+    "lock_collar",
+    98.67
+   ]
+  ],
+  "1 막힘": [],
+  "2 막힘": [],
+  "3 막힘": [],
+  "4 막힘": [],
+  "5 막힘": [],
+  "R 막힘": []
+ },
+ "mesh": [
+  [
+   "1",
+   0.188,
+   0.0
+  ],
+  [
+   "2",
+   0.188,
+   0.0
+  ],
+  [
+   "3",
+   0.188,
+   0.0
+  ],
+  [
+   "4",
+   0.188,
+   0.0
+  ],
+  [
+   "5",
+   0.188,
+   0.0
+  ],
+  [
+   "R 입력-아이들러",
+   0.188,
+   0.0
+  ],
+  [
+   "R 아이들러-출력",
+   0.188,
+   0.0
+  ],
+  [
+   "R 입력-출력(떨어져야)",
+   6.008,
+   0
+  ]
+ ],
+ "sweep_total": 6,
+ "sweep_non_reverse_lock": [],
+ "reverse_blocked_at": [
+  -8.0,
+  -7.0,
+  -6.0,
+  -5.0,
+  -4.0,
+  -3.0
+ ],
+ "pedal": {
+  "travel_deg": 10.74,
+  "arm^base": {
+   "24.0": 59.78,
+   "25.0": 0.0,
+   "30.4": 0.0,
+   "35.7": 0.0,
+   "36.7": 42.67
+  },
+  "bolt^base": 0.0,
+  "pot^base": -0.0,
+  "bolt^arm": -0.0,
+  "pot_shaft_tip_in_D_mm": 4.0,
+  "release_ring_travel_mm": 3.07,
+  "cable_rest^base": 0.0,
+  "cable_stop^base": 0.0,
+  "spring_len_rest_stop": [
+   22.26,
+   14.49
+  ]
+ },
+ "steer": {
+  "static": {
+   "frame^cover": -0.0,
+   "frame^base": -0.0,
+   "frame^bearings": -0.0,
+   "shaft^frame": 0.0,
+   "pot^frame": 0.0,
+   "wheel^table": 0.0,
+   "wheel^base": 0.0
+  },
+  "angles": {
+   "-137": {
+    "hub^frame": 138.23,
+    "cam_roller_gap": 0.0,
+    "spring_len": 11.53
+   },
+   "-135": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 11.68
+   },
+   "-134": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 11.76
+   },
+   "-90": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 15.02
+   },
+   "-45": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 18.35
+   },
+   "-10": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 20.94
+   },
+   "0": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 21.68
+   },
+   "10": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 20.94
+   },
+   "45": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 18.35
+   },
+   "90": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 15.02
+   },
+   "134": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 11.76
+   },
+   "135": {
+    "cam_roller_gap": 0.0,
+    "spring_len": 11.68
+   },
+   "137": {
+    "hub^frame": 138.23,
+    "cam_roller_gap": 0.0,
+    "spring_len": 11.53
+   }
+  },
+  "return_torque_Nm": {
+   "0.5": 0.08,
+   "15": 0.105,
+   "45": 0.158,
+   "90": 0.237,
+   "135": 0.317
+  }
+ },
+ "stl_bad": [],
+ "stl_count": 74
+}

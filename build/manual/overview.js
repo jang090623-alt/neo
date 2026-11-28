@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+const fs = require('fs'), path = require('path'), http = require('http');
+const ROOT = path.join(__dirname, 'web');
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json' };
+const srv = http.createServer((q, r) => { const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0])); fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'Content-Type': types[path.extname(f)] || 'application/octet-stream' }); r.end(d); }); });
+(async () => {
+  await new Promise(res => srv.listen(8766, res));
+  const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  const p = await b.newPage(); await p.goto('http://localhost:8766/render.html'); await p.waitForFunction(() => window.ready === true);
+  const steps = JSON.parse(fs.readFileSync(path.join(ROOT, 'steps.json')));
+  const all = steps[steps.length - 1];
+  const cfg = JSON.parse(process.argv[2]);
+  const st = { ...all, new: [...all.ctx], ctx: [], explode: [0, 0, 0], inset: null, fit: null, view: { dir: cfg.dir, up: [0, 1, 0] } };
+  await p.evaluate(() => { window.GROUPMODE = true; });
+  const url = await p.evaluate(([s]) => window.renderStep(s, 2400, 1400, false), [st]);
+  fs.writeFileSync(cfg.out, Buffer.from(url.split(',')[1], 'base64'));
+  const pts = await p.evaluate(([a]) => window.projectPts(a), [cfg.pts]);
+  fs.writeFileSync(cfg.out + '.json', JSON.stringify(pts));
+  await b.close(); srv.close();
+})();

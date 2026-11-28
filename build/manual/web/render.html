@@ -1,0 +1,202 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:#fff}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+
+const COL = {
+  newP: 0xf39a2b, newM: 0x4f86c6, oldP: 0xd9dce1, oldM: 0xb5bdc7, rubber: 0x3a3a3a, cork: 0xc9975a, arrow: 0xd8342b,
+};
+const METAL = /^(shaft_|brg_|rod$|rail_|cl_pilot|cl_relbrg|cl_washer|cpl_pin|cl_bolt|cl_adj|cl_push|cl_pivot_bolt|cl_spring|fspring|nutA|brkbolt|m_body|m_bracket|m_shaft|m_sprocket|ped_bolt|ped_spring|cen_spring|shaft_idler|pinsteel|ped_cable)/;
+const RUBBER = /^(pins_|hall_|mag_)/; const CORK = /^cl_cork/;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
+renderer.setPixelRatio(1);
+document.body.appendChild(renderer.domElement);
+const loader = new STLLoader();
+const geoCache = {};
+async function geo(url) {
+  if (!geoCache[url]) {
+    geoCache[url] = (async () => {
+      const buf = await (await fetch(url)).arrayBuffer();
+      let g = loader.parse(buf);
+      g.deleteAttribute('normal');
+      g = BGU.mergeVertices(g, 1e-3);
+      const sm = BGU.toCreasedNormals(g, Math.PI / 6);
+      const edges = new THREE.EdgesGeometry(g, 32);
+      return { sm, edges };
+    })();
+  }
+  return geoCache[url];
+}
+const GROUP_COL = [[/^m_/, 0x3b6fd8], [/^(cl_|cpl_pin)/, 0xd8342b], [/^(gin_|gout_|g_idler|pins_|slv_|hub_|hubw|sp_|shaft_|brg_g|brg_idler|idler_|pinsteel)/, 0xf39a2b],
+  [/^(fork_|fwash|fspring|fcap|rail_|rcol|lug_|mag_lug|cage|carrier|pivot|rod$|ball|lower_lever|spring_spacer|lock_collar|gate|knob|hall_(12|34|5R))/, 0x2f9e5b],
+  [/^(wheel|hall_rpm)/, 0x8b5cf6]];
+function colorOf(name, isNew) {
+  if (window.GROUPMODE) { for (const [re, c] of GROUP_COL) if (re.test(name)) return c; return 0xc9ccd2; }
+  if (RUBBER.test(name)) return COL.rubber;
+  if (CORK.test(name)) return COL.cork;
+  const metal = METAL.test(name);
+  if (isNew) return metal ? COL.newM : COL.newP;
+  return metal ? COL.oldM : COL.oldP;
+}
+function addPart(scene, g, color, offset, W, H, lw) {
+  const mat = new THREE.MeshLambertMaterial({ color, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+  const m = new THREE.Mesh(g.sm, mat); m.position.set(...offset); scene.add(m);
+  const lg = new LineSegmentsGeometry().fromEdgesGeometry(g.edges);
+  const lm = new LineMaterial({ color: 0x1d1f22, linewidth: lw, resolution: new THREE.Vector2(W, H) });
+  const l = new LineSegments2(lg, lm); l.position.set(...offset); scene.add(l);
+  return m;
+}
+function lights(scene, dir) {
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x9096a0, 2.2));
+  const d1 = new THREE.DirectionalLight(0xffffff, 1.6); d1.position.set(dir[0] + 0.3, dir[1] + 1.2, dir[2] + 0.2); scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0xffffff, 0.5); d2.position.set(-dir[0], 0.3, -dir[2]); scene.add(d2);
+}
+function camFor(box, dir, up, W, H, margin = 1.12, center = null, half = null) {
+  const d = new THREE.Vector3(...dir).normalize();
+  const u = new THREE.Vector3(...up).normalize();
+  const c = center ? new THREE.Vector3(...center) : box.getCenter(new THREE.Vector3());
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, -5000, 5000);
+  cam.up.copy(u); cam.position.copy(c.clone().add(d.clone().multiplyScalar(1000))); cam.lookAt(c); cam.updateMatrixWorld();
+  let hw, hh;
+  if (half) { hw = half * W / H; hh = half; }
+  else {
+    const inv = cam.matrixWorldInverse; let xmin = 1e9, xmax = -1e9, ymin = 1e9, ymax = -1e9;
+    for (let i = 0; i < 8; i++) {
+      const p = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
+      xmin = Math.min(xmin, p.x); xmax = Math.max(xmax, p.x); ymin = Math.min(ymin, p.y); ymax = Math.max(ymax, p.y);
+    }
+    // 중심 보정
+    const cx = (xmin + xmax) / 2, cy = (ymin + ymax) / 2;
+    const right = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0), upv = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 1);
+    cam.position.add(right.multiplyScalar(cx)).add(upv.multiplyScalar(cy)); cam.updateMatrixWorld();
+    hw = (xmax - xmin) / 2 * margin; hh = (ymax - ymin) / 2 * margin;
+    if (hw / hh > W / H) hh = hw * H / W; else hw = hh * W / H;
+  }
+  cam.left = -hw; cam.right = hw; cam.top = hh; cam.bottom = -hh; cam.updateProjectionMatrix();
+  return cam;
+}
+function arrow(scene, from, to, size) {
+  const a = new THREE.Vector3(...from), b = new THREE.Vector3(...to);
+  const v = b.clone().sub(a); const L = v.length(); if (L < 1e-3) return;
+  const dirv = v.clone().normalize();
+  const hl = Math.min(size * 0.06, L * 0.4), r = hl * 0.2;
+  const mat = new THREE.MeshBasicMaterial({ color: COL.arrow });
+  const sh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, Math.max(L - hl, 0.1), 16), mat);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(r * 3, hl, 24), mat);
+  const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirv);
+  sh.quaternion.copy(q); cone.quaternion.copy(q);
+  sh.position.copy(a.clone().add(dirv.clone().multiplyScalar((L - hl) / 2)));
+  cone.position.copy(a.clone().add(dirv.clone().multiplyScalar(L - hl / 2)));
+  sh.renderOrder = 10; cone.renderOrder = 10; mat.depthTest = false;
+  scene.add(sh); scene.add(cone);
+}
+window.renderStep = async function (st, W, H, insetMode) {
+  renderer.setSize(W, H);
+  const scene = new THREE.Scene();
+  const box = new THREE.Box3(); const boxNew = new THREE.Box3(), boxNewFinal = new THREE.Box3();
+  const ex = st.explode;
+  const lw = insetMode ? 2.2 : 1.6;
+  for (const n of st.ctx) { if (st.new.includes(n)) continue; const g = await geo(`parts/${n}.stl`); addPart(scene, g, colorOf(n, false), [0, 0, 0], W, H, lw); g.sm.computeBoundingBox(); box.union(g.sm.boundingBox); }
+  for (const n of st.new) {
+    const g = await geo(`parts/${n}.stl`); addPart(scene, g, colorOf(n, true), ex, W, H, lw);
+    g.sm.computeBoundingBox(); const bb = g.sm.boundingBox.clone(); boxNewFinal.union(bb);
+    bb.translate(new THREE.Vector3(...ex)); boxNew.union(bb); box.union(bb);
+  }
+  const v = st.view;
+  let cam, fbox = box;
+  if (st.fit === 'new' && st.new.length) { fbox = boxNew.clone().union(boxNewFinal); fbox.expandByScalar(st.pad || 45); }
+  if (insetMode) cam = camFor(box, v.dir, v.up, W, H, 1, st.inset.target, st.inset.size);
+  else cam = camFor(fbox, v.dir, v.up, W, H, 1.10);
+  lights(scene, v.dir);
+  const exL = Math.hypot(...ex);
+  if (!insetMode && exL > 1 && st.new.length) {
+    const c0 = boxNew.getCenter(new THREE.Vector3()), c1 = boxNewFinal.getCenter(new THREE.Vector3());
+    const exv = new THREE.Vector3(...ex).normalize();
+    const size = fbox.getSize(new THREE.Vector3()).length();
+    // 화살표: 분해된 부품 덩어리 끝에서 붙을 자리 끝까지 (사이 빈 곳에만)
+    const sz = boxNew.getSize(new THREE.Vector3());
+    const half = Math.abs(exv.x) * sz.x / 2 + Math.abs(exv.y) * sz.y / 2 + Math.abs(exv.z) * sz.z / 2;
+    const s = c0.clone().sub(exv.clone().multiplyScalar(half + 2));
+    const e = c1.clone().add(exv.clone().multiplyScalar(half + 2));
+    const gap = s.clone().sub(e).dot(exv);
+    let A = s, B = e;
+    if (gap <= 8) { A = c0.clone().add(exv.clone().multiplyScalar(half + exL * 0.9 + 4)); B = c0.clone().add(exv.clone().multiplyScalar(half + 4)); }
+    const pa = A.clone().project(cam), pb = B.clone().project(cam);
+    const px = Math.hypot((pa.x - pb.x) * W / 2, (pa.y - pb.y) * H / 2);
+    if (px > 60) arrow(scene, A.toArray(), B.toArray(), Math.min(size, 350));
+  }
+  renderer.render(scene, cam); window._cam = cam; window._W = W; window._H = H;
+  const url = renderer.domElement.toDataURL('image/png');
+  scene.traverse(o => { if (o.material) o.material.dispose(); });
+  return url;
+};
+
+// ---------- 아이콘 ----------
+function hexShape(af) { const R = af / Math.sqrt(3); const s = new THREE.Shape(); for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k; const p = [R * Math.cos(a), R * Math.sin(a)]; k ? s.lineTo(...p) : s.moveTo(...p); } return s; }
+function tubeG(ro, ri, h) { const s = new THREE.Shape(); s.absarc(0, 0, ro, 0, Math.PI * 2); const hole = new THREE.Path(); hole.absarc(0, 0, ri, 0, Math.PI * 2, true); s.holes.push(hole); return new THREE.ExtrudeGeometry(s, { depth: h, bevelEnabled: false, curveSegments: 48 }); }
+function cylG(r, h, z0 = 0) { const g = new THREE.CylinderGeometry(r, r, h, 40); g.rotateX(Math.PI / 2); g.translate(0, 0, z0 + h / 2); return g; }
+function helixG(R, r, L, turns) { const pts = []; for (let i = 0; i <= turns * 40; i++) { const t = i / 40 * Math.PI * 2; pts.push(new THREE.Vector3(R * Math.cos(t), R * Math.sin(t), L * i / (turns * 40))); } return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), turns * 60, r, 10, false); }
+const NUT_AF = { 3: 5.5, 4: 7, 5: 8, 6: 10 };
+function hwIcon(key) {
+  const [k, a, b] = key.split(':'); const M = 0x7d8fa6, S = 0x9aa7b5; const parts = [];
+  const add = (g, c) => parts.push([g, c]);
+  if (k === 'brg6001' || k === 'brg6003') { const [o, i, w] = k === 'brg6001' ? [28, 12, 8] : [35, 17, 10]; add(tubeG(o / 2, o / 2 - 2.5, w), S); add(tubeG(i / 2 + 2.5, i / 2, w), S); add(tubeG(o / 2 - 2.5, i / 2 + 2.5, w * 0.8).translate(0, 0, w * 0.1), 0x5d6670); }
+  else if (k === 'pin5x25' || k === 'pin5x40') add(cylG(2.5, k === 'pin5x25' ? 25 : 40), S);
+  else if (k === 'hose') add(tubeG(5, 2.5, 6), 0x3a3a3a);
+  else if (k === 'bolt') { const d = +a, L = +b; add(cylG(d / 2, L), S); const hd = new THREE.ExtrudeGeometry(new THREE.Shape().absarc(0, 0, d * 0.82, 0, Math.PI * 2), { depth: d, bevelEnabled: false, curveSegments: 40 }); hd.translate(0, 0, L); add(hd, S); const so = new THREE.ExtrudeGeometry(hexShape(d * 0.5), { depth: 0.3, bevelEnabled: false }); so.translate(0, 0, L + d); add(so, 0x222222); }
+  else if (k === 'nut') { const d = +a; const sh = hexShape(NUT_AF[d]); sh.holes.push(new THREE.Path().absarc(0, 0, d / 2, 0, Math.PI * 2, true)); add(new THREE.ExtrudeGeometry(sh, { depth: d * 0.8, bevelEnabled: false, curveSegments: 32 }), S); }
+  else if (k === 'rod') { const d = +a, L = +b; const g = new THREE.CylinderGeometry(d / 2, d / 2, L, 40); g.rotateZ(Math.PI / 2); add(g, S); }
+  else if (k === 'spring') { const big = a === 'big'; add(helixG(big ? 7.6 : 2.0, big ? 1.4 : 0.4, big ? 25 : 10, big ? 6 : 7), S); }
+  else if (k === 'ball') add(new THREE.SphereGeometry(3, 32, 16), S);
+  else if (k === 'washer50') add(tubeG(25, 8.5, 3), S);
+  else if (k === 'washer3') add(tubeG(3.5, 1.7, 0.6), S);
+  else if (k === 'cork') add(tubeG(25, 13, 2), 0xc9975a);
+  else if (k === 'wood') { add(cylG(2, 16), 0xb59a5a); const c = new THREE.ConeGeometry(2, 4, 24); c.rotateX(-Math.PI / 2); c.translate(0, 0, -2); add(c, 0xb59a5a); add(cylG(3.8, 2.5, 16), 0xb59a5a); }
+  else if (k === 'mdf') add(new THREE.BoxGeometry(75, 4, 30), 0xc7a77a);
+  else if (k === 'epoxy' || k === 'ca' || k === 'grease') { const col = k === 'epoxy' ? 0x2f9e5b : k === 'ca' ? 0x3b6fd8 : 0xe3e3e3; add(cylG(6, 26), col); const t = new THREE.ConeGeometry(6, 8, 32); t.rotateX(Math.PI / 2); t.translate(0, 0, 30); add(t, col); add(cylG(1.2, 6, 34), 0x444444); }
+  else if (k === 'iron') { add(cylG(5, 40), 0x2b2b2b); add(cylG(2.2, 25, 40), 0xb0b6bd); const t = new THREE.ConeGeometry(2.2, 8, 24); t.rotateX(Math.PI / 2); t.translate(0, 0, 69); add(t, 0xb0b6bd); }
+  else if (k === 'sand') add(new THREE.BoxGeometry(40, 1, 30), 0xb48a4a);
+  else if (k === 'hall') { add(new THREE.BoxGeometry(4.5, 1.5, 3.5).translate(0, 0, 13), 0x222222); for (const x of [-1.27, 0, 1.27]) add(new THREE.BoxGeometry(0.4, 0.4, 13).translate(x, 0, 6.5), 0xb0b6bd); }
+  else if (k === 'resistor') { add(cylG(1.2, 6, 0), 0xc8a87a); add(cylG(0.25, 22, -8), 0xb0b6bd); }
+  else if (k === 'meter') { add(new THREE.BoxGeometry(40, 70, 14), 0xf2c94c); add(new THREE.BoxGeometry(30, 18, 2).translate(0, 18, 7.5), 0x9fb7a5); }
+  else if (k === 'magnet') add(cylG(3, 3), 0x8a8f99);
+  else if (k === 'filament') add(cylG(1.425, 24), 0x2f80ed);
+  else if (k === 'grub') { add(cylG(1.5, 8), S); }
+  else if (k === 'pot') { add(cylG(8.5, 7), 0x6b7280); add(cylG(3.5, 7, 7), S); add(cylG(3, 15, 14), 0xc8a04a); }
+  else if (k === 'sprocket') { const sh = new THREE.Shape(); for (let i = 0; i <= 24; i++) { const a = i / 24 * Math.PI * 2, r = i % 2 ? 16 : 20.5; i ? sh.lineTo(r * Math.cos(a), r * Math.sin(a)) : sh.moveTo(r, 0); } sh.holes.push(new THREE.Path().absarc(0, 0, 7.5, 0, Math.PI * 2, true)); add(new THREE.ExtrudeGeometry(sh, { depth: 4.3, bevelEnabled: false }), S); add(tubeG(12, 7.5, 10).translate(0, 0, -10), S); }
+  else if (k === 'motor') { add(new THREE.BoxGeometry(90, 90, 120).translate(0, 0, 60), 0x5b6b80); add(cylG(7.5, 25, 120), S); add(new THREE.BoxGeometry(150, 6, 60).translate(0, -48, 140), S); }
+  else if (k === 'cable') { const pts = []; for (let i = 0; i <= 60; i++) { const t = i / 60 * Math.PI * 1.6; pts.push(new THREE.Vector3(20 * Math.cos(t), 20 * Math.sin(t), i * 0.5)); } add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 120, 1.8, 10), 0x222222); }
+  return parts;
+}
+window.renderIcon = async function (key, W) {
+  renderer.setSize(W, W);
+  const scene = new THREE.Scene(); const box = new THREE.Box3();
+  let dir = [1, -1.3, 1.2], up = [0, 0, 1];
+  if (key.startsWith('stl:')) {
+    const g = await geo(`stl/${key.slice(4)}.stl`); addPart(scene, g, COL.newP, [0, 0, 0], W, W, 1.3); g.sm.computeBoundingBox(); box.union(g.sm.boundingBox);
+  } else {
+    for (const [g0, c] of hwIcon(key)) {
+      const g = BGU.toCreasedNormals(BGU.mergeVertices(g0.deleteAttribute('normal') && g0 || g0, 1e-3), Math.PI / 6);
+      const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })); scene.add(m);
+      const lg = new LineSegmentsGeometry().fromEdgesGeometry(new THREE.EdgesGeometry(g, 32));
+      scene.add(new LineSegments2(lg, new LineMaterial({ color: 0x1d1f22, linewidth: 1.3, resolution: new THREE.Vector2(W, W) })));
+      g.computeBoundingBox(); box.union(g.boundingBox);
+    }
+    if (key.startsWith('rod') || key === 'mdf' || key === 'sand') { dir = [0.4, -1, 1.1]; }
+  }
+  lights(scene, dir);
+  const cam = camFor(box, dir, up, W, W, 1.12);
+  renderer.render(scene, cam);
+  return renderer.domElement.toDataURL('image/png');
+};
+window.projectPts = function (pts) { return pts.map(p => { const v = new THREE.Vector3(...p).project(window._cam); return [(v.x + 1) / 2 * window._W, (1 - v.y) / 2 * window._H]; }); };
+window.ready = true;
+</script></body></html>
